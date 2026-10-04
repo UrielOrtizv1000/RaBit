@@ -27,4 +27,4 @@ tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 tauri-plugin-notification = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
-window-vibrancy = "0.5"
+window-vibrancy = "0.8"
