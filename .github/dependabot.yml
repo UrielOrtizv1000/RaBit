@@ -1,14 +1,10 @@
 version: 2
-updates:
-  - package-ecosystem: github-actions
-    directory: /
-    schedule:
-      interval: weekly
-    # One PR for the workflow actions instead of one per action.
-    groups:
-      actions:
-        patterns: ["*"]
 
+# There is no github-actions entry on purpose: the repository has no workflow
+# files, and a block with no dependency file to resolve fails the scheduled run
+# with `dependency_file_not_found`. Add it back together with the first
+# workflow.
+updates:
   - package-ecosystem: npm
     directory: /
     schedule:
