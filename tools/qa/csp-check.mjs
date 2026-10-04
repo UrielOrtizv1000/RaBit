@@ -10,7 +10,7 @@ import { extname, join } from "node:path";
 import { chromium } from "@playwright/test";
 
 const conf = JSON.parse(readFileSync("src-tauri/tauri.conf.json", "utf8"));
-const csp = conf.app.security.csp.replace("script-src 'self'", "script-src 'self' 'wasm-unsafe-eval'");
+const csp = conf.app.security.csp + "; script-src 'self' 'wasm-unsafe-eval'";
 const types = {
   ".html": "text/html",
   ".js": "text/javascript",
