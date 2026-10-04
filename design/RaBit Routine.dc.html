@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Doto:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#e9eeeb;color:#16211c;font-family:"Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#0b7a45;text-decoration:none}
+a:hover{color:#0f9a56}
+@keyframes rb-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes rb-cursor{0%,50%{opacity:1}51%,100%{opacity:0}}
+@keyframes rb-fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.rb-scroll::-webkit-scrollbar{width:9px}
+.rb-scroll::-webkit-scrollbar-track{background:transparent}
+.rb-scroll::-webkit-scrollbar-thumb{background:rgba(18,38,30,.16);border-radius:6px;border:2px solid transparent;background-clip:padding-box}
+.rb-scroll::-webkit-scrollbar-thumb:hover{background:rgba(23,184,102,.5);background-clip:padding-box}
+@keyframes rb-drift{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-20px)}}
+@keyframes rb-pulse{0%,100%{box-shadow:0 0 0 0 rgba(23,184,102,.45)}70%{box-shadow:0 0 0 7px rgba(23,184,102,0)}}
+@keyframes rb-toast{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes rb-spin{to{transform:rotate(360deg)}}
+@keyframes rb-tilt{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}
+</style>
+</helmet>
+
+<div style="position:relative;width:1440px;min-height:100vh;overflow:clip;border-radius:22px;background:linear-gradient(160deg,#f1f4f2 0%,#e6ebe8 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)">
+  <!-- ambient color behind the glass -->
+  <div style="position:absolute;left:-120px;top:-140px;width:620px;height:520px;border-radius:50%;background:rgba(122,221,159,.55);filter:blur(90px);animation:rb-drift 18s ease-in-out infinite"></div>
+  <div style="position:absolute;right:-160px;top:120px;width:560px;height:520px;border-radius:50%;background:rgba(168,205,236,.5);filter:blur(100px)"></div>
+  <div style="position:absolute;left:420px;bottom:-220px;width:640px;height:460px;border-radius:50%;background:rgba(246,214,182,.45);filter:blur(110px)"></div>
+
+<div style="position:relative;width:1440px;min-height:100vh;background:linear-gradient(160deg,rgba(255,255,255,.42),rgba(255,255,255,.2));display:flex;flex-direction:column">
+
+  <!-- TOP BAR -->
+  <div style="display:flex;align-items:center;gap:22px;padding:26px 26px 6px">
+    <div onMouseEnter="{{ logoEnter }}" onMouseLeave="{{ logoLeave }}" onClick="{{ toggleTheme }}" title="Switch light / dark" style="cursor:pointer;transition:box-shadow .3s ease-out,transform .2s ease-out;display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:999px;background:linear-gradient(150deg,rgba(14,26,20,.9),rgba(18,40,30,.82));border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 12px 24px -14px rgba(10,30,20,.8)">
+      <div style="font-family:Silkscreen,monospace;font-weight:700;font-size:13px;color:#3ddc84;text-shadow:0 0 9px rgba(61,220,132,.7)">&gt;</div>
+      <div style="font-family:Silkscreen,monospace;font-weight:700;font-size:14px;letter-spacing:.06em;color:#3ddc84;text-shadow:0 0 10px rgba(61,220,132,.55)">RABIT</div>
+      <div style="width:6px;height:13px;background:#3ddc84;box-shadow:0 0 8px rgba(61,220,132,.8);animation:rb-cursor 1.1s steps(1) infinite"></div>
+      <div style="display:flex;align-items:center;gap:8px;overflow:hidden;white-space:nowrap;max-width:{{ logoW }};opacity:{{ logoOp }};margin-left:{{ logoMl }};transition:max-width .4s cubic-bezier(.2,.8,.3,1),opacity .25s ease-out,margin-left .3s ease-out">
+        <div style="width:1px;height:14px;flex:none;background:rgba(61,220,132,.3)"></div>
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3ddc84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 5px rgba(61,220,132,.7));animation:rb-tilt 2.4s ease-in-out infinite"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg></sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3ddc84" stroke-width="2" stroke-linecap="round" style="filter:drop-shadow(0 0 5px rgba(61,220,132,.7));animation:rb-spin 6s linear infinite"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></sc-if>
+        <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.1em;color:#3ddc84;text-shadow:0 0 8px rgba(61,220,132,.5)">{{ themeLabel }}</div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex">
+      <div style="display:flex;align-items:center;gap:10px;width:380px;padding:11px 18px;border-radius:999px;background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.4));backdrop-filter:blur(20px) saturate(170%);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 1px rgba(255,255,255,.95),0 10px 24px -18px rgba(20,48,34,.4);color:#6b7a73;font-size:13px;transition:background .2s ease-out" style-hover="background:rgba(255,255,255,.85)">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#6b7a73" stroke-width="1.6"><circle cx="7" cy="7" r="4.6"></circle><path d="M10.5 10.5 14 14"></path></svg>
+        <input onKeyDown="{{ onSearchKey }}" placeholder="Search events, notes…" style="flex:1;min-width:0;border:0;outline:0;background:transparent;font-family:inherit;font-size:13px;color:#121a16">
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div onClick="{{ toggleNotif }}" title="Notifications" style="position:relative;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,0 10px 22px -16px rgba(20,48,34,.45);transition:transform .15s ease-out" style-hover="transform:scale(1.05)">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="#2b3a34" stroke-width="1.5" stroke-linejoin="round"><path d="M4.5 7.2a4.5 4.5 0 0 1 9 0c0 3.3 1.2 4.3 1.2 4.3H3.3s1.2-1 1.2-4.3Z"></path><path d="M7.4 14a1.7 1.7 0 0 0 3.2 0"></path></svg>
+        <div style="position:absolute;top:10px;right:11px;width:6px;height:6px;border-radius:50%;background:#17b866;box-shadow:0 0 0 2px #fff"></div>
+        <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stopNotif }}" style="position:absolute;right:-6px;top:52px;z-index:50;width:320px;padding:10px;border-radius:24px;cursor:default;background:linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 30px 60px -24px rgba(12,40,26,.45);animation:rb-toast .18s ease-out both">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px 10px">
+              <div style="font-size:14px;font-weight:700;color:#121a16">Notifications</div>
+              <div style="font-size:11px;font-weight:600;color:#0b7a45">3 new</div>
+            </div>
+            <sc-for list="{{ notifs }}" as="nt" hint-placeholder-count="3">
+              <a href="{{ nt.href }}" style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:16px;transition:background .2s ease-out" style-hover="background:rgba(255,255,255,.85)">
+                <div style="width:8px;height:8px;flex:none;border-radius:50%;background:{{ nt.color }}"></div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:600;color:#121a16;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ nt.title }}</div>
+                  <div style="font-size:11.5px;color:#5d6f67;margin-top:2px">{{ nt.sub }}</div>
+                </div>
+              </a>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <div onClick="{{ openSettings }}" title="Settings" style="width:42px;height:42px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,0 10px 22px -16px rgba(20,48,34,.45);transition:transform .15s ease-out" style-hover="transform:scale(1.05)">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2b3a34" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border-radius:999px;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,0 10px 22px -16px rgba(20,48,34,.45)">
+        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,#0b7a45,#4fc389);display:grid;place-items:center;font-family:Silkscreen,monospace;font-size:11px;color:#fff">{{ userInitial }}</div>
+        <div style="font-size:13px;font-weight:600;color:#1d2a24">{{ userName }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:stretch;min-height:0;padding:14px 0 0">
+
+    <!-- FLOATING DOCK -->
+    <div style="position:relative;z-index:10;flex:none;display:flex;justify-content:flex-start;align-items:flex-start;padding:0 20px 26px 26px;box-sizing:border-box">
+      <div style="position:sticky;top:26px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px;height:max-content;border-radius:26px;background:linear-gradient(160deg,rgba(255,255,255,.66),rgba(255,255,255,.32));backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,inset 0 -10px 20px -14px rgba(255,255,255,.7),0 22px 44px -26px rgba(20,48,34,.4)">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+          <a href="{{ n.href }}" onMouseEnter="{{ navEnter }}" onMouseLeave="{{ navLeave }}" data-id="{{ n.id }}" style="position:relative;width:46px;height:46px;box-sizing:border-box;border-radius:17px;display:grid;place-items:center;background:{{ n.bg }};box-shadow:{{ n.shadow }};transition:background .2s ease-out,box-shadow .2s ease-out">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="{{ n.stroke }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ n.d }}"></path></svg>
+            <div style="position:absolute;bottom:5px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#17b866;opacity:{{ n.bar }}"></div>
+            <div style="position:absolute;left:58px;top:50%;transform:translate({{ n.labelX }},-50%);opacity:{{ n.labelOp }};transition:opacity .18s ease-out,transform .18s ease-out;pointer-events:none;padding:7px 12px;border-radius:999px;background:linear-gradient(150deg,rgba(14,26,20,.9),rgba(18,40,30,.84));backdrop-filter:blur(14px);color:#eef4f0;font-size:11.5px;font-weight:600;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 10px 22px -10px rgba(12,30,22,.7)">{{ n.label }}</div>
+          </a>
+        </sc-for>
+        <div style="width:22px;height:1px;background:rgba(18,38,30,.1);margin:4px 0"></div>
+        <a href="RaBit Calendar.dc.html#new-event" title="New event" style="width:46px;height:46px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(150deg,#1fc172,#0f9a56);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 12px 22px -12px rgba(23,184,102,.9);transition:transform .15s ease-out" style-hover="transform:scale(1.06)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"></path></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div style="flex:1;min-width:0;padding:10px 26px 26px 0;display:flex;flex-direction:column;gap:20px">
+
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+        <div>
+          <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.16em;color:#6b7a73;margin-bottom:12px">SATURDAY · SEPTEMBER 19</div>
+          <div style="font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1.05;color:#121a16;margin-bottom:8px">Routine</div>
+          <div style="font-size:14px;color:#5d6f67;font-weight:500">{{ subtitle }}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="display:flex;align-items:center;gap:2px;padding:4px;border-radius:999px;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42));border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,0 10px 22px -16px rgba(20,48,34,.4)">
+            <div onClick="{{ prevWeek }}" style="width:30px;height:28px;border-radius:999px;display:grid;place-items:center;cursor:pointer;color:#41504a;font-size:13px" style-hover="background:rgba(238,250,243,1)">‹</div>
+            <div style="min-width:96px;padding:0 12px;height:28px;display:grid;place-items:center;border-radius:999px;font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.05em;color:#0b7a45;white-space:nowrap">{{ weekLabel }}</div>
+            <div onClick="{{ nextWeek }}" style="width:30px;height:28px;border-radius:999px;display:grid;place-items:center;cursor:pointer;color:#41504a;font-size:13px" style-hover="background:rgba(238,250,243,1)">›</div>
+          </div>
+          <div onClick="{{ openModal }}" style="display:flex;align-items:center;gap:9px;padding:10px 16px;border-radius:999px;background:linear-gradient(150deg,#1fc172,#0f9a56);color:#fff;font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.05em;white-space:nowrap;cursor:pointer;box-shadow:0 14px 26px -16px rgba(23,184,102,1)" style-hover="background:#16211c">
+            <div style="position:relative;width:9px;height:9px">
+              <div style="position:absolute;left:0;top:3px;width:9px;height:3px;background:#fff"></div>
+              <div style="position:absolute;left:3px;top:0;width:3px;height:9px;background:#fff"></div>
+            </div>ADD ROUTINE
+          </div>
+        </div>
+      </div>
+
+      <!-- WEEK SCHEDULER (calendar week-view layout) -->
+      <div ref="{{ viewRef }}" style="flex:1;padding:18px 20px 20px;border-radius:28px;background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.38));backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 1px #fff,inset 0 -10px 24px -18px rgba(255,255,255,.8),0 24px 48px -30px rgba(20,48,34,.3)">
+        <div style="display:flex;padding-left:58px;margin-bottom:8px">
+          <sc-for list="{{ cols }}" as="c" hint-placeholder-count="7">
+            <div style="flex:1;min-width:0;display:flex;align-items:baseline;gap:7px;padding:5px 9px;border-radius:9px;background:{{ c.headBg }}">
+              <div style="font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.08em;color:#5d6f67">{{ c.dow }}</div>
+              <div style="font-size:13px;font-weight:700;color:{{ c.numColor }}">{{ c.num }}</div>
+              <div style="font-family:Silkscreen,monospace;font-size:7.5px;letter-spacing:.06em;color:#0b7a45">{{ c.tag }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;padding:0 0 7px 58px">
+          <div style="flex:1;height:1px;background:repeating-linear-gradient(90deg,rgba(23,184,102,.35) 0 5px,transparent 5px 10px)"></div>
+          <div onClick="{{ openDay }}" title="Set wake-up time" style="display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;cursor:pointer;font-family:Silkscreen,monospace;font-size:7.5px;letter-spacing:.12em;color:#0b7a45;transition:background .2s ease-out" style-hover="background:rgba(23,184,102,.12)">✦ WAKE UP {{ wakeUp }}<svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="#0b7a45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2.5 13.5 5 6 12.5 3 13l.5-3Z"></path></svg></div>
+          <div style="flex:1;height:1px;background:repeating-linear-gradient(90deg,rgba(23,184,102,.35) 0 5px,transparent 5px 10px)"></div>
+        </div>
+        <div style="position:relative;max-height:610px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(23,184,102,.45) transparent">
+          <sc-for list="{{ hours }}" as="h" hint-placeholder-count="16">
+            <div style="display:flex;height:{{ h.h }}px;box-sizing:border-box;border-top:1px solid rgba(18,38,30,.06)">
+              <div style="width:58px;flex:none;box-sizing:border-box;padding-right:10px;padding-top:3px;text-align:right;font-size:10.5px;line-height:14px;color:#5d6f67">{{ h.label }}</div>
+              <sc-for list="{{ cols }}" as="c" hint-placeholder-count="7">
+                <div style="flex:1;border-left:1px solid rgba(18,38,30,.06);background:{{ c.colBg }}"></div>
+              </sc-for>
+            </div>
+          </sc-for>
+          <div style="border-top:1px solid rgba(18,38,30,.06)"></div>
+          <div style="position:absolute;left:58px;right:0;top:0;bottom:0;display:flex">
+            <sc-for list="{{ cols }}" as="c" hint-placeholder-count="7">
+              <div onClick="{{ addAt }}" data-day="{{ c.i }}" style="position:relative;flex:1;min-width:0;cursor:pointer">
+                <sc-for list="{{ c.blocks }}" as="b" hint-placeholder-count="0">
+                  <div onClick="{{ selectBlock }}" data-b="{{ b.id }}" title="{{ b.tip }}" style="position:absolute;left:{{ b.left }};width:{{ b.width }};top:{{ b.top }}px;height:{{ b.h }}px;padding:{{ b.pad }};box-sizing:border-box;border-radius:12px;background:{{ b.bg }};backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%);border:1px solid {{ b.border }};border-left:3px solid {{ b.color }};box-shadow:{{ b.shadow }};z-index:{{ b.z }};opacity:{{ b.op }};cursor:pointer;overflow:hidden;transition:transform .15s ease-out,box-shadow .2s ease-out" style-hover="transform:translateY(-1px);box-shadow:inset 0 1px 1px #fff,0 12px 22px -12px rgba(18,60,40,.55);z-index:5">
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;height:100%;overflow:hidden;text-align:center">
+                      <div style="display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;max-width:100%">
+                        <div style="min-width:0;font-size:10.5px;font-weight:700;line-height:1.15;color:#121a16;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.title }}</div>
+                        <div style="{{ b.repStyle }}">{{ b.rep }}</div>
+                      </div>
+                      <div style="{{ b.showTime }}">{{ b.time }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;padding:8px 0 0 58px">
+          <div style="flex:1;height:1px;background:repeating-linear-gradient(90deg,rgba(18,38,30,.16) 0 5px,transparent 5px 10px)"></div>
+          <div onClick="{{ openDay }}" title="Set bedtime" style="display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;cursor:pointer;font-family:Silkscreen,monospace;font-size:7.5px;letter-spacing:.12em;color:#5d6f67;transition:background .2s ease-out" style-hover="background:rgba(18,38,30,.06)">☾ BEDTIME {{ bedtime }}<svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="#5d6f67" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2.5 13.5 5 6 12.5 3 13l.5-3Z"></path></svg></div>
+          <div style="flex:1;height:1px;background:repeating-linear-gradient(90deg,rgba(18,38,30,.16) 0 5px,transparent 5px 10px)"></div>
+        </div>
+      </div>
+
+      <!-- legend -->
+      <div style="display:flex;align-items:center;gap:20px;padding-left:4px">
+        <div style="display:flex;align-items:center;gap:7px"><div style="width:9px;height:9px;border-radius:2px;border:1.5px solid #17b866;box-sizing:border-box"></div><div style="font-size:11.5px;color:#5d6f67">Routine</div></div>
+        <div style="display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:#4b7fd6"></div><div style="font-size:11.5px;color:#5d6f67">Calendar event</div></div>
+        <div style="display:flex;align-items:center;gap:7px"><div style="width:9px;height:9px;border-radius:2px;border:1.5px solid #8a6fd6;box-sizing:border-box"></div><div style="font-size:11.5px;color:#5d6f67">Task</div></div>
+        <div style="font-size:11.5px;color:#8b9a93">{{ legendNote }}</div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div ref="{{ colRef }}" style="width:340px;flex:none;padding:0 26px 26px 0;display:flex;flex-direction:column;gap:16px">
+      <!-- terminal bubble -->
+      <div style="margin-top:{{ panelTop }}px;border-radius:28px;background:linear-gradient(150deg,rgba(12,24,18,.9),rgba(16,40,29,.82));backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px rgba(61,220,132,.08),0 30px 60px -30px rgba(10,30,20,.75)">
+        <div style="display:flex;align-items:center;gap:7px;padding:14px 20px 0">
+          <div style="width:7px;height:7px;background:#3ddc84"></div>
+          <div style="width:7px;height:7px;background:rgba(61,220,132,.45)"></div>
+          <div style="width:7px;height:7px;background:rgba(61,220,132,.2)"></div>
+          <div style="margin-left:6px;font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.1em;color:#6ee6a4">rabit@routine</div>
+        </div>
+        <div style="padding:12px 22px 20px">
+          <div style="font-family:Silkscreen,monospace;font-size:11px;color:#6ee6a4;letter-spacing:.06em;margin-bottom:9px">&gt; {{ botGreeting }}</div>
+          <div style="font-family:Doto,monospace;font-weight:900;font-size:20px;line-height:1.25;color:#3ddc84;text-shadow:0 0 12px rgba(61,220,132,.5)">{{ botLine }}<span style="display:inline-block;width:10px;height:18px;margin-left:8px;vertical-align:-3px;background:#3ddc84;box-shadow:0 0 9px rgba(61,220,132,.8);animation:rb-cursor 1.1s steps(1) infinite"></span></div>
+        </div>
+      </div>
+
+
+      <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:20px;border-radius:28px;background:linear-gradient(150deg,rgba(255,255,255,.8),rgba(240,250,245,.46));backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,inset 0 -12px 26px -18px rgba(255,255,255,.8),0 24px 48px -30px rgba(20,48,34,.34)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.16em;color:#6b7a73">{{ sel.kindLabel }}</div>
+            <div style="width:9px;height:9px;border-radius:2px;border:2px solid {{ sel.color }};box-sizing:border-box"></div>
+          </div>
+          <div style="font-size:22px;font-weight:700;color:#16211c;margin-bottom:4px">{{ sel.title }}</div>
+          <div style="font-size:13px;color:#5d6f67">{{ sel.days }} · {{ sel.time }}</div>
+
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(18,38,30,.08)">
+            <div style="font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.1em;color:#0b7a45;margin-bottom:8px">REPEATS</div>
+            <div style="font-size:13px;color:#2b3a34;font-weight:600">{{ sel.repeat }}</div>
+          </div>
+
+          <sc-if value="{{ sel.hasNext }}" hint-placeholder-val="{{ true }}">
+            <div style="margin-top:14px">
+              <div style="font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.16em;color:#6b7a73;margin-bottom:8px">NEXT</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ sel.next }}" as="n" hint-placeholder-count="3">
+                  <div style="font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.03em;color:#0b7a45;padding:4px 8px;border-radius:7px;background:rgba(215,244,229,.9);border:1px solid rgba(23,184,102,.22)">{{ n }}</div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ sel.conflict }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:14px;display:flex;gap:9px;padding:11px 12px;border-radius:12px;background:rgba(201,138,30,.1);border:1px solid rgba(201,138,30,.3)">
+              <div style="font-family:Silkscreen,monospace;font-size:11px;color:#a06810">!</div>
+              <div style="font-size:11.5px;line-height:1.5;color:#7a5210">{{ sel.conflictText }}</div>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;gap:8px;margin-top:16px">
+            <div onClick="{{ openModal }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px;border-radius:11px;background:#16211c;color:#fff;font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.05em;cursor:pointer" style-hover="background:#17b866">EDIT</div>
+            <div onClick="{{ askRemove }}" style="width:42px;flex:none;display:grid;place-items:center;padding:10px;border-radius:11px;border:1px solid rgba(18,38,30,.1);background:rgba(255,255,255,.7);cursor:pointer" style-hover="border-color:rgba(168,68,58,.4);background:rgba(168,68,58,.06)">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#a8443a" stroke-width="1.6" stroke-linecap="round"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5 5 13h6l.5-8.5"></path></svg>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ noSelection }}" hint-placeholder-val="{{ true }}">
+        <div ref="{{ todayRef }}" style="height:{{ todayH }}px;box-sizing:border-box;display:flex;flex-direction:column;padding:22px 24px;border-radius:30px;background:linear-gradient(150deg,rgba(255,255,255,.8),rgba(240,250,245,.46));backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,inset 0 -12px 26px -18px rgba(255,255,255,.8),0 24px 48px -30px rgba(20,48,34,.34)">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.16em;color:#6b7a73">TODAY</div>
+            <div onClick="{{ openDay }}" title="Day settings" style="width:30px;height:30px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:rgba(255,255,255,.75);box-shadow:inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4);transition:transform .15s ease-out" style-hover="transform:scale(1.08)">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#0b7a45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2.5 13.5 5 6 12.5 3 13l.5-3Z"></path></svg>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:14px;margin-top:6px">
+            <div style="font-family:Doto,monospace;font-weight:900;font-size:62px;line-height:.9;color:#121a16;letter-spacing:-.02em">19</div>
+            <div style="padding-bottom:8px">
+              <div style="display:inline-block;font-size:11px;font-weight:700;color:#0b7a45;padding:4px 10px;border-radius:999px;background:rgba(23,184,102,.14)">{{ todayName }}</div>
+              <div style="font-size:13px;color:#5d6f67;margin-top:6px">{{ todayCount }} items · {{ clashCount }} clashes</div>
+            </div>
+          </div>
+
+          <div onClick="{{ openDay }}" style="display:flex;align-items:center;gap:14px;margin-top:16px;padding:8px 14px;border-radius:16px;cursor:pointer;background:transparent;transition:background .2s ease-out" style-hover="background:rgba(23,184,102,.08)">
+            <div style="font-family:Doto,monospace;font-weight:900;font-size:17px;color:#0b7a45;width:56px">{{ wakeUp }}</div>
+            <div style="flex:1;font-size:14px;font-weight:700;color:#121a16">✦ Wake up</div>
+            <div style="font-size:10.5px;font-weight:600;color:#8b9a93">Edit</div>
+          </div>
+
+          <div style="height:1px;background:rgba(18,38,30,.08);margin:12px 0 10px"></div>
+                    <div style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin:0 -4px;padding:0 4px 2px;scrollbar-width:thin;scrollbar-color:rgba(18,38,30,.16) transparent">
+            <sc-for list="{{ todayList }}" as="t" hint-placeholder-count="6">
+              <div style="flex:none;display:flex;align-items:center;gap:12px;padding:9px 14px;border-radius:16px;background:{{ t.bg }};box-shadow:{{ t.shadow }}">
+                <div style="font-family:Doto,monospace;font-weight:900;font-size:16px;color:{{ t.timeColor }};width:52px">{{ t.start }}</div>
+                <div style="width:3px;height:16px;flex:none;border-radius:3px;background:{{ t.bar }}"></div>
+                <div style="flex:1;min-width:0;font-size:13.5px;font-weight:{{ t.weight }};color:{{ t.textColor }};text-decoration:{{ t.deco }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.title }}</div>
+                <div style="font-size:10.5px;font-weight:700;color:{{ t.tagColor }}">{{ t.tag }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div onClick="{{ openDay }}" style="flex:none;margin-top:12px;display:flex;align-items:center;gap:14px;padding:8px 14px;border-radius:16px;cursor:pointer;background:transparent;transition:background .2s ease-out" style-hover="background:rgba(18,38,30,.04)">
+            <div style="font-family:Doto,monospace;font-weight:900;font-size:17px;color:#41504a;width:56px">{{ bedtime }}</div>
+            <div style="flex:1;font-size:14px;font-weight:700;color:#121a16">☾ Bedtime</div>
+            <div style="font-size:10.5px;font-weight:600;color:#8b9a93">Edit</div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+
+  <!-- ADD ROUTINE MODAL -->
+  <sc-if value="{{ modal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:30;display:grid;place-items:center;background:rgba(16,32,25,.36);backdrop-filter:blur(6px)">
+      <div style="width:660px;max-height:88%;overflow:auto;border-radius:28px;background:linear-gradient(150deg,rgba(255,255,255,.9),rgba(245,250,247,.78));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.55);animation:rb-fade .18s ease-out">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid rgba(18,38,30,.07)">
+          <div style="font-family:Silkscreen,monospace;font-size:13px;letter-spacing:.06em;color:#16211c">ADD ROUTINE</div>
+          <div onClick="{{ closeModal }}" style="width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:#5d6f67;font-size:15px;cursor:pointer" style-hover="background:rgba(18,38,30,.06)">×</div>
+        </div>
+
+        <div style="padding:20px 24px 24px;display:flex;flex-direction:column;gap:16px">
+          <div>
+            <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Title</div>
+            <div style="padding:11px 13px;border-radius:14px;background:#fff;border:1px solid rgba(23,184,102,.4);box-shadow:0 0 0 3px rgba(23,184,102,.1);font-size:13.5px;color:#16211c">Gym<span style="display:inline-block;width:2px;height:15px;margin-left:2px;vertical-align:-3px;background:#17b866;animation:rb-cursor 1.1s steps(1) infinite"></span></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+            <div>
+              <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Start time</div>
+              <div style="padding:11px 13px;border-radius:14px;background:rgba(255,255,255,.8);border:1px solid rgba(18,38,30,.09);font-size:13px;color:#16211c">07:00</div>
+            </div>
+            <div>
+              <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">End time</div>
+              <div style="padding:11px 13px;border-radius:14px;background:rgba(255,255,255,.8);border:1px solid rgba(18,38,30,.09);font-size:13px;color:#16211c">08:00</div>
+            </div>
+            <div>
+              <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Color</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:14px;background:rgba(255,255,255,.8);border:1px solid rgba(18,38,30,.09)">
+                <sc-for list="{{ swatches }}" as="s" hint-placeholder-count="6">
+                  <div onClick="{{ pickColor }}" data-c="{{ s.c }}" style="width:16px;height:16px;border-radius:5px;cursor:pointer;background:{{ s.c }};box-shadow:{{ s.ring }}"></div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:8px">Repeat on</div>
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{ dayToggles }}" as="d" hint-placeholder-count="7">
+                <div onClick="{{ toggleDay }}" data-d="{{ d.i }}" style="flex:1;height:40px;display:grid;place-items:center;border-radius:10px;font-family:Silkscreen,monospace;font-size:11px;cursor:pointer;color:{{ d.color }};background:{{ d.bg }};border:1px solid {{ d.border }};box-shadow:{{ d.glow }}">{{ d.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:8px">Repeat frequency</div>
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{ intervals }}" as="iv" hint-placeholder-count="4">
+                <div onClick="{{ pickInterval }}" data-iv="{{ iv.id }}" style="flex:1;padding:10px 8px;text-align:center;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;color:{{ iv.color }};background:{{ iv.bg }};border:1px solid {{ iv.border }}">{{ iv.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:14px;padding:14px 16px;border-radius:14px;background:rgba(238,250,243,.7);border:1px solid rgba(23,184,102,.2)">
+            <div>
+              <div style="font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.1em;color:#0b7a45;margin-bottom:9px">REPEATS</div>
+              <div style="font-size:13.5px;font-weight:700;color:#16211c;line-height:1.5">{{ repeatSummary }}</div>
+              <div style="font-size:12px;color:#5d6f67;margin-top:6px">{{ repeatSub }}</div>
+            </div>
+            <div style="border-left:1px solid rgba(23,184,102,.2);padding-left:14px">
+              <div style="font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.16em;color:#6b7a73;margin-bottom:9px">NEXT</div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <sc-for list="{{ nextDates }}" as="n" hint-placeholder-count="4">
+                  <div style="font-size:12.5px;color:#2b3a34;font-weight:600">{{ n }}</div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding-top:2px">
+            <div onClick="{{ closeModal }}" style="padding:11px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.9);background:linear-gradient(145deg,rgba(255,255,255,.85),rgba(255,255,255,.55));box-shadow:inset 0 1px 1px #fff,0 8px 18px -12px rgba(20,48,34,.35);font-size:13px;font-weight:600;color:#2b3a34;cursor:pointer" style-hover="background:#fff">Cancel</div>
+            <div onClick="{{ closeModal }}" style="display:flex;align-items:center;gap:9px;padding:11px 20px;border-radius:999px;background:linear-gradient(150deg,#1fc172,#0f9a56);color:#fff;font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.05em;cursor:pointer;box-shadow:0 14px 26px -16px rgba(23,184,102,1)" style-hover="background:#16211c">SAVE ROUTINE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- DAY SETTINGS -->
+  <sc-if value="{{ dayModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:36;display:grid;place-items:center;background:rgba(16,32,25,.3);backdrop-filter:blur(6px)">
+      <div style="width:400px;border-radius:30px;padding:24px;background:linear-gradient(150deg,rgba(255,255,255,.9),rgba(245,250,247,.78));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.55);animation:rb-fade .18s ease-out">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.01em;color:#121a16">Your day</div>
+          <div onClick="{{ closeDay }}" style="width:30px;height:30px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#5d6f67;font-size:16px" style-hover="background:rgba(18,38,30,.06)">×</div>
+        </div>
+        <div style="font-size:12.5px;color:#5d6f67;margin-bottom:16px">RaBit builds your routine grid between these two times.</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:20px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+              <div>
+                <div style="font-size:12px;font-weight:600;color:#5d6f67">✦ Wake up</div>
+                <div style="font-family:Doto,monospace;font-weight:900;font-size:32px;line-height:1.1;color:#121a16">{{ draftWake }}</div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <div onClick="{{ wakeMinus }}" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:#fff;box-shadow:inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4);font-size:18px;color:#1d2a24;transition:transform .15s ease-out" style-hover="transform:scale(1.08)">−</div>
+                <div onClick="{{ wakePlus }}" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:#fff;box-shadow:inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4);font-size:18px;color:#1d2a24;transition:transform .15s ease-out" style-hover="transform:scale(1.08)">+</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:20px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+              <div>
+                <div style="font-size:12px;font-weight:600;color:#5d6f67">☾ Bedtime</div>
+                <div style="font-family:Doto,monospace;font-weight:900;font-size:32px;line-height:1.1;color:#121a16">{{ draftBed }}</div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <div onClick="{{ bedMinus }}" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:#fff;box-shadow:inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4);font-size:18px;color:#1d2a24;transition:transform .15s ease-out" style-hover="transform:scale(1.08)">−</div>
+                <div onClick="{{ bedPlus }}" style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:#fff;box-shadow:inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4);font-size:18px;color:#1d2a24;transition:transform .15s ease-out" style-hover="transform:scale(1.08)">+</div>
+              </div>
+            </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:14px">
+          <sc-for list="{{ applyOpts }}" as="o" hint-placeholder-count="3">
+            <div onClick="{{ pickApply }}" data-a="{{ o.id }}" style="flex:1;text-align:center;padding:9px 6px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }}">{{ o.label }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <div onClick="{{ closeDay }}" style="flex:1;text-align:center;padding:12px;border-radius:999px;background:rgba(255,255,255,.75);box-shadow:inset 0 1px 1px #fff,0 8px 18px -12px rgba(20,48,34,.35);font-size:13px;font-weight:600;color:#2b3a34;cursor:pointer">Cancel</div>
+          <div onClick="{{ saveDay }}" style="flex:1;text-align:center;padding:12px;border-radius:999px;background:linear-gradient(150deg,#1fc172,#0f9a56);color:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 14px 26px -14px rgba(23,184,102,1)">Save</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- REMOVE CONFIRM -->
+  <sc-if value="{{ removing }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:35;display:grid;place-items:center;background:rgba(16,32,25,.36);backdrop-filter:blur(6px)">
+      <div style="width:380px;border-radius:28px;padding:24px;background:linear-gradient(150deg,rgba(255,255,255,.9),rgba(245,250,247,.78));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.55);animation:rb-fade .18s ease-out">
+        <div style="font-family:Silkscreen,monospace;font-size:12px;letter-spacing:.06em;color:#16211c;margin-bottom:12px">REMOVE ROUTINE?</div>
+        <div style="font-size:14px;font-weight:700;color:#16211c">{{ sel.title }}</div>
+        <div style="font-size:12.5px;color:#5d6f67;margin-top:4px">{{ sel.days }} · {{ sel.time }}</div>
+        <div style="font-size:12px;color:#5d6f67;margin-top:12px;line-height:1.5">This will remove the recurring routine from every week.</div>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <div onClick="{{ cancelRemove }}" style="flex:1;text-align:center;padding:11px;border-radius:999px;border:1px solid rgba(255,255,255,.9);background:linear-gradient(145deg,rgba(255,255,255,.85),rgba(255,255,255,.55));box-shadow:inset 0 1px 1px #fff,0 8px 18px -12px rgba(20,48,34,.35);font-size:13px;font-weight:600;color:#2b3a34;cursor:pointer" style-hover="background:#fff">Cancel</div>
+          <div onClick="{{ cancelRemove }}" style="flex:1;text-align:center;padding:11px;border-radius:11px;background:#a8443a;color:#fff;font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.05em;cursor:pointer" style-hover="background:#8a3730">REMOVE</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ pageOff }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:55;display:grid;place-items:center;background:rgba(230,242,236,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)">
+      <div style="width:400px;box-sizing:border-box;padding:28px;border-radius:30px;background:linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8));border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.5);animation:rb-toast .2s ease-out both">
+        <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73">&gt; MODULE OFF</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.01em;color:#121a16;margin-top:10px">{{ pageName }} is turned off</div>
+        <div style="font-size:13.5px;line-height:1.55;color:#5d6f67;margin-top:8px">It's hidden from the sidebar and Home. Your data is still here.</div>
+        <div style="display:flex;gap:8px;margin-top:22px">
+          <div onClick="{{ enablePage }}" style="flex:1;text-align:center;padding:12px 18px;border-radius:999px;cursor:pointer;background:linear-gradient(150deg,#1fc172,#0f9a56);color:#fff;font-size:13.5px;font-weight:600;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 14px 26px -14px rgba(23,184,102,.95)" style-hover="transform:scale(1.02)">Turn it back on</div>
+          <a href="RaBit Home v2.dc.html" style="flex:1;text-align:center;padding:12px 18px;border-radius:999px;background:rgba(255,255,255,.8);box-shadow:inset 0 1px 1px #fff,0 8px 18px -12px rgba(20,48,34,.4);color:#1d2a24;font-size:13.5px;font-weight:600">Go Home</a>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="RaBitItemPanel" adhoc="{{ panelAdhoc }}" on-close="{{ closePanel }}" style="position:absolute;inset:0;z-index:58" hint-size="100%,100%"></dc-import>
+  </sc-if>
+
+  <!-- SETTINGS -->
+  <sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSettings }}" style="position:absolute;inset:0;z-index:60;display:grid;place-items:center;background:rgba(16,32,25,.3);backdrop-filter:blur(6px)">
+      <div onClick="{{ stopNotif }}" style="width:480px;max-height:88%;box-sizing:border-box;display:flex;flex-direction:column;border-radius:30px;background:linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.55);animation:rb-toast .18s ease-out both">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 24px 6px">
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.01em;color:#121a16">Settings</div>
+          <div onClick="{{ closeSettings }}" style="width:30px;height:30px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#5d6f67;font-size:16px" style-hover="background:rgba(18,38,30,.06)">×</div>
+        </div>
+        <div style="flex:1;min-height:0;overflow-y:auto;padding:0 24px 4px;scrollbar-width:thin;scrollbar-color:rgba(18,38,30,.16) transparent">
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">PROFILE</div>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="width:40px;height:40px;flex:none;border-radius:50%;background:linear-gradient(145deg,#0b7a45,#4fc389);display:grid;place-items:center;font-family:Silkscreen,monospace;font-size:13px;color:#fff">{{ userInitial }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:3px">Your name · used in greetings</div>
+              <input value="{{ prefName }}" onInput="{{ onPrefName }}" placeholder="Your name" style="width:100%;box-sizing:border-box;border:0;outline:0;background:transparent;font-family:inherit;font-size:15px;font-weight:700;color:#121a16">
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:18px 0 8px">
+            <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73">MODULES · {{ modOnCount }}/4 ON</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <div onClick="{{ allModsOn }}" style="padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:600;cursor:pointer;color:#0b7a45" style-hover="background:#fff">All on</div>
+              <div onClick="{{ allModsOff }}" style="padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:600;cursor:pointer;color:#5d6f67" style-hover="background:#fff;color:#a8443a">All off</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ modRows }}" as="md" hint-placeholder-count="4">
+              <div onClick="{{ toggleMod }}" data-id="{{ md.id }}" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:18px;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff;opacity:{{ md.op }};transition:opacity .2s ease-out">
+                <div style="width:36px;height:36px;flex:none;border-radius:12px;display:grid;place-items:center;background:{{ md.iconBg }};box-shadow:inset 0 1px 1px #fff;transition:background .2s ease-out">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="{{ md.iconStroke }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ md.d }}"></path></svg>
+                </div>
+                <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:#121a16">{{ md.label }}</div><div style="font-size:12px;color:#5d6f67;margin-top:3px;line-height:1.45">{{ md.desc }}</div></div>
+                <div style="width:42px;height:24px;flex:none;border-radius:12px;padding:3px;box-sizing:border-box;background:{{ md.sw.bg }};transition:background .2s ease-out"><div style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(12,40,26,.3);transform:translateX({{ md.sw.x }});transition:transform .2s ease-out"></div></div>
+              </div>
+            </sc-for>
+            <div style="padding:4px 4px 0;font-size:11.5px;line-height:1.5;color:#6b7a73">Home always stays on. Turned-off modules disappear from the sidebar and Home — your data is kept.</div>
+          </div>
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">TIME &amp; DATE</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="font-size:14px;font-weight:700;color:#121a16">Time format</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <sc-for list="{{ timeOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ pickPref }}" data-k="{{ o.key }}" data-v="{{ o.id }}" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .2s ease-out">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="font-size:14px;font-weight:700;color:#121a16">Week starts on</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <sc-for list="{{ weekOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ pickPref }}" data-k="{{ o.key }}" data-v="{{ o.id }}" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .2s ease-out">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+            <sc-if value="{{ showRoutineMod }}" hint-placeholder-val="{{ true }}">
+              <div onClick="{{ openDay }}" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-radius:18px;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff;font-size:14px;font-weight:700;color:#121a16">Wake up &amp; bedtime<span style="font-size:12.5px;font-weight:600;color:#0b7a45">Edit →</span></div>
+            </sc-if>
+          </div>
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">RABIT</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+          <div onClick="{{ toggleRemind }}" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:18px;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="flex:1"><div style="font-size:14px;font-weight:700;color:#121a16">Reminders</div><div style="font-size:12px;color:#5d6f67;margin-top:3px;line-height:1.45">RaBit pops up before your events and deadlines.</div></div>
+            <div style="width:42px;height:24px;flex:none;border-radius:12px;padding:3px;box-sizing:border-box;background:{{ remindSw.bg }};transition:background .2s ease-out"><div style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(12,40,26,.3);transform:translateX({{ remindSw.x }});transition:transform .2s ease-out"></div></div>
+          </div>
+          <div onClick="{{ toggleSound }}" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:18px;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="flex:1"><div style="font-size:14px;font-weight:700;color:#121a16">Sound</div><div style="font-size:12px;color:#5d6f67;margin-top:3px;line-height:1.45">Play a soft 8-bit chime with reminders.</div></div>
+            <div style="width:42px;height:24px;flex:none;border-radius:12px;padding:3px;box-sizing:border-box;background:{{ soundSw.bg }};transition:background .2s ease-out"><div style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(12,40,26,.3);transform:translateX({{ soundSw.x }});transition:transform .2s ease-out"></div></div>
+          </div>
+          </div>
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">APPEARANCE</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="font-size:14px;font-weight:700;color:#121a16">Theme</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <sc-for list="{{ themeOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ pickPref }}" data-k="{{ o.key }}" data-v="{{ o.id }}" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .2s ease-out">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          </div>
+        </div>
+        <div style="padding:16px 24px 22px">
+          <div onClick="{{ closeSettings }}" style="text-align:center;padding:12px;border-radius:999px;background:linear-gradient(150deg,#1fc172,#0f9a56);color:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 14px 26px -14px rgba(23,184,102,1)">Done</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1000}}">
+const C = { green: "#17b866", blue: "#4b7fd6", amber: "#c98a1e", red: "#a8443a", violet: "#8a6fd6", teal: "#2aa6a0" };
+const DOW3 = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+const DOWFULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const WEEKNUMS = [14, 15, 16, 17, 18, 19, 20];
+
+const ROUTINES = [
+  { id: "gym", title: "Gym", days: [0, 2, 4], s: "07:00", e: "08:00", color: C.green, every: 1 },
+  { id: "study", title: "Study", days: [0, 1, 2, 3, 4], s: "09:00", e: "11:00", color: C.blue, every: 1 },
+  { id: "lunch", title: "Lunch", days: [0, 1, 2, 3, 4], s: "13:00", e: "14:00", color: C.amber, every: 1 },
+  { id: "therapy", title: "Therapy", days: [1], s: "16:00", e: "17:00", color: C.violet, every: 2 },
+  { id: "read", title: "Read", days: [0, 1, 2, 3, 4, 5, 6], s: "22:00", e: "23:00", color: C.teal, every: 1 },
+  { id: "run", title: "Long run", days: [5], s: "08:30", e: "10:00", color: C.green, every: 1 },
+  { id: "review", title: "Weekly review", days: [6], s: "18:00", e: "19:00", color: C.violet, every: 1 }
+];
+// Calendar items keyed by day index 0..6 for this week — shown only in THIS WEEK
+const CAL = {
+  1: [{ id: "c-dentist15", title: "Dentist", s: "10:00", e: "11:00", color: C.teal, kind: "event" }],
+  5: [{ id: "c-flight", title: "Vuelo temprano", s: "04:00", e: "07:00", color: C.blue, kind: "event" },
+      { id: "c-dentist19", title: "Dentist", s: "09:00", e: "10:00", color: C.teal, kind: "event" },
+      { id: "c-report", title: "Submit report", s: "13:30", e: "14:30", color: C.violet, kind: "task" },
+      { id: "c-marathon", title: "Maratón de estudio", s: "22:00", e: "24:00", color: C.violet, kind: "event" }]
+};
+
+const WAKE0 = 6 * 60 + 30, BED0 = 23 * 60 + 30;   // 06:30 → 23:30 = 17h
+const toMin = t => parseInt(t.slice(0, 2), 10) * 60 + parseInt(t.slice(3), 10);
+const fmt = m => (Math.floor(m / 60) < 10 ? "0" : "") + Math.floor(m / 60) + ":" + (m % 60 < 10 ? "0" : "") + (m % 60);
+
+const MOD_DEFS = [
+  { id: "calendar", label: "Calendar", desc: "Events, tasks and RaBit reminders. Routine keeps working without it.", d: "M5 3.6h8a2.4 2.4 0 0 1 2.4 2.4v7a2.4 2.4 0 0 1-2.4 2.4H5a2.4 2.4 0 0 1-2.4-2.4V6A2.4 2.4 0 0 1 5 3.6ZM2.6 7.2h12.8" },
+  { id: "routine", label: "Daily routine", desc: "Recurring week, wake-up and bedtime. Calendar keeps working without it.", d: "M2.6 9a6.4 6.4 0 1 0 12.8 0a6.4 6.4 0 1 0-12.8 0ZM9 5.4V9l2.4 1.6" },
+  { id: "notes", label: "Quick notes", desc: "Fast notes you can turn into calendar tasks.", d: "M4 3.2h7.2L14 6v8.8H4ZM6.4 8.4h5.2M6.4 11.2h3.4" },
+  { id: "portfolio", label: "Portfolio", desc: "Stock tracker with Excel import and value history.", d: "M3 6.5h12v8.5H3ZM6.5 6.5V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5M3 10.5h12" }
+];
+class Component extends DCLogic {
+  __prefs() {
+    const st = this.state || {};
+    if (st.__prefs) return st.__prefs;
+    const d = { name: "Sofía", timeFmt: "24h", weekStart: "mon", theme: "light", reminders: true, sound: false };
+    try { return { ...d, ...(JSON.parse(localStorage.getItem("rabit.prefs") || "{}")) }; } catch (e) { return d; }
+  }
+  __setPref(k, v) { const p = { ...this.__prefs(), [k]: v }; try { localStorage.setItem("rabit.prefs", JSON.stringify(p)); } catch (e) {} this.setState({ __prefs: p }); }
+  __prefVals() {
+    const p = this.__prefs();
+    const seg = (key, opts) => opts.map(([id, label]) => { const on = p[key] === id; return { id, key, label, color: on ? "#0b7a45" : "#5d6f67", bg: on ? "#fff" : "transparent", shadow: on ? "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)" : "none" }; });
+    const sw = on => ({ bg: on ? "linear-gradient(150deg,#1fc172,#0f9a56)" : "rgba(18,38,30,.16)", x: on ? "18px" : "0px" });
+    const nm = (p.name || "").trim() || "there";
+    return {
+      userName: nm, userInitial: nm.charAt(0).toUpperCase(), prefName: p.name,
+      onPrefName: e => this.__setPref("name", e.target.value),
+      timeOpts: seg("timeFmt", [["24h", "24-hour"], ["12h", "12-hour"]]),
+      weekOpts: seg("weekStart", [["mon", "Monday"], ["sun", "Sunday"]]),
+      themeOpts: seg("theme", [["light", "Light"], ["dark", "Dark"], ["auto", "Auto"]]),
+      pickPref: e => this.__setPref(e.currentTarget.dataset.k, e.currentTarget.dataset.v),
+      remindSw: sw(p.reminders), soundSw: sw(p.sound),
+      toggleRemind: () => this.__setPref("reminders", !p.reminders),
+      toggleSound: () => this.__setPref("sound", !p.sound)
+    };
+  }
+  __mods() {
+    const st = this.state || {};
+    if (st.__mods) return st.__mods;
+    try { const v = JSON.parse(localStorage.getItem("rabit.modules") || "null"); if (v) return { calendar: v.calendar !== false, routine: v.routine !== false, notes: v.notes !== false, portfolio: v.portfolio !== false }; } catch (e) {}
+    return { calendar: true, routine: true, notes: true, portfolio: true };
+  }
+  __modOk(id) { const m = this.__mods(); return id === "home" ? true : m[id] !== false; }
+  __settings() {
+    const m = this.__mods(), st = this.state || {};
+    const set = (k) => { const nm = { ...this.__mods(), [k]: !this.__mods()[k] }; try { localStorage.setItem("rabit.modules", JSON.stringify(nm)); } catch (e) {} this.setState({ __mods: nm }); };
+    const setAll = (v) => { const nm = { calendar: v, routine: v, notes: v, portfolio: v }; try { localStorage.setItem("rabit.modules", JSON.stringify(nm)); } catch (e) {} this.setState({ __mods: nm }); };
+    const sw = on => ({ bg: on ? "linear-gradient(150deg,#1fc172,#0f9a56)" : "rgba(18,38,30,.16)", x: on ? "18px" : "0px" });
+    return {
+      settingsOpen: !!st.__settings,
+      openSettings: () => this.setState({ __settings: true }),
+      closeSettings: () => this.setState({ __settings: false }),
+      toggleRoutineMod: () => set("routine"), toggleNotesMod: () => set("notes"),
+      routineSw: sw(m.routine), notesSw: sw(m.notes),
+      showRoutineMod: m.routine, showNotesMod: m.notes, showCalendarMod: m.calendar, showPortfolioMod: m.portfolio,
+      showSideCol: m.calendar || m.routine,
+      modOnCount: MOD_DEFS.filter(d => m[d.id]).length,
+      modRows: MOD_DEFS.map(d => ({ ...d, sw: sw(m[d.id]), op: m[d.id] ? 1 : .72, iconBg: m[d.id] ? "rgba(23,184,102,.12)" : "rgba(18,38,30,.05)", iconStroke: m[d.id] ? "#0b7a45" : "#8b9a93" })),
+      toggleMod: e => set(e.currentTarget.dataset.id),
+      allModsOn: () => setAll(true), allModsOff: () => setAll(false),
+      pageOff: m.routine === false, pageName: "Daily routine",
+      enablePage: () => { if (!this.__mods()["routine"]) set("routine"); }
+    };
+  }
+  __shell() {
+    const st = this.state || {};
+    return {
+      notifOpen: !!st.__notif,
+      toggleNotif: () => this.setState(s2 => ({ __notif: !(s2 && s2.__notif) })),
+      stopNotif: e => e.stopPropagation(),
+      notifs: [
+        { title: "Entrega proyecto Flutter", sub: "In 2 days · Mon 10:00", color: "#a8443a", href: "RaBit Calendar.dc.html#day-21" },
+        { title: "Maratón de estudio overlaps Read", sub: "Today · 22:00 · Routine", color: "#d9952a", href: "RaBit Routine.dc.html" },
+        { title: "Comprar materiales", sub: "Thu 24 · 14:00 · from Quick Notes", color: "#8a6fd6", href: "RaBit Calendar.dc.html#day-24" }
+      ],
+      onSearchKey: e => { if (e.key === "Enter" && e.target.value.trim()) location.href = "RaBit Quick Notes.dc.html#q=" + encodeURIComponent(e.target.value.trim()); }
+    };
+  }
+  viewRef = React.createRef();
+  colRef = React.createRef();
+  todayRef = React.createRef();
+  measurePanel = () => {
+    const v = this.viewRef.current, c = this.colRef.current;
+    if (!v || !c) return;
+    const cr = c.getBoundingClientRect(), vr = v.getBoundingClientRect();
+    const k = c.offsetWidth ? cr.width / c.offsetWidth : 1;
+    const top = Math.round((vr.top - cr.top) / k);
+    const td = this.todayRef.current; let th = (this.state && this.state.__todayH) || 0;
+    if (td) { const tr = td.getBoundingClientRect(); th = Math.max(0, Math.round((vr.bottom - tr.top) / k)); }
+    const S = this.state || {};
+    if (top !== S.__panelTop || th !== S.__todayH) this.setState({ __panelTop: top, __todayH: th });
+  };
+  componentDidMount() {
+    this.measurePanel();
+    if (location.hash === "#day-settings") this.setState({ dayModal: true, dWake: WAKE0, dBed: BED0 });
+    this.__pt = [setTimeout(this.measurePanel, 600), setTimeout(this.measurePanel, 1400)];
+    if (document.fonts) document.fonts.ready.then(this.measurePanel);
+    window.addEventListener("resize", this.measurePanel);
+  }
+  componentDidUpdate() { clearTimeout(this.__pu); this.__pu = setTimeout(this.measurePanel, 30); }
+  componentWillUnmount() { clearTimeout(this.__pu); (this.__pt || []).forEach(clearTimeout); window.removeEventListener("resize", this.measurePanel); }
+  __nav() {
+    const NAVS = [
+      { id: "home", label: "Home", href: "RaBit Home v2.dc.html", d: "M2.6 8.2 9 3l6.4 5.2V15a.8.8 0 0 1-.8.8H3.4a.8.8 0 0 1-.8-.8Z" },
+      { id: "calendar", label: "Calendar", href: "RaBit Calendar.dc.html", d: "M5 3.6h8a2.4 2.4 0 0 1 2.4 2.4v7a2.4 2.4 0 0 1-2.4 2.4H5a2.4 2.4 0 0 1-2.4-2.4V6A2.4 2.4 0 0 1 5 3.6ZM2.6 7.2h12.8M6 2.2v2.6M12 2.2v2.6" },
+      { id: "routine", label: "Routine", href: "RaBit Routine.dc.html", d: "M2.6 9a6.4 6.4 0 1 0 12.8 0a6.4 6.4 0 1 0-12.8 0ZM9 5.4V9l2.4 1.6" },
+      { id: "notes", label: "Quick Notes", href: "RaBit Quick Notes.dc.html", d: "M4 3.2h7.2L14 6v8.8H4ZM6.4 8.4h5.2M6.4 11.2h3.4" },
+      { id: "portfolio", label: "Portfolio", href: "RaBit Portfolio.dc.html", d: "M3 6.5h12v8.5H3ZM6.5 6.5V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5M3 10.5h12" }
+    ];
+    const hv = this.state && this.state.__hover;
+    return {
+      nav: NAVS.filter(n => this.__modOk(n.id)).map(n => {
+        const a = n.id === "routine", h = hv === n.id;
+        return { ...n, bg: a ? "#fff" : h ? "rgba(255,255,255,.7)" : "transparent",
+          shadow: a ? "inset 0 1px 1px #fff,0 8px 18px -10px rgba(20,48,34,.45)" : "none",
+          stroke: a ? "#0b7a45" : h ? "#1d2a24" : "#5d6f67", bar: a ? 1 : 0, labelOp: h ? 1 : 0, labelX: h ? "0px" : "-6px" };
+      }),
+      navEnter: e => this.setState({ __hover: e.currentTarget.dataset.id }),
+      navLeave: () => this.setState({ __hover: null })
+    };
+  }
+  state = { mode: "ROUTINE", week: 0, sel: null, modal: false, removing: false, color: C.green, days: [0, 2, 4], every: 1 };
+
+  markStyle(kind, color) {
+    if (kind === "event") return "width:7px;height:7px;flex:none;border-radius:50%;background:" + color;
+    return "width:8px;height:8px;flex:none;border-radius:2px;border:1.5px solid " + color + ";box-sizing:border-box";
+  }
+
+  renderVals() {
+    const st = this.state, today = 5;
+    const WAKE = st.wake ?? WAKE0, BED = st.bed ?? BED0;
+    const CONF = [];
+
+    // calendar-style hour rows: one 38px row per hour from wake hour to bed hour
+    const ROW = 38;
+    const H1 = Math.ceil(BED / 60);
+    // first row is the partial wake row (06:30 → 07:00), then whole hours
+    const hours = [{ label: fmt(WAKE), h: ((Math.ceil(WAKE / 60) * 60) - WAKE) / 60 * ROW }];
+    for (let h = Math.ceil(WAKE / 60); h < H1; h++) hours.push({ label: (h < 10 ? "0" : "") + h + ":00", h: ROW });
+    const yOf = min => ((min - WAKE) / 60) * ROW;
+
+    const thisWeek = true;
+    const layout = list => {
+      const items = list.map(r => ({ ...r, sM: toMin(r.s), eM: toMin(r.e) })).sort((a, b) => a.sM - b.sM || b.eM - a.eM);
+      const groups = [];
+      items.forEach(it => {
+        let g = groups.find(gr => gr.some(x => it.sM < x.eM && x.sM < it.eM));
+        if (g) g.push(it); else groups.push([it]);
+      });
+      const out = [];
+      groups.forEach(g => g.forEach((it, i) => out.push({ ...it, n: g.length, idx: i })));
+      return out;
+    };
+
+    const cols = WEEKNUMS.map((num, di) => {
+      let list = ROUTINES.filter(r => r.days.includes(di) && (st.week % r.every === 0))
+        .map(r => ({ id: r.id, rid: r.id, title: r.title, s: r.s, e: r.e, color: r.color, kind: "routine", every: r.every, days: r.days }));
+      if (CAL[di]) list = list.concat(CAL[di].map(c => ({ ...c, rid: c.id })));
+
+      const laid = layout(list);
+      const blocks = laid.filter(b => b.eM > WAKE && b.sM < BED).map(b => {
+        const others = laid.filter(o => o !== b && (o.kind === "routine") !== (b.kind === "routine") && o.sM < b.eM && b.sM < o.eM);
+        const hit = others.length > 0;
+        if (hit && b.kind === "routine") others.forEach(o => CONF.push({ rid: b.rid, r: b.title, c: o.title, day: DOWFULL[di], min: Math.min(b.eM, o.eM) - Math.max(b.sM, o.sM) }));
+        const cs = Math.max(b.sM, WAKE), ceM = Math.min(b.eM, BED);
+        const top = yOf(cs), h = Math.max(18, yOf(ceM) - yOf(cs));
+        const isCal = b.kind !== "routine";
+        const selc = st.sel === b.rid;
+        const GAP = 3;
+        const routineTint = "linear-gradient(145deg,#ffffff,#f5f8f6)";
+        const eventTint = "linear-gradient(145deg,#ffffff,#f3f6f8)";
+        const repIcon = b.kind === "routine" ? (b.every > 1 ? "↻" + b.every : (b.days && b.days.length > 1 ? "↻" : "")) : "";
+        const daysTxt = b.days ? b.days.map(d => DOW3[d]).join(" · ") : "";
+        return {
+          id: b.rid, title: b.title, time: b.s + "–" + b.e, color: b.color,
+          left: "calc(" + (b.idx * (100 / b.n)) + "% + " + GAP + "px)",
+          width: "calc(" + (100 / b.n) + "% - " + (GAP * 2) + "px)",
+          pad: h < 30 ? "0 8px" : b.n > 1 ? (h < 40 ? "2px 4px" : "4px") : (h < 40 ? "2px 8px" : "6px 8px"),
+          showMark: b.n > 1 ? "display:none" : this.markStyle(b.kind, b.color),
+          showTime: ((b.n > 1 && h < 34) || h < 30) ? "display:none" : "font-size:9px;line-height:1.15;color:#5d6f67;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%",
+          repStyle: b.n > 1 ? "display:none" : "font-family:Silkscreen,monospace;font-size:7px;color:#0b7a45",
+          top: top + GAP, h: Math.max(24, h - GAP * 2),
+          bg: selc ? "linear-gradient(145deg,#e6f8ee,#d3f1e1)" : (isCal ? eventTint : routineTint),
+          border: selc ? "rgba(23,184,102,.5)" : (isCal ? b.color + "66" : "rgba(255,255,255,.95)"),
+          shadow: selc ? "inset 0 1px 1px #fff,0 8px 18px -12px rgba(23,184,102,.8)" : (isCal ? "inset 0 1px 1px #fff,inset 0 0 0 1px " + b.color + "26,0 8px 16px -10px rgba(18,60,40,.45)" : "inset 0 1px 1px #fff,0 4px 10px -7px rgba(20,48,34,.28)"),
+          z: isCal ? (hit ? 4 : 3) : 1,
+          op: (!isCal && hit && !selc) ? .42 : 1,
+          ...(isCal && hit && !selc ? { bg: "linear-gradient(145deg,#fff3dc,#ffe2b8)", border: "#d9952a", shadow: "inset 0 1px 1px #fff,0 0 0 3px rgba(217,149,42,.18),0 10px 18px -10px rgba(160,100,10,.55)", title: "! " + b.title } : {}),
+          mark: this.markStyle(b.kind, b.color), rep: repIcon,
+          tip: b.title + "  " + b.s + "–" + b.e + (b.kind === "routine" ? "\nRoutine · " + daysTxt : "\nCalendar " + b.kind)
+        };
+      });
+
+      const isToday = di === today && st.week === 0;
+      return {
+        i: di, dow: DOW3[di], num, blocks,
+        headBg: isToday ? "rgba(215,244,229,.7)" : (di >= 5 ? "rgba(18,38,30,.025)" : "transparent"),
+        colBg: isToday ? "rgba(215,244,229,.16)" : (di >= 5 ? "rgba(18,38,30,.015)" : "transparent"),
+        dowColor: isToday ? "#0b7a45" : "#5d6f67", numColor: isToday ? "#0b7a45" : "#16211c",
+        tag: isToday ? "TODAY" : ""
+      };
+    });
+
+    const selR = ROUTINES.find(r => r.id === st.sel);
+    const selC = st.sel && st.sel.startsWith("c-") ? Object.values(CAL).flat().find(c => c.id === st.sel) : null;
+    const dayNames = r => r.days.map(d => DOW3[d]).join(" · ");
+    const proj = r => { const out = []; let day = 14 + r.days[0]; for (let k = 0; k < 3; k++) { const dd = day + k * 7 * r.every; out.push(dd > 30 ? "OCT " + (dd - 30) : "SEP " + dd); } return out; };
+
+
+    const todayList = (() => {
+      let l = ROUTINES.filter(r => r.days.includes(today) && st.week % r.every === 0)
+        .map(r => ({ s: r.s, e: r.e, title: r.title, color: r.color, kind: "routine" }));
+      if (CAL[today]) l = l.concat(CAL[today].map(c => ({ s: c.s, e: c.e, title: c.title, color: c.color, kind: c.kind })));
+      l = l.map(x => ({ ...x, sM: toMin(x.s), eM: toMin(x.e) }));
+      return l.sort((p, q) => p.sM - q.sM).map(t => {
+        const clash = l.some(o => o !== t && (o.kind === "routine") !== (t.kind === "routine") && o.sM < t.eM && t.sM < o.eM);
+        const cal = t.kind !== "routine";
+        const amber = clash && cal, dim = clash && !cal;
+        return { start: t.s, title: t.title, color: t.color, clash: amber || dim,
+          tag: amber ? "! Clash" : cal ? (t.kind === "task" ? "Task" : "Event") : "",
+          tagColor: amber ? "#b07414" : dim ? "#8f9d97" : cal ? "#41504a" : "#0b7a45",
+          bg: amber ? "linear-gradient(145deg,#fff3dc,#ffe7c4)" : cal ? "rgba(255,255,255,.9)" : "transparent",
+          shadow: amber ? "inset 0 0 0 1px rgba(217,149,42,.4)" : cal ? "inset 0 1px 1px #fff,0 6px 14px -10px rgba(20,48,34,.35)" : "none",
+          timeColor: amber ? "#b07414" : cal ? "#121a16" : "#a3b0aa",
+          textColor: dim ? "#a3b0aa" : cal ? "#121a16" : "#5d6f67", weight: cal ? 700 : 500, deco: dim ? "line-through" : "none", bar: cal ? t.color : "transparent" };
+      });
+    })();
+
+    const conflict = CONF.length > 0, cf = CONF[0];
+    const selDays = st.days.slice().sort((a, b) => a - b).map(d => DOW3[d]).join(" · ") || "—";
+    const everyLabel = st.every === 1 ? "Every week" : "Every " + st.every + " weeks";
+    const baseNext = () => { const out = []; const d0 = st.days.length ? st.days.slice().sort((a, b) => a - b)[0] : 0; for (let k = 0; k < 4; k++) { const dd = 14 + d0 + k * 7 * st.every; out.push((dd > 30 ? "Oct " + (dd - 30) : "Sep " + dd) + " · " + DOWFULL[d0]); } return out; };
+
+    return {
+      ...this.__shell(),
+      ...this.__settings(),
+      ...this.__prefVals(),
+      isDark: this.__prefs().theme === "dark", isLight: this.__prefs().theme !== "dark",
+      themeLabel: this.__prefs().theme === "dark" ? "DARK" : "LIGHT",
+      toggleTheme: () => this.__setPref("theme", this.__prefs().theme === "dark" ? "light" : "dark"),
+      logoEnter: () => this.setState({ __logo: true }), logoLeave: () => this.setState({ __logo: false }),
+      logoW: (this.state && this.state.__logo) ? "110px" : "0px", logoOp: (this.state && this.state.__logo) ? 1 : 0, logoMl: (this.state && this.state.__logo) ? "2px" : "-9px",
+      ...this.__nav(),
+      dayModal: !!st.dayModal, draftWake: fmt(st.dWake ?? WAKE), draftBed: fmt(st.dBed ?? BED),
+      openDay: () => this.setState({ dayModal: true, dWake: WAKE, dBed: BED }),
+      closeDay: () => this.setState({ dayModal: false }),
+      saveDay: () => this.setState(s2 => ({ dayModal: false, wake: s2.dWake, bed: s2.dBed })),
+      wakeMinus: () => this.setState(s2 => ({ dWake: Math.max(240, (s2.dWake ?? WAKE) - 30) })),
+      wakePlus: () => this.setState(s2 => ({ dWake: Math.min((s2.dBed ?? BED) - 360, (s2.dWake ?? WAKE) + 30) })),
+      bedMinus: () => this.setState(s2 => ({ dBed: Math.max((s2.dWake ?? WAKE) + 360, (s2.dBed ?? BED) - 30) })),
+      bedPlus: () => this.setState(s2 => ({ dBed: Math.min(1440, (s2.dBed ?? BED) + 30) })),
+      applyOpts: [{ id: "all", label: "Every day" }, { id: "week", label: "Weekdays" }, { id: "custom", label: "By day" }].map(o => {
+        const on = (st.applyTo || "all") === o.id;
+        return { ...o, color: on ? "#0b7a45" : "#5d6f67", bg: on ? "#fff" : "transparent", shadow: on ? "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)" : "none" };
+      }),
+      pickApply: e => this.setState({ applyTo: e.currentTarget.dataset.a }),
+      viewRef: this.viewRef, colRef: this.colRef, todayRef: this.todayRef, todayH: (this.state && this.state.__todayH) || 0, todayCount: todayList.length, clashCount: todayList.filter(t => t.tag === "! Clash").length, panelTop: (this.state && this.state.__panelTop) || 128,
+      subtitle: thisWeek ? "This week · routines + calendar" : "My weekly routine · " + ROUTINES.length + " bloques + calendar",
+      hours, cols,
+      wakeUp: fmt(WAKE), bedtime: fmt(BED),
+      legendNote: "Calendar items always sit on top of your routine.",
+      modes: [{ id: "ROUTINE", label: "ROUTINE" }, { id: "WEEK", label: "THIS WEEK" }].map(m => ({
+        ...m, color: st.mode === m.id ? "#0b7a45" : "#5d6f67",
+        bg: st.mode === m.id ? "rgba(215,244,229,.95)" : "transparent",
+        border: st.mode === m.id ? "rgba(23,184,102,.28)" : "transparent"
+      })),
+      weekLabel: st.week === 0 ? "THIS WEEK" : st.week === 1 ? "SEP 21–27" : st.week === -1 ? "SEP 7–13" : "WEEK " + (st.week > 0 ? "+" : "") + st.week,
+      hasSelection: !!(selR || selC), noSelection: !(selR || selC),
+      sel: selR ? {
+        kindLabel: "ROUTINE", title: selR.title, days: dayNames(selR), time: selR.s + " — " + selR.e, color: selR.color,
+        repeat: (selR.every === 1 ? "Every week" : "Every " + selR.every + " weeks") + " on " + dayNames(selR),
+        hasNext: true, next: proj(selR),
+        conflict: CONF.some(x => x.rid === selR.id), conflictText: CONF.filter(x => x.rid === selR.id).map(x => x.c + " overlaps " + selR.title + " on " + x.day + " by " + x.min + " min. Calendar wins.").join(" ")
+      } : selC ? {
+        kindLabel: selC.kind === "task" ? "TASK" : "CALENDAR", title: selC.title, days: "This week", time: selC.s + " — " + selC.e, color: selC.color,
+        repeat: "Does not repeat", hasNext: false, next: [], conflict: false, conflictText: ""
+      } : { title: "", days: "", time: "" },
+      todayName: DOWFULL[today], todayList,
+      botGreeting: conflict ? "HEADS UP!" : "HEY!",
+      botLine: conflict ? cf.c.toUpperCase() + " OVERLAPS YOUR " + cf.r.toUpperCase() + " ON " + cf.day.toUpperCase() + " BY " + cf.min + " MIN." : "YOUR " + DOWFULL[today].toUpperCase() + " STARTS AT " + fmt(WAKE) + ".",
+      modal: st.modal, removing: st.removing,
+      swatches: [C.green, C.blue, C.teal, C.violet, C.amber, C.red].map(c => ({ c, ring: st.color === c ? "0 0 0 2px #fff,0 0 0 4px " + c : "none" })),
+      dayToggles: DOW3.map((label, i) => {
+        const on = st.days.includes(i);
+        return { i, label: label[0], color: on ? "#fff" : "#5d6f67",
+          bg: on ? "linear-gradient(150deg,#1fc172,#0f9a56)" : "rgba(255,255,255,.7)",
+          border: on ? "#17b866" : "rgba(18,38,30,.09)", glow: on ? "0 8px 16px -10px rgba(23,184,102,.9)" : "none" };
+      }),
+      intervals: [{ id: 1, label: "Every week" }, { id: 2, label: "2 weeks" }, { id: 4, label: "4 weeks" }, { id: 0, label: "Never" }].map(iv => ({
+        ...iv, color: st.every === iv.id ? "#0b7a45" : "#5d6f67",
+        bg: st.every === iv.id ? "rgba(215,244,229,.95)" : "rgba(255,255,255,.7)",
+        border: st.every === iv.id ? "rgba(23,184,102,.35)" : "rgba(18,38,30,.09)"
+      })),
+      repeatSummary: st.every === 0 ? "Only this week" : everyLabel + " on " + selDays,
+      repeatSub: st.every === 0 ? "This routine won't repeat automatically." : st.days.length + (st.days.length === 1 ? " day selected" : " days selected"),
+      nextDates: st.every === 0 ? ["Sep 14 · once"] : baseNext(),
+      setMode: e => this.setState({ mode: e.currentTarget.dataset.m }),
+      prevWeek: () => this.setState(s => ({ week: s.week - 1 })),
+      nextWeek: () => this.setState(s => ({ week: s.week + 1 })),
+      selectBlock: e => {
+        e.stopPropagation(); const id = e.currentTarget.dataset.b;
+        let hit = null; Object.keys(CAL).forEach(di => (CAL[di] || []).forEach(c => { if (c.id === id) hit = { ...c, di: +di }; }));
+        if (hit) { this.setState({ panel: { kind: hit.kind === "task" ? "task" : "event", day: 14 + hit.di + 7 * ((this.state && this.state.week) || 0), label: hit.title, time: hit.s, end: hit.e === "24:00" ? "23:59" : hit.e, color: hit.color } }); return; }
+        this.setState(s => ({ sel: s.sel === id ? null : id }));
+      },
+      panelOpen: !!(this.state && this.state.panel), panelAdhoc: this.state && this.state.panel,
+      closePanel: () => this.setState({ panel: null }),
+      addAt: () => this.setState({ modal: true }),
+      openModal: () => this.setState({ modal: true }),
+      closeModal: () => this.setState({ modal: false }),
+      askRemove: () => this.setState({ removing: true }),
+      cancelRemove: () => this.setState({ removing: false }),
+      pickColor: e => this.setState({ color: e.currentTarget.dataset.c }),
+      toggleDay: e => { const i = Number(e.currentTarget.dataset.d); this.setState(s => ({ days: s.days.includes(i) ? s.days.filter(x => x !== i) : [...s.days, i] })); },
+      pickInterval: e => this.setState({ every: Number(e.currentTarget.dataset.iv) })
+    };
+  }
+}
+
+</script>
+</body>
+</html>

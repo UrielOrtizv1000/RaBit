@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Doto:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#e9eeeb;color:#16211c;font-family:"Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#0b7a45;text-decoration:none}
+a:hover{color:#0f9a56}
+@keyframes rb-cursor{0%,50%{opacity:1}51%,100%{opacity:0}}
+@keyframes rb-fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.rb-scroll::-webkit-scrollbar{width:9px}
+.rb-scroll::-webkit-scrollbar-track{background:transparent}
+.rb-scroll::-webkit-scrollbar-thumb{background:rgba(18,38,30,.16);border-radius:6px;border:2px solid transparent;background-clip:padding-box}
+.rb-scroll::-webkit-scrollbar-thumb:hover{background:rgba(23,184,102,.5);background-clip:padding-box}
+@keyframes rb-drift{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-20px)}}
+@keyframes rb-pulse{0%,100%{box-shadow:0 0 0 0 rgba(23,184,102,.45)}70%{box-shadow:0 0 0 7px rgba(23,184,102,0)}}
+@keyframes rb-toast{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes rb-spin{to{transform:rotate(360deg)}}
+@keyframes rb-tilt{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}
+</style>
+</helmet>
+
+<div style="position:relative;width:1440px;min-height:100vh;overflow:clip;border-radius:22px;background:linear-gradient(160deg,#f1f4f2 0%,#e6ebe8 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)">
+  <!-- ambient color behind the glass -->
+  <div style="position:absolute;left:-120px;top:-140px;width:620px;height:520px;border-radius:50%;background:rgba(122,221,159,.55);filter:blur(90px);animation:rb-drift 18s ease-in-out infinite"></div>
+  <div style="position:absolute;right:-160px;top:120px;width:560px;height:520px;border-radius:50%;background:rgba(168,205,236,.5);filter:blur(100px)"></div>
+  <div style="position:absolute;left:420px;bottom:-220px;width:640px;height:460px;border-radius:50%;background:rgba(246,214,182,.45);filter:blur(110px)"></div>
+
+<div style="position:relative;width:1440px;min-height:100vh;background:linear-gradient(160deg,rgba(255,255,255,.42),rgba(255,255,255,.2));display:flex;flex-direction:column">
+
+  <!-- TOP BAR -->
+  <div style="display:flex;align-items:center;gap:22px;padding:26px 26px 6px">
+    <div onMouseEnter="{{ logoEnter }}" onMouseLeave="{{ logoLeave }}" onClick="{{ toggleTheme }}" title="Switch light / dark" style="cursor:pointer;transition:box-shadow .3s ease-out,transform .2s ease-out;display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:999px;background:linear-gradient(150deg,rgba(14,26,20,.9),rgba(18,40,30,.82));border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 12px 24px -14px rgba(10,30,20,.8)">
+      <div style="font-family:Silkscreen,monospace;font-weight:700;font-size:13px;color:#3ddc84;text-shadow:0 0 9px rgba(61,220,132,.7)">&gt;</div>
+      <div style="font-family:Silkscreen,monospace;font-weight:700;font-size:14px;letter-spacing:.06em;color:#3ddc84;text-shadow:0 0 10px rgba(61,220,132,.55)">RABIT</div>
+      <div style="width:6px;height:13px;background:#3ddc84;box-shadow:0 0 8px rgba(61,220,132,.8);animation:rb-cursor 1.1s steps(1) infinite"></div>
+      <div style="display:flex;align-items:center;gap:8px;overflow:hidden;white-space:nowrap;max-width:{{ logoW }};opacity:{{ logoOp }};margin-left:{{ logoMl }};transition:max-width .4s cubic-bezier(.2,.8,.3,1),opacity .25s ease-out,margin-left .3s ease-out">
+        <div style="width:1px;height:14px;flex:none;background:rgba(61,220,132,.3)"></div>
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3ddc84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 5px rgba(61,220,132,.7));animation:rb-tilt 2.4s ease-in-out infinite"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg></sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3ddc84" stroke-width="2" stroke-linecap="round" style="filter:drop-shadow(0 0 5px rgba(61,220,132,.7));animation:rb-spin 6s linear infinite"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></sc-if>
+        <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.1em;color:#3ddc84;text-shadow:0 0 8px rgba(61,220,132,.5)">{{ themeLabel }}</div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex">
+      <div style="display:flex;align-items:center;gap:10px;width:380px;padding:11px 18px;border-radius:999px;background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.4));backdrop-filter:blur(20px) saturate(170%);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 1px rgba(255,255,255,.95),0 10px 24px -18px rgba(20,48,34,.4);color:#6b7a73;font-size:13px;transition:background .2s ease-out" style-hover="background:rgba(255,255,255,.85)">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#6b7a73" stroke-width="1.6"><circle cx="7" cy="7" r="4.6"></circle><path d="M10.5 10.5 14 14"></path></svg>
+        <input onKeyDown="{{ onSearchKey }}" placeholder="Search events, notes…" style="flex:1;min-width:0;border:0;outline:0;background:transparent;font-family:inherit;font-size:13px;color:#121a16">
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div onClick="{{ toggleNotif }}" title="Notifications" style="position:relative;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,0 10px 22px -16px rgba(20,48,34,.45);transition:transform .15s ease-out" style-hover="transform:scale(1.05)">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="#2b3a34" stroke-width="1.5" stroke-linejoin="round"><path d="M4.5 7.2a4.5 4.5 0 0 1 9 0c0 3.3 1.2 4.3 1.2 4.3H3.3s1.2-1 1.2-4.3Z"></path><path d="M7.4 14a1.7 1.7 0 0 0 3.2 0"></path></svg>
+        <div style="position:absolute;top:10px;right:11px;width:6px;height:6px;border-radius:50%;background:#17b866;box-shadow:0 0 0 2px #fff"></div>
+        <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stopNotif }}" style="position:absolute;right:-6px;top:52px;z-index:50;width:320px;padding:10px;border-radius:24px;cursor:default;background:linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 30px 60px -24px rgba(12,40,26,.45);animation:rb-toast .18s ease-out both">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px 10px">
+              <div style="font-size:14px;font-weight:700;color:#121a16">Notifications</div>
+              <div style="font-size:11px;font-weight:600;color:#0b7a45">3 new</div>
+            </div>
+            <sc-for list="{{ notifs }}" as="nt" hint-placeholder-count="3">
+              <a href="{{ nt.href }}" style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:16px;transition:background .2s ease-out" style-hover="background:rgba(255,255,255,.85)">
+                <div style="width:8px;height:8px;flex:none;border-radius:50%;background:{{ nt.color }}"></div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:600;color:#121a16;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ nt.title }}</div>
+                  <div style="font-size:11.5px;color:#5d6f67;margin-top:2px">{{ nt.sub }}</div>
+                </div>
+              </a>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <div onClick="{{ openSettings }}" title="Settings" style="width:42px;height:42px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,0 10px 22px -16px rgba(20,48,34,.45);transition:transform .15s ease-out" style-hover="transform:scale(1.05)">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2b3a34" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border-radius:999px;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,0 10px 22px -16px rgba(20,48,34,.45)">
+        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,#0b7a45,#4fc389);display:grid;place-items:center;font-family:Silkscreen,monospace;font-size:11px;color:#fff">{{ userInitial }}</div>
+        <div style="font-size:13px;font-weight:600;color:#1d2a24">{{ userName }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;align-items:stretch;min-height:0;padding:14px 0 0">
+
+    <!-- FLOATING DOCK -->
+    <div style="position:relative;z-index:10;flex:none;display:flex;justify-content:flex-start;align-items:flex-start;padding:0 20px 26px 26px;box-sizing:border-box">
+      <div style="position:sticky;top:26px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px;height:max-content;border-radius:26px;background:linear-gradient(160deg,rgba(255,255,255,.66),rgba(255,255,255,.32));backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,inset 0 -10px 20px -14px rgba(255,255,255,.7),0 22px 44px -26px rgba(20,48,34,.4)">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+          <a href="{{ n.href }}" onMouseEnter="{{ navEnter }}" onMouseLeave="{{ navLeave }}" data-id="{{ n.id }}" style="position:relative;width:46px;height:46px;box-sizing:border-box;border-radius:17px;display:grid;place-items:center;background:{{ n.bg }};box-shadow:{{ n.shadow }};transition:background .2s ease-out,box-shadow .2s ease-out">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="{{ n.stroke }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ n.d }}"></path></svg>
+            <div style="position:absolute;bottom:5px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#17b866;opacity:{{ n.bar }}"></div>
+            <div style="position:absolute;left:58px;top:50%;transform:translate({{ n.labelX }},-50%);opacity:{{ n.labelOp }};transition:opacity .18s ease-out,transform .18s ease-out;pointer-events:none;padding:7px 12px;border-radius:999px;background:linear-gradient(150deg,rgba(14,26,20,.9),rgba(18,40,30,.84));backdrop-filter:blur(14px);color:#eef4f0;font-size:11.5px;font-weight:600;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 10px 22px -10px rgba(12,30,22,.7)">{{ n.label }}</div>
+          </a>
+        </sc-for>
+        <div style="width:22px;height:1px;background:rgba(18,38,30,.1);margin:4px 0"></div>
+        <a href="RaBit Calendar.dc.html#new-event" title="New event" style="width:46px;height:46px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(150deg,#1fc172,#0f9a56);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 12px 22px -12px rgba(23,184,102,.9);transition:transform .15s ease-out" style-hover="transform:scale(1.06)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"></path></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div style="flex:1;min-width:0;padding:10px 26px 26px 0;display:flex;flex-direction:column;gap:20px">
+
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+        <div>
+          <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.16em;color:#6b7a73;margin-bottom:12px">SATURDAY · SEPTEMBER 19</div>
+          <div style="font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1.05;color:#121a16;margin-bottom:8px">Quick Notes</div>
+          <div style="font-size:14px;color:#5d6f67;font-weight:500">Capture something before you forget.</div>
+        </div>
+      </div>
+
+      <div style="position:relative;flex:1;min-height:640px">
+        <dc-import name="RaBitItemPanel" kind="note" inline="{{ true }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD TO CALENDAR MODAL -->
+  <sc-if value="{{ calModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:30;display:grid;place-items:center;background:rgba(16,32,25,.36);backdrop-filter:blur(6px)">
+      <div style="width:452px;border-radius:28px;background:linear-gradient(150deg,rgba(255,255,255,.9),rgba(245,250,247,.78));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.55);animation:rb-fade .18s ease-out">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:17px 22px;border-bottom:1px solid rgba(18,38,30,.07)">
+          <div style="font-family:Silkscreen,monospace;font-size:12px;letter-spacing:.06em;color:#16211c">ADD TO CALENDAR</div>
+          <div onClick="{{ closeCal }}" style="width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:#5d6f67;font-size:15px;cursor:pointer" style-hover="background:rgba(18,38,30,.06)">×</div>
+        </div>
+
+        <sc-if value="{{ dupWarn }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:20px 22px">
+            <div style="font-size:13.5px;color:#2b3a34;line-height:1.55">This note is already in Calendar.</div>
+            <div style="margin-top:10px;padding:11px 13px;border-radius:11px;background:rgba(215,244,229,.8);border:1px solid rgba(23,184,102,.25);font-size:13px;font-weight:700;color:#0b7a45">{{ linkLabel }}</div>
+            <div style="display:flex;gap:10px;margin-top:18px">
+              <div onClick="{{ closeCal }}" style="flex:1;text-align:center;padding:11px;border-radius:999px;border:1px solid rgba(255,255,255,.9);background:linear-gradient(145deg,rgba(255,255,255,.85),rgba(255,255,255,.55));box-shadow:inset 0 1px 1px #fff,0 8px 18px -12px rgba(20,48,34,.35);font-size:13px;font-weight:600;color:#2b3a34;cursor:pointer" style-hover="background:#fff">View</div>
+              <div onClick="{{ addAnother }}" style="flex:1;text-align:center;padding:11px;border-radius:11px;background:#16211c;color:#fff;font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.05em;cursor:pointer" style-hover="background:#17b866">ADD ANOTHER</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ calForm }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:15px">
+            <div>
+              <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Task title · from note</div>
+              <div style="padding:11px 13px;border-radius:11px;background:rgba(255,255,255,.85);border:1px solid rgba(23,184,102,.35);font-size:13.5px;font-weight:600;color:#16211c">{{ title }}</div>
+            </div>
+
+            <div>
+              <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:8px">When?</div>
+              <div style="display:flex;gap:8px">
+                <sc-for list="{{ whens }}" as="w" hint-placeholder-count="3">
+                  <div onClick="{{ pickWhen }}" data-w="{{ w.id }}" style="flex:1;padding:10px 8px;text-align:center;border-radius:10px;font-size:12.5px;font-weight:600;cursor:pointer;color:{{ w.color }};background:{{ w.bg }};border:1px solid {{ w.border }}">{{ w.label }}</div>
+                </sc-for>
+              </div>
+              <div style="margin-top:8px;padding:10px 13px;border-radius:10px;background:rgba(255,255,255,.75);border:1px solid rgba(18,38,30,.08);font-size:12.5px;color:#2b3a34">{{ dateLabel }}</div>
+            </div>
+
+            <div style="display:flex;gap:10px;align-items:flex-end">
+              <div style="flex:1">
+                <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Time</div>
+                <div style="padding:10px 13px;border-radius:10px;background:{{ timeBg }};border:1px solid rgba(18,38,30,.08);font-size:12.5px;color:{{ timeColor }}">{{ timeLabel }}</div>
+              </div>
+              <div onClick="{{ toggleAllDay }}" style="flex:1;display:flex;align-items:center;gap:9px;padding:10px 13px;border-radius:10px;cursor:pointer;background:{{ allDayBg }};border:1px solid {{ allDayBorder }}">
+                <div style="width:16px;height:16px;border-radius:5px;display:grid;place-items:center;box-sizing:border-box;background:{{ allDayBoxBg }};border:1.6px solid {{ allDayBoxBorder }};color:#fff;font-size:9px">{{ allDayCheck }}</div>
+                <div style="font-size:12.5px;font-weight:600;color:#2b3a34">All day</div>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Color</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:10px;background:rgba(255,255,255,.8);border:1px solid rgba(18,38,30,.08)">
+                <sc-for list="{{ swatches }}" as="s" hint-placeholder-count="6">
+                  <div onClick="{{ pickColor }}" data-c="{{ s.c }}" style="width:16px;height:16px;border-radius:5px;cursor:pointer;background:{{ s.c }};box-shadow:{{ s.ring }}"></div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">RaBit reminder</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ reminders }}" as="r" hint-placeholder-count="5">
+                  <div onClick="{{ pickReminder }}" data-r="{{ r.id }}" style="padding:7px 11px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;color:{{ r.color }};background:{{ r.bg }};border:1px solid {{ r.border }}">{{ r.label }}</div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px">
+              <div onClick="{{ closeCal }}" style="padding:11px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.9);background:linear-gradient(145deg,rgba(255,255,255,.85),rgba(255,255,255,.55));box-shadow:inset 0 1px 1px #fff,0 8px 18px -12px rgba(20,48,34,.35);font-size:13px;font-weight:600;color:#2b3a34;cursor:pointer" style-hover="background:#fff">Cancel</div>
+              <div onClick="{{ confirmCal }}" style="padding:11px 20px;border-radius:999px;background:linear-gradient(150deg,#1fc172,#0f9a56);color:#fff;font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.05em;cursor:pointer;box-shadow:0 14px 26px -16px rgba(23,184,102,1)" style-hover="background:#16211c">ADD</div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- DELETE MODAL -->
+  <sc-if value="{{ deleting }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:35;display:grid;place-items:center;background:rgba(16,32,25,.36);backdrop-filter:blur(6px)">
+      <div style="width:392px;border-radius:28px;padding:24px;background:linear-gradient(150deg,rgba(255,255,255,.9),rgba(245,250,247,.78));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.55);animation:rb-fade .18s ease-out">
+        <div style="font-family:Silkscreen,monospace;font-size:12px;letter-spacing:.06em;color:#16211c;margin-bottom:12px">DELETE NOTE?</div>
+        <div style="font-size:14px;font-weight:700;color:#16211c">“{{ title }}”</div>
+        <sc-if value="{{ isLinked }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top:14px">
+            <div style="font-size:12px;color:#5d6f67;line-height:1.5;margin-bottom:10px">This note is linked to {{ linkLabel }}.</div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <sc-for list="{{ delModes }}" as="d" hint-placeholder-count="2">
+                <div onClick="{{ pickDelMode }}" data-d="{{ d.id }}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;background:{{ d.bg }};border:1px solid {{ d.border }}">
+                  <div style="width:14px;height:14px;border-radius:50%;box-sizing:border-box;border:2px solid {{ d.dotBorder }};background:{{ d.dotBg }}"></div>
+                  <div style="font-size:12.5px;font-weight:600;color:#2b3a34">{{ d.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ notLinked }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12.5px;color:#5d6f67;margin-top:10px">This cannot be undone.</div>
+        </sc-if>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <div onClick="{{ cancelDelete }}" style="flex:1;text-align:center;padding:11px;border-radius:999px;border:1px solid rgba(255,255,255,.9);background:linear-gradient(145deg,rgba(255,255,255,.85),rgba(255,255,255,.55));box-shadow:inset 0 1px 1px #fff,0 8px 18px -12px rgba(20,48,34,.35);font-size:13px;font-weight:600;color:#2b3a34;cursor:pointer" style-hover="background:#fff">Cancel</div>
+          <div onClick="{{ confirmDelete }}" style="flex:1;text-align:center;padding:11px;border-radius:11px;background:#a8443a;color:#fff;font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.05em;cursor:pointer" style-hover="background:#8a3730">DELETE</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ pageOff }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:55;display:grid;place-items:center;background:rgba(230,242,236,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)">
+      <div style="width:400px;box-sizing:border-box;padding:28px;border-radius:30px;background:linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8));border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.5);animation:rb-toast .2s ease-out both">
+        <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73">&gt; MODULE OFF</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.01em;color:#121a16;margin-top:10px">{{ pageName }} is turned off</div>
+        <div style="font-size:13.5px;line-height:1.55;color:#5d6f67;margin-top:8px">It's hidden from the sidebar and Home. Your data is still here.</div>
+        <div style="display:flex;gap:8px;margin-top:22px">
+          <div onClick="{{ enablePage }}" style="flex:1;text-align:center;padding:12px 18px;border-radius:999px;cursor:pointer;background:linear-gradient(150deg,#1fc172,#0f9a56);color:#fff;font-size:13.5px;font-weight:600;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 14px 26px -14px rgba(23,184,102,.95)" style-hover="transform:scale(1.02)">Turn it back on</div>
+          <a href="RaBit Home v2.dc.html" style="flex:1;text-align:center;padding:12px 18px;border-radius:999px;background:rgba(255,255,255,.8);box-shadow:inset 0 1px 1px #fff,0 8px 18px -12px rgba(20,48,34,.4);color:#1d2a24;font-size:13.5px;font-weight:600">Go Home</a>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- SETTINGS -->
+  <sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSettings }}" style="position:absolute;inset:0;z-index:60;display:grid;place-items:center;background:rgba(16,32,25,.3);backdrop-filter:blur(6px)">
+      <div onClick="{{ stopNotif }}" style="width:480px;max-height:88%;box-sizing:border-box;display:flex;flex-direction:column;border-radius:30px;background:linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.55);animation:rb-toast .18s ease-out both">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 24px 6px">
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.01em;color:#121a16">Settings</div>
+          <div onClick="{{ closeSettings }}" style="width:30px;height:30px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#5d6f67;font-size:16px" style-hover="background:rgba(18,38,30,.06)">×</div>
+        </div>
+        <div style="flex:1;min-height:0;overflow-y:auto;padding:0 24px 4px;scrollbar-width:thin;scrollbar-color:rgba(18,38,30,.16) transparent">
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">PROFILE</div>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="width:40px;height:40px;flex:none;border-radius:50%;background:linear-gradient(145deg,#0b7a45,#4fc389);display:grid;place-items:center;font-family:Silkscreen,monospace;font-size:13px;color:#fff">{{ userInitial }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:3px">Your name · used in greetings</div>
+              <input value="{{ prefName }}" onInput="{{ onPrefName }}" placeholder="Your name" style="width:100%;box-sizing:border-box;border:0;outline:0;background:transparent;font-family:inherit;font-size:15px;font-weight:700;color:#121a16">
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:18px 0 8px">
+            <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73">MODULES · {{ modOnCount }}/4 ON</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <div onClick="{{ allModsOn }}" style="padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:600;cursor:pointer;color:#0b7a45" style-hover="background:#fff">All on</div>
+              <div onClick="{{ allModsOff }}" style="padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:600;cursor:pointer;color:#5d6f67" style-hover="background:#fff;color:#a8443a">All off</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ modRows }}" as="md" hint-placeholder-count="4">
+              <div onClick="{{ toggleMod }}" data-id="{{ md.id }}" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:18px;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff;opacity:{{ md.op }};transition:opacity .2s ease-out">
+                <div style="width:36px;height:36px;flex:none;border-radius:12px;display:grid;place-items:center;background:{{ md.iconBg }};box-shadow:inset 0 1px 1px #fff;transition:background .2s ease-out">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="{{ md.iconStroke }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ md.d }}"></path></svg>
+                </div>
+                <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:#121a16">{{ md.label }}</div><div style="font-size:12px;color:#5d6f67;margin-top:3px;line-height:1.45">{{ md.desc }}</div></div>
+                <div style="width:42px;height:24px;flex:none;border-radius:12px;padding:3px;box-sizing:border-box;background:{{ md.sw.bg }};transition:background .2s ease-out"><div style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(12,40,26,.3);transform:translateX({{ md.sw.x }});transition:transform .2s ease-out"></div></div>
+              </div>
+            </sc-for>
+            <div style="padding:4px 4px 0;font-size:11.5px;line-height:1.5;color:#6b7a73">Home always stays on. Turned-off modules disappear from the sidebar and Home — your data is kept.</div>
+          </div>
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">TIME &amp; DATE</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="font-size:14px;font-weight:700;color:#121a16">Time format</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <sc-for list="{{ timeOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ pickPref }}" data-k="{{ o.key }}" data-v="{{ o.id }}" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .2s ease-out">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="font-size:14px;font-weight:700;color:#121a16">Week starts on</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <sc-for list="{{ weekOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ pickPref }}" data-k="{{ o.key }}" data-v="{{ o.id }}" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .2s ease-out">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+            <sc-if value="{{ showRoutineMod }}" hint-placeholder-val="{{ true }}">
+              <a href="RaBit Routine.dc.html#day-settings" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff;font-size:14px;font-weight:700;color:#121a16">Wake up &amp; bedtime<span style="font-size:12.5px;font-weight:600;color:#0b7a45">Edit →</span></a>
+            </sc-if>
+          </div>
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">RABIT</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+          <div onClick="{{ toggleRemind }}" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:18px;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="flex:1"><div style="font-size:14px;font-weight:700;color:#121a16">Reminders</div><div style="font-size:12px;color:#5d6f67;margin-top:3px;line-height:1.45">RaBit pops up before your events and deadlines.</div></div>
+            <div style="width:42px;height:24px;flex:none;border-radius:12px;padding:3px;box-sizing:border-box;background:{{ remindSw.bg }};transition:background .2s ease-out"><div style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(12,40,26,.3);transform:translateX({{ remindSw.x }});transition:transform .2s ease-out"></div></div>
+          </div>
+          <div onClick="{{ toggleSound }}" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:18px;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="flex:1"><div style="font-size:14px;font-weight:700;color:#121a16">Sound</div><div style="font-size:12px;color:#5d6f67;margin-top:3px;line-height:1.45">Play a soft 8-bit chime with reminders.</div></div>
+            <div style="width:42px;height:24px;flex:none;border-radius:12px;padding:3px;box-sizing:border-box;background:{{ soundSw.bg }};transition:background .2s ease-out"><div style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(12,40,26,.3);transform:translateX({{ soundSw.x }});transition:transform .2s ease-out"></div></div>
+          </div>
+          </div>
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">APPEARANCE</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="font-size:14px;font-weight:700;color:#121a16">Theme</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <sc-for list="{{ themeOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ pickPref }}" data-k="{{ o.key }}" data-v="{{ o.id }}" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .2s ease-out">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          </div>
+        </div>
+        <div style="padding:16px 24px 22px">
+          <div onClick="{{ closeSettings }}" style="text-align:center;padding:12px;border-radius:999px;background:linear-gradient(150deg,#1fc172,#0f9a56);color:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 14px 26px -14px rgba(23,184,102,1)">Done</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1000}}">
+const C = { green: "#17b866", blue: "#4b7fd6", amber: "#c98a1e", red: "#a8443a", violet: "#8a6fd6", teal: "#2aa6a0" };
+const NOTES = [
+  { id: "materials", title: "Comprar materiales", pinned: true, when: "Hoy · 02:41", link: "SEP 24 · 14:00",
+    body: ["## Universidad", "- Cartulina", "- Plumones", "- Pegamento", "", "[ ] Revisar precios", "[x] Pedir cotización", "> Entregar antes del viernes"] },
+  { id: "api", title: "Ideas de API", pinned: false, when: "Hoy · 01:12", link: "",
+    body: ["## Autenticación", "Investigar tokens y refresh silencioso.", "", "- Guardar en keychain", "- Rotación cada 30 días", "[ ] Probar con Flutter", "`POST /auth/refresh`"] },
+  { id: "books", title: "Libros por leer", pinned: false, when: "Ayer", link: "",
+    body: ["1. The Design of Everyday Things", "2. Refactoring UI", "3. Thinking in Systems", "", "[ ] Comprar el segundo"] },
+  { id: "rabit", title: "RaBit ideas", pinned: false, when: "Sep 18", link: "",
+    body: ["## Recordatorios", "- Tono más humano", "- Streaks NO", "", "> Que RaBit hable solo cuando aporta."] },
+  { id: "empty", title: "Untitled note", pinned: false, when: "Sep 17", link: "", body: [] }
+];
+const preview = n => (n.body.find(l => l.trim() && !l.startsWith("#")) || "Sin contenido").replace(/^[-*>]\s*|^\[[ x]\]\s*|^\d+\.\s*/, "");
+
+const MOD_DEFS = [
+  { id: "calendar", label: "Calendar", desc: "Events, tasks and RaBit reminders. Routine keeps working without it.", d: "M5 3.6h8a2.4 2.4 0 0 1 2.4 2.4v7a2.4 2.4 0 0 1-2.4 2.4H5a2.4 2.4 0 0 1-2.4-2.4V6A2.4 2.4 0 0 1 5 3.6ZM2.6 7.2h12.8" },
+  { id: "routine", label: "Daily routine", desc: "Recurring week, wake-up and bedtime. Calendar keeps working without it.", d: "M2.6 9a6.4 6.4 0 1 0 12.8 0a6.4 6.4 0 1 0-12.8 0ZM9 5.4V9l2.4 1.6" },
+  { id: "notes", label: "Quick notes", desc: "Fast notes you can turn into calendar tasks.", d: "M4 3.2h7.2L14 6v8.8H4ZM6.4 8.4h5.2M6.4 11.2h3.4" },
+  { id: "portfolio", label: "Portfolio", desc: "Stock tracker with Excel import and value history.", d: "M3 6.5h12v8.5H3ZM6.5 6.5V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5M3 10.5h12" }
+];
+class Component extends DCLogic {
+  __prefs() {
+    const st = this.state || {};
+    if (st.__prefs) return st.__prefs;
+    const d = { name: "Sofía", timeFmt: "24h", weekStart: "mon", theme: "light", reminders: true, sound: false };
+    try { return { ...d, ...(JSON.parse(localStorage.getItem("rabit.prefs") || "{}")) }; } catch (e) { return d; }
+  }
+  __setPref(k, v) { const p = { ...this.__prefs(), [k]: v }; try { localStorage.setItem("rabit.prefs", JSON.stringify(p)); } catch (e) {} this.setState({ __prefs: p }); }
+  __prefVals() {
+    const p = this.__prefs();
+    const seg = (key, opts) => opts.map(([id, label]) => { const on = p[key] === id; return { id, key, label, color: on ? "#0b7a45" : "#5d6f67", bg: on ? "#fff" : "transparent", shadow: on ? "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)" : "none" }; });
+    const sw = on => ({ bg: on ? "linear-gradient(150deg,#1fc172,#0f9a56)" : "rgba(18,38,30,.16)", x: on ? "18px" : "0px" });
+    const nm = (p.name || "").trim() || "there";
+    return {
+      userName: nm, userInitial: nm.charAt(0).toUpperCase(), prefName: p.name,
+      onPrefName: e => this.__setPref("name", e.target.value),
+      timeOpts: seg("timeFmt", [["24h", "24-hour"], ["12h", "12-hour"]]),
+      weekOpts: seg("weekStart", [["mon", "Monday"], ["sun", "Sunday"]]),
+      themeOpts: seg("theme", [["light", "Light"], ["dark", "Dark"], ["auto", "Auto"]]),
+      pickPref: e => this.__setPref(e.currentTarget.dataset.k, e.currentTarget.dataset.v),
+      remindSw: sw(p.reminders), soundSw: sw(p.sound),
+      toggleRemind: () => this.__setPref("reminders", !p.reminders),
+      toggleSound: () => this.__setPref("sound", !p.sound)
+    };
+  }
+  __mods() {
+    const st = this.state || {};
+    if (st.__mods) return st.__mods;
+    try { const v = JSON.parse(localStorage.getItem("rabit.modules") || "null"); if (v) return { calendar: v.calendar !== false, routine: v.routine !== false, notes: v.notes !== false, portfolio: v.portfolio !== false }; } catch (e) {}
+    return { calendar: true, routine: true, notes: true, portfolio: true };
+  }
+  __modOk(id) { const m = this.__mods(); return id === "home" ? true : m[id] !== false; }
+  __settings() {
+    const m = this.__mods(), st = this.state || {};
+    const set = (k) => { const nm = { ...this.__mods(), [k]: !this.__mods()[k] }; try { localStorage.setItem("rabit.modules", JSON.stringify(nm)); } catch (e) {} this.setState({ __mods: nm }); };
+    const setAll = (v) => { const nm = { calendar: v, routine: v, notes: v, portfolio: v }; try { localStorage.setItem("rabit.modules", JSON.stringify(nm)); } catch (e) {} this.setState({ __mods: nm }); };
+    const sw = on => ({ bg: on ? "linear-gradient(150deg,#1fc172,#0f9a56)" : "rgba(18,38,30,.16)", x: on ? "18px" : "0px" });
+    return {
+      settingsOpen: !!st.__settings,
+      openSettings: () => this.setState({ __settings: true }),
+      closeSettings: () => this.setState({ __settings: false }),
+      toggleRoutineMod: () => set("routine"), toggleNotesMod: () => set("notes"),
+      routineSw: sw(m.routine), notesSw: sw(m.notes),
+      showRoutineMod: m.routine, showNotesMod: m.notes, showCalendarMod: m.calendar, showPortfolioMod: m.portfolio,
+      showSideCol: m.calendar || m.routine,
+      modOnCount: MOD_DEFS.filter(d => m[d.id]).length,
+      modRows: MOD_DEFS.map(d => ({ ...d, sw: sw(m[d.id]), op: m[d.id] ? 1 : .72, iconBg: m[d.id] ? "rgba(23,184,102,.12)" : "rgba(18,38,30,.05)", iconStroke: m[d.id] ? "#0b7a45" : "#8b9a93" })),
+      toggleMod: e => set(e.currentTarget.dataset.id),
+      allModsOn: () => setAll(true), allModsOff: () => setAll(false),
+      pageOff: m.notes === false, pageName: "Quick notes",
+      enablePage: () => { if (!this.__mods()["notes"]) set("notes"); }
+    };
+  }
+  componentDidMount() {
+    const hq = (location.hash || "").match(/q=([^&]+)/); if (hq) this.setState({ query: decodeURIComponent(hq[1]) });
+  }
+  __shell() {
+    const st = this.state || {};
+    return {
+      notifOpen: !!st.__notif,
+      toggleNotif: () => this.setState(s2 => ({ __notif: !(s2 && s2.__notif) })),
+      stopNotif: e => e.stopPropagation(),
+      notifs: [
+        { title: "Entrega proyecto Flutter", sub: "In 2 days · Mon 10:00", color: "#a8443a", href: "RaBit Calendar.dc.html#day-21" },
+        { title: "Maratón de estudio overlaps Read", sub: "Today · 22:00 · Routine", color: "#d9952a", href: "RaBit Routine.dc.html" },
+        { title: "Comprar materiales", sub: "Thu 24 · 14:00 · from Quick Notes", color: "#8a6fd6", href: "RaBit Calendar.dc.html#day-24" }
+      ],
+      onSearchKey: e => { if (e.key === "Enter" && e.target.value.trim()) location.href = "RaBit Quick Notes.dc.html#q=" + encodeURIComponent(e.target.value.trim()); }
+    };
+  }
+  __nav() {
+    const NAVS = [
+      { id: "home", label: "Home", href: "RaBit Home v2.dc.html", d: "M2.6 8.2 9 3l6.4 5.2V15a.8.8 0 0 1-.8.8H3.4a.8.8 0 0 1-.8-.8Z" },
+      { id: "calendar", label: "Calendar", href: "RaBit Calendar.dc.html", d: "M5 3.6h8a2.4 2.4 0 0 1 2.4 2.4v7a2.4 2.4 0 0 1-2.4 2.4H5a2.4 2.4 0 0 1-2.4-2.4V6A2.4 2.4 0 0 1 5 3.6ZM2.6 7.2h12.8M6 2.2v2.6M12 2.2v2.6" },
+      { id: "routine", label: "Routine", href: "RaBit Routine.dc.html", d: "M2.6 9a6.4 6.4 0 1 0 12.8 0a6.4 6.4 0 1 0-12.8 0ZM9 5.4V9l2.4 1.6" },
+      { id: "notes", label: "Quick Notes", href: "RaBit Quick Notes.dc.html", d: "M4 3.2h7.2L14 6v8.8H4ZM6.4 8.4h5.2M6.4 11.2h3.4" },
+      { id: "portfolio", label: "Portfolio", href: "RaBit Portfolio.dc.html", d: "M3 6.5h12v8.5H3ZM6.5 6.5V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5M3 10.5h12" }
+    ];
+    const hv = this.state && this.state.__hover;
+    return {
+      nav: NAVS.filter(n => this.__modOk(n.id)).map(n => {
+        const a = n.id === "notes", h = hv === n.id;
+        return { ...n, bg: a ? "#fff" : h ? "rgba(255,255,255,.7)" : "transparent",
+          shadow: a ? "inset 0 1px 1px #fff,0 8px 18px -10px rgba(20,48,34,.45)" : "none",
+          stroke: a ? "#0b7a45" : h ? "#1d2a24" : "#5d6f67", bar: a ? 1 : 0, labelOp: h ? 1 : 0, labelX: h ? "0px" : "-6px" };
+      }),
+      navEnter: e => this.setState({ __hover: e.currentTarget.dataset.id }),
+      navLeave: () => this.setState({ __hover: null })
+    };
+  }
+  state = { sel: "materials", query: "", menu: false, calModal: false, dupWarn: false, deleting: false, delMode: "note",
+    toast: "", when: "pick", allDay: false, color: C.violet, reminder: "1d", checks: {}, pins: {}, editing: false };
+
+  note() { return NOTES.find(n => n.id === this.state.sel) || NOTES[0]; }
+  isPinned(n) { return this.state.pins[n.id] !== undefined ? this.state.pins[n.id] : n.pinned; }
+
+  renderVals() {
+    const st = this.state, note = this.note(), q = st.query.trim().toLowerCase();
+    const match = n => !q || n.title.toLowerCase().includes(q) || n.body.join(" ").toLowerCase().includes(q);
+    const card = n => ({
+      id: n.id, title: n.title, preview: preview(n), when: n.when,
+      linkTag: n.link ? "◫ " + n.link.split(" ·")[0] : "",
+      bg: st.sel === n.id ? "rgba(215,244,229,.8)" : "rgba(255,255,255,.55)",
+      border: st.sel === n.id ? "rgba(23,184,102,.4)" : "rgba(18,38,30,.06)"
+    });
+    const shown = NOTES.filter(match);
+    const pinned = shown.filter(n => this.isPinned(n)).map(card);
+    const recent = shown.filter(n => !this.isPinned(n)).map(card);
+
+    // light markdown renderer
+    const lines = note.body.map((raw, i) => {
+      const t = raw.trim();
+      let wrap = "display:flex;gap:9px;align-items:flex-start;padding:2px 0", mark = "", markStyle = "display:none", textStyle = "font-size:14px;line-height:1.7;color:#2b3a34";
+      if (!t) return { i, wrap: "height:10px", mark: "", markStyle: "display:none", textStyle: "display:none", text: "" };
+      if (/^###\s/.test(t)) { return { i, wrap, mark, markStyle, textStyle: "font-size:14.5px;font-weight:700;color:#16211c;margin-top:8px", text: t.replace(/^###\s/, "") }; }
+      if (/^##\s/.test(t)) { return { i, wrap, mark, markStyle, textStyle: "font-size:17px;font-weight:700;color:#16211c;margin-top:12px", text: t.replace(/^##\s/, "") }; }
+      if (/^#\s/.test(t)) { return { i, wrap, mark, markStyle, textStyle: "font-size:21px;font-weight:700;color:#16211c;margin-top:12px", text: t.replace(/^#\s/, "") }; }
+      if (/^\[[ xX]\]\s/.test(t)) {
+        const base = /^\[[xX]\]/.test(t);
+        const done = st.checks[i] !== undefined ? st.checks[i] : base;
+        return { i, wrap: wrap + ";cursor:pointer;border-radius:7px",
+          mark: done ? "✓" : "",
+          markStyle: "width:17px;height:17px;flex:none;margin-top:2px;border-radius:5px;display:grid;place-items:center;box-sizing:border-box;font-size:10px;color:#fff;background:" + (done ? "#17b866" : "transparent") + ";border:1.6px solid " + (done ? "#17b866" : "rgba(18,38,30,.22)"),
+          textStyle: "font-size:14px;line-height:1.7;color:" + (done ? "#8f9d97" : "#2b3a34") + ";text-decoration:" + (done ? "line-through" : "none"),
+          text: t.replace(/^\[[ xX]\]\s/, "") };
+      }
+      if (/^[-*]\s/.test(t)) return { i, wrap, mark: "•", markStyle: "width:14px;flex:none;color:#17b866;font-size:15px;line-height:1.55;text-align:center", textStyle, text: t.replace(/^[-*]\s/, "") };
+      if (/^\d+\.\s/.test(t)) return { i, wrap, mark: t.match(/^\d+/)[0] + ".", markStyle: "width:18px;flex:none;font-family:Silkscreen,monospace;font-size:9.5px;color:#0b7a45;padding-top:4px", textStyle, text: t.replace(/^\d+\.\s/, "") };
+      if (/^>\s/.test(t)) return { i, wrap: "display:flex;gap:11px;padding:6px 0 6px 2px", mark: "", markStyle: "width:3px;flex:none;border-radius:2px;background:rgba(23,184,102,.5)", textStyle: "font-size:13.5px;line-height:1.7;color:#5d6f67;font-style:italic", text: t.replace(/^>\s/, "") };
+      if (/^`.*`$/.test(t)) return { i, wrap, mark: "", markStyle: "display:none", textStyle: "font-family:ui-monospace,Menlo,monospace;font-size:12.5px;padding:5px 9px;border-radius:7px;background:rgba(18,38,30,.05);color:#0b7a45", text: t.replace(/`/g, "") };
+      return { i, wrap, mark, markStyle, textStyle, text: t };
+    });
+
+    const checkTotal = note.body.filter(l => /^\[[ xX]\]\s/.test(l.trim())).length;
+    const checkDone = note.body.filter((l, i) => /^\[[ xX]\]\s/.test(l.trim()) && (st.checks[i] !== undefined ? st.checks[i] : /^\[[xX]\]/.test(l.trim()))).length;
+    const linked = !!note.link;
+    const pinnedNow = this.isPinned(note);
+
+    const whenMap = { today: "Today · Sep 20, 2026", tomorrow: "Tomorrow · Sep 21, 2026", pick: "September 24, 2026" };
+
+    return {
+      ...this.__shell(),
+      ...this.__settings(),
+      ...this.__prefVals(),
+      isDark: this.__prefs().theme === "dark", isLight: this.__prefs().theme !== "dark",
+      themeLabel: this.__prefs().theme === "dark" ? "DARK" : "LIGHT",
+      toggleTheme: () => this.__setPref("theme", this.__prefs().theme === "dark" ? "light" : "dark"),
+      logoEnter: () => this.setState({ __logo: true }), logoLeave: () => this.setState({ __logo: false }),
+      logoW: (this.state && this.state.__logo) ? "110px" : "0px", logoOp: (this.state && this.state.__logo) ? 1 : 0, logoMl: (this.state && this.state.__logo) ? "2px" : "-9px",
+      ...this.__nav(),
+      pinned, recent, hasPinned: pinned.length > 0,
+      emptySearch: shown.length === 0 ? "Sin resultados para “" + st.query + "”" : "",
+      query: st.query, listOpacity: st.editing ? .82 : 1,
+      title: note.title, titleColor: note.body.length === 0 && note.title === "Untitled note" ? "#a3b0aa" : "#16211c",
+      lines, isEmptyNote: note.body.length === 0, editing: st.editing,
+      saveState: "SAVED", editedAt: note.when, counts: checkTotal ? checkDone + "/" + checkTotal + " tareas en la nota" : lines.filter(l => l.text).length + " líneas",
+      isLinked: linked, notLinked: !linked, linkLabel: note.link ? "◫ " + note.link : "",
+      pinAction: pinnedNow ? "Unpin note" : "Pin note",
+      pinBg: pinnedNow ? "rgba(215,244,229,.9)" : "rgba(255,255,255,.7)",
+      pinBorder: pinnedNow ? "rgba(23,184,102,.35)" : "rgba(18,38,30,.08)",
+      pinColor: pinnedNow ? "#0b7a45" : "#5d6f67",
+      ctaBg: "linear-gradient(150deg,#1fc172,#0f9a56)",
+      menu: st.menu, calModal: st.calModal, dupWarn: st.dupWarn, calForm: st.calModal && !st.dupWarn,
+      toast: !!st.toast, toastText: st.toast,
+      deleting: st.deleting,
+      whens: [{ id: "today", label: "Today" }, { id: "tomorrow", label: "Tomorrow" }, { id: "pick", label: "Pick date" }].map(w => ({
+        ...w, color: st.when === w.id ? "#0b7a45" : "#5d6f67",
+        bg: st.when === w.id ? "rgba(215,244,229,.95)" : "rgba(255,255,255,.7)",
+        border: st.when === w.id ? "rgba(23,184,102,.35)" : "rgba(18,38,30,.09)"
+      })),
+      dateLabel: whenMap[st.when],
+      timeLabel: st.allDay ? "—" : "14:00", timeBg: st.allDay ? "rgba(18,38,30,.04)" : "rgba(255,255,255,.8)", timeColor: st.allDay ? "#a3b0aa" : "#16211c",
+      allDayBg: st.allDay ? "rgba(215,244,229,.8)" : "rgba(255,255,255,.7)",
+      allDayBorder: st.allDay ? "rgba(23,184,102,.3)" : "rgba(18,38,30,.09)",
+      allDayBoxBg: st.allDay ? "linear-gradient(150deg,#1fc172,#0f9a56)" : "transparent",
+      allDayBoxBorder: st.allDay ? "#17b866" : "rgba(18,38,30,.22)", allDayCheck: st.allDay ? "✓" : "",
+      swatches: [C.green, C.blue, C.teal, C.violet, C.amber, C.red].map(c => ({ c, ring: st.color === c ? "0 0 0 2px #fff,0 0 0 4px " + c : "none" })),
+      reminders: [{ id: "none", label: "No reminder" }, { id: "at", label: "At time" }, { id: "30m", label: "30 min before" }, { id: "1h", label: "1 hour before" }, { id: "1d", label: "1 day before" }].map(r => ({
+        ...r, color: st.reminder === r.id ? "#0b7a45" : "#5d6f67",
+        bg: st.reminder === r.id ? "rgba(215,244,229,.95)" : "rgba(255,255,255,.7)",
+        border: st.reminder === r.id ? "rgba(23,184,102,.35)" : "rgba(18,38,30,.09)"
+      })),
+      delModes: [{ id: "note", label: "Delete note only" }, { id: "both", label: "Delete note and calendar task" }].map(d => ({
+        ...d, bg: st.delMode === d.id ? "rgba(215,244,229,.8)" : "rgba(255,255,255,.7)",
+        border: st.delMode === d.id ? "rgba(23,184,102,.35)" : "rgba(18,38,30,.09)",
+        dotBorder: st.delMode === d.id ? "#17b866" : "rgba(18,38,30,.25)",
+        dotBg: st.delMode === d.id ? "#17b866" : "transparent"
+      })),
+      onSearch: e => this.setState({ query: e.target.value }),
+      selectNote: e => this.setState({ sel: e.currentTarget.dataset.n, menu: false, editing: false, checks: {} }),
+      newNote: () => this.setState({ sel: "empty", editing: true, menu: false, query: "" }),
+      focusEditor: () => this.setState({ editing: true, menu: false }),
+      toggleLine: e => { const i = Number(e.currentTarget.dataset.l); const l = this.note().body[i] || ""; if (!/^\[[ xX]\]\s/.test(l.trim())) return; const base = /^\[[xX]\]/.test(l.trim()); this.setState(s => ({ checks: { ...s.checks, [i]: !(s.checks[i] !== undefined ? s.checks[i] : base) } })); },
+      togglePin: () => { const n = this.note(); this.setState(s => ({ pins: { ...s.pins, [n.id]: !this.isPinned(n) }, menu: false })); },
+      toggleMenu: () => this.setState(s => ({ menu: !s.menu })),
+      openCal: () => this.setState({ calModal: true, dupWarn: !!this.note().link, menu: false }),
+      addAnother: () => this.setState({ dupWarn: false }),
+      closeCal: () => this.setState({ calModal: false, dupWarn: false }),
+      confirmCal: () => { const d = whenMap[st.when].split(" · ").pop(); this.setState({ calModal: false, toast: "Added to " + d.replace(", 2026", "") }); setTimeout(() => this.setState({ toast: "" }), 2600); },
+      pickWhen: e => this.setState({ when: e.currentTarget.dataset.w }),
+      toggleAllDay: () => this.setState(s => ({ allDay: !s.allDay })),
+      pickColor: e => this.setState({ color: e.currentTarget.dataset.c }),
+      pickReminder: e => this.setState({ reminder: e.currentTarget.dataset.r }),
+      askDelete: () => this.setState({ deleting: true, menu: false }),
+      cancelDelete: () => this.setState({ deleting: false }),
+      confirmDelete: () => this.setState({ deleting: false, toast: "Note deleted" }),
+      pickDelMode: e => this.setState({ delMode: e.currentTarget.dataset.d })
+    };
+  }
+}
+
+</script>
+</body>
+</html>

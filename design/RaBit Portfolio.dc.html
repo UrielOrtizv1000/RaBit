@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Doto:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#e9eeeb;color:#16211c;font-family:"Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#0b7a45;text-decoration:none}
+a:hover{color:#0f9a56}
+@keyframes rb-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes rb-pulse{0%,100%{box-shadow:0 0 0 0 rgba(23,184,102,.45)}70%{box-shadow:0 0 0 7px rgba(23,184,102,0)}}
+@keyframes rb-cursor{0%,50%{opacity:1}51%,100%{opacity:0}}
+@keyframes rb-fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes rb-drift{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-20px)}}
+@keyframes rb-pulse{0%,100%{box-shadow:0 0 0 0 rgba(23,184,102,.45)}70%{box-shadow:0 0 0 7px rgba(23,184,102,0)}}
+@keyframes rb-toast{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes rb-spin{to{transform:rotate(360deg)}}
+@keyframes rb-tilt{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}
+</style>
+</helmet>
+
+<div style="position:relative;width:1440px;min-height:100vh;overflow:clip;border-radius:22px;background:linear-gradient(160deg,#f1f4f2 0%,#e6ebe8 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)">
+  <!-- ambient color behind the glass -->
+  <div style="position:absolute;left:-120px;top:-140px;width:620px;height:520px;border-radius:50%;background:rgba(122,221,159,.55);filter:blur(90px);animation:rb-drift 18s ease-in-out infinite"></div>
+  <div style="position:absolute;right:-160px;top:120px;width:560px;height:520px;border-radius:50%;background:rgba(168,205,236,.5);filter:blur(100px)"></div>
+  <div style="position:absolute;left:420px;bottom:-220px;width:640px;height:460px;border-radius:50%;background:rgba(246,214,182,.45);filter:blur(110px)"></div>
+
+<div style="position:relative;width:1440px;min-height:100vh;background:linear-gradient(160deg,rgba(255,255,255,.42),rgba(255,255,255,.2));display:flex;flex-direction:column">
+
+  <!-- TOP BAR -->
+  <div style="display:flex;align-items:center;gap:22px;padding:26px 26px 6px">
+    <div onMouseEnter="{{ logoEnter }}" onMouseLeave="{{ logoLeave }}" onClick="{{ toggleTheme }}" title="Switch light / dark" style="cursor:pointer;transition:box-shadow .3s ease-out,transform .2s ease-out;display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:999px;background:linear-gradient(150deg,rgba(14,26,20,.9),rgba(18,40,30,.82));border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 12px 24px -14px rgba(10,30,20,.8)">
+      <div style="font-family:Silkscreen,monospace;font-weight:700;font-size:13px;color:#3ddc84;text-shadow:0 0 9px rgba(61,220,132,.7)">&gt;</div>
+      <div style="font-family:Silkscreen,monospace;font-weight:700;font-size:14px;letter-spacing:.06em;color:#3ddc84;text-shadow:0 0 10px rgba(61,220,132,.55)">RABIT</div>
+      <div style="width:6px;height:13px;background:#3ddc84;box-shadow:0 0 8px rgba(61,220,132,.8);animation:rb-cursor 1.1s steps(1) infinite"></div>
+      <div style="display:flex;align-items:center;gap:8px;overflow:hidden;white-space:nowrap;max-width:{{ logoW }};opacity:{{ logoOp }};margin-left:{{ logoMl }};transition:max-width .4s cubic-bezier(.2,.8,.3,1),opacity .25s ease-out,margin-left .3s ease-out">
+        <div style="width:1px;height:14px;flex:none;background:rgba(61,220,132,.3)"></div>
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3ddc84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 5px rgba(61,220,132,.7));animation:rb-tilt 2.4s ease-in-out infinite"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg></sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3ddc84" stroke-width="2" stroke-linecap="round" style="filter:drop-shadow(0 0 5px rgba(61,220,132,.7));animation:rb-spin 6s linear infinite"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></sc-if>
+        <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.1em;color:#3ddc84;text-shadow:0 0 8px rgba(61,220,132,.5)">{{ themeLabel }}</div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex">
+      <div style="display:flex;align-items:center;gap:10px;width:380px;padding:11px 18px;border-radius:999px;background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.4));backdrop-filter:blur(20px) saturate(170%);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 1px rgba(255,255,255,.95),0 10px 24px -18px rgba(20,48,34,.4);color:#6b7a73;font-size:13px;transition:background .2s ease-out" style-hover="background:rgba(255,255,255,.85)">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#6b7a73" stroke-width="1.6"><circle cx="7" cy="7" r="4.6"></circle><path d="M10.5 10.5 14 14"></path></svg>
+        <input onKeyDown="{{ onSearchKey }}" placeholder="Search events, notes…" style="flex:1;min-width:0;border:0;outline:0;background:transparent;font-family:inherit;font-size:13px;color:#121a16">
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div onClick="{{ toggleNotif }}" title="Notifications" style="position:relative;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,0 10px 22px -16px rgba(20,48,34,.45);transition:transform .15s ease-out" style-hover="transform:scale(1.05)">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="#2b3a34" stroke-width="1.5" stroke-linejoin="round"><path d="M4.5 7.2a4.5 4.5 0 0 1 9 0c0 3.3 1.2 4.3 1.2 4.3H3.3s1.2-1 1.2-4.3Z"></path><path d="M7.4 14a1.7 1.7 0 0 0 3.2 0"></path></svg>
+        <div style="position:absolute;top:10px;right:11px;width:6px;height:6px;border-radius:50%;background:#17b866;box-shadow:0 0 0 2px #fff"></div>
+        <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stopNotif }}" style="position:absolute;right:-6px;top:52px;z-index:50;width:320px;padding:10px;border-radius:24px;cursor:default;background:linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 30px 60px -24px rgba(12,40,26,.45);animation:rb-toast .18s ease-out both">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px 10px">
+              <div style="font-size:14px;font-weight:700;color:#121a16">Notifications</div>
+              <div style="font-size:11px;font-weight:600;color:#0b7a45">3 new</div>
+            </div>
+            <sc-for list="{{ notifs }}" as="nt" hint-placeholder-count="3">
+              <a href="{{ nt.href }}" style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:16px;transition:background .2s ease-out" style-hover="background:rgba(255,255,255,.85)">
+                <div style="width:8px;height:8px;flex:none;border-radius:50%;background:{{ nt.color }}"></div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:600;color:#121a16;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ nt.title }}</div>
+                  <div style="font-size:11.5px;color:#5d6f67;margin-top:2px">{{ nt.sub }}</div>
+                </div>
+              </a>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <div onClick="{{ openSettings }}" title="Settings" style="width:42px;height:42px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,0 10px 22px -16px rgba(20,48,34,.45);transition:transform .15s ease-out" style-hover="transform:scale(1.05)">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2b3a34" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border-radius:999px;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,0 10px 22px -16px rgba(20,48,34,.45)">
+        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,#0b7a45,#4fc389);display:grid;place-items:center;font-family:Silkscreen,monospace;font-size:11px;color:#fff">{{ userInitial }}</div>
+        <div style="font-size:13px;font-weight:600;color:#1d2a24">{{ userName }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:stretch;min-height:0;padding:14px 0 0">
+
+    <!-- FLOATING DOCK -->
+    <div style="position:relative;z-index:10;flex:none;display:flex;justify-content:flex-start;align-items:flex-start;padding:0 20px 26px 26px;box-sizing:border-box">
+      <div style="position:sticky;top:26px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px;height:max-content;border-radius:26px;background:linear-gradient(160deg,rgba(255,255,255,.66),rgba(255,255,255,.32));backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,inset 0 -10px 20px -14px rgba(255,255,255,.7),0 22px 44px -26px rgba(20,48,34,.4)">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+          <a href="{{ n.href }}" onMouseEnter="{{ navEnter }}" onMouseLeave="{{ navLeave }}" data-id="{{ n.id }}" style="position:relative;width:46px;height:46px;box-sizing:border-box;border-radius:17px;display:grid;place-items:center;background:{{ n.bg }};box-shadow:{{ n.shadow }};transition:background .2s ease-out,box-shadow .2s ease-out">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="{{ n.stroke }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ n.d }}"></path></svg>
+            <div style="position:absolute;bottom:5px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#17b866;opacity:{{ n.bar }}"></div>
+            <div style="position:absolute;left:58px;top:50%;transform:translate({{ n.labelX }},-50%);opacity:{{ n.labelOp }};transition:opacity .18s ease-out,transform .18s ease-out;pointer-events:none;padding:7px 12px;border-radius:999px;background:linear-gradient(150deg,rgba(14,26,20,.9),rgba(18,40,30,.84));backdrop-filter:blur(14px);color:#eef4f0;font-size:11.5px;font-weight:600;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 10px 22px -10px rgba(12,30,22,.7)">{{ n.label }}</div>
+          </a>
+        </sc-for>
+        <div style="width:22px;height:1px;background:rgba(18,38,30,.1);margin:4px 0"></div>
+        <a href="RaBit Calendar.dc.html#new-event" title="New event" style="cursor:pointer;width:46px;height:46px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(150deg,#1fc172,#0f9a56);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 12px 22px -12px rgba(23,184,102,.9);transition:transform .15s ease-out" style-hover="transform:scale(1.06)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"></path></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div style="flex:1;min-width:0;padding:10px 26px 26px 0;display:flex;flex-direction:column;gap:20px">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+        <div>
+          <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.16em;color:#6b7a73;margin-bottom:12px">MERCADO DE CAPITALES USA</div>
+          <div style="font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1.05;color:#121a16;margin-bottom:8px">Portfolio</div>
+          <div style="font-size:14px;color:#5d6f67">{{ holdCount }} holdings · {{ sourceLabel }}</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <label style="display:flex;align-items:center;gap:8px;padding:12px 20px;border-radius:999px;background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(255,255,255,.46));border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 12px 24px -18px rgba(20,48,34,.5);color:#1d2a24;font-size:13px;font-weight:600;cursor:pointer;transition:transform .15s ease-out" style-hover="transform:scale(1.03)">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#17b866" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V3M4.5 6.5 8 3l3.5 3.5M3 13h10"></path></svg>Import Excel
+            <input type="file" accept=".xlsx" onChange="{{ onImport }}" style="display:none">
+          </label>
+          <div onClick="{{ openAdd }}" style="display:flex;align-items:center;gap:8px;padding:12px 20px;border-radius:999px;background:linear-gradient(150deg,#1fc172,#0f9a56);color:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 14px 26px -14px rgba(23,184,102,1);transition:transform .15s ease-out" style-hover="transform:scale(1.03)">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M8 3v10M3 8h10"></path></svg>Add stock
+          </div>
+        </div>
+      </div>
+
+      <!-- SUMMARY + VALUE VS COST -->
+      <div ref="{{ viewRef }}" style="position:relative;display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;padding:26px 28px;border-radius:30px;background:linear-gradient(150deg,rgba(255,255,255,.8),rgba(240,250,245,.46));backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,inset 0 -12px 26px -18px rgba(255,255,255,.8),0 24px 48px -30px rgba(20,48,34,.34)">
+        <div style="display:flex;flex-direction:column">
+          <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.16em;color:#6b7a73">TOTAL VALUE</div>
+          <div style="font-family:Doto,monospace;font-weight:900;font-size:50px;line-height:1;color:#121a16;margin-top:12px;letter-spacing:-.01em">{{ totalValue }}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:12px">
+            <div style="font-size:13px;font-weight:700;color:{{ plColor }};padding:5px 11px;border-radius:999px;background:{{ plBg }}">{{ plPct }}</div>
+            <div style="font-size:13px;color:#5d6f67">return to date</div>
+          </div>
+          <div style="flex:1;min-height:18px"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+              <div style="font-size:11px;font-weight:600;color:#6b7a73">Invested</div>
+              <div style="font-size:15px;font-weight:700;color:#121a16;margin-top:3px">{{ totalCost }}</div>
+            </div>
+            <div style="padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+              <div style="font-size:11px;font-weight:600;color:#6b7a73">To date</div>
+              <div style="font-size:15px;font-weight:700;color:{{ plColor }};margin-top:3px">{{ plAbs }}</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;min-width:0">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.16em;color:#6b7a73">{{ chartTitle }}</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <sc-for list="{{ chartModes }}" as="cm" hint-placeholder-count="2">
+                <div onClick="{{ pickChart }}" data-c="{{ cm.id }}" style="padding:6px 12px;border-radius:999px;font-size:11.5px;font-weight:600;cursor:pointer;color:{{ cm.color }};background:{{ cm.bg }};box-shadow:{{ cm.shadow }};transition:background .2s ease-out">{{ cm.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <sc-if value="{{ isHist }}" hint-placeholder-val="{{ true }}">
+          <sc-if value="{{ hasHistory }}" hint-placeholder-val="{{ false }}">
+            <div onMouseMove="{{ onChartMove }}" onMouseLeave="{{ onChartLeave }}" style="position:relative;flex:1;min-height:200px;margin-top:14px">
+              <svg width="100%" height="100%" viewBox="0 0 600 200" preserveAspectRatio="none" style="position:absolute;inset:0;overflow:visible">
+                <defs><linearGradient id="rbArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#17b866" stop-opacity=".28"></stop><stop offset="1" stop-color="#17b866" stop-opacity="0"></stop></linearGradient></defs>
+                <sc-for list="{{ gridY }}" as="g" hint-placeholder-count="4"><line x1="0" x2="600" y1="{{ g }}" y2="{{ g }}" stroke="rgba(18,38,30,.07)" stroke-dasharray="3 5"></line></sc-for>
+                <path d="{{ areaD }}" fill="url(#rbArea)"></path>
+                <path d="{{ lineD }}" fill="none" stroke="#17b866" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+              </svg>
+              <sc-if value="{{ hoverOn }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;top:0;bottom:0;left:{{ hoverX }};width:1.5px;background:rgba(23,184,102,.5)"></div>
+                <div style="position:absolute;left:{{ hoverX }};top:{{ hoverY }};width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#fff;border:2.5px solid #17b866;box-shadow:0 0 0 4px rgba(23,184,102,.18)"></div>
+                <div style="position:absolute;left:{{ hoverX }};top:{{ hoverY }};transform:translate(-50%,-130%);padding:7px 11px;border-radius:12px;background:#121a16;color:#fff;font-size:12px;white-space:nowrap;box-shadow:0 10px 22px -10px rgba(0,0,0,.5)"><div style="font-size:10.5px;color:#a9c6b8">{{ hoverDate }}</div><div style="font-weight:700">{{ hoverVal }}</div></div>
+              </sc-if>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:8px">
+              <sc-for list="{{ snapLabels }}" as="l" hint-placeholder-count="3"><div style="font-size:11px;color:#8b9a93">{{ l }}</div></sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noHistory }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1;min-height:200px;margin-top:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:22px;border:1.5px dashed rgba(18,38,30,.12);background:repeating-linear-gradient(0deg,transparent 0 39px,rgba(18,38,30,.04) 39px 40px)">
+              <div style="font-family:Doto,monospace;font-weight:900;font-size:22px;color:#a3b0aa">NOT ENOUGH DATA</div>
+              <div style="font-size:12.5px;color:#6b7a73">Import another Excel later and your history will start here.</div>
+            </div>
+          </sc-if>
+          </sc-if>
+          <sc-if value="{{ isGain }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;align-items:flex-end;gap:14px;margin-top:14px;min-height:200px;padding-bottom:4px;border-bottom:1px solid rgba(18,38,30,.08)">
+              <sc-for list="{{ gbars }}" as="g" hint-placeholder-count="7">
+                <div title="{{ g.tip }}" style="flex:1;min-width:0;height:100%;display:flex;align-items:flex-end;justify-content:center">
+                  <div style="position:relative;width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;gap:4px">
+                    <div style="position:absolute;left:50%;bottom:calc({{ g.topH }} + 6px);transform:translateX(-50%);font-size:10.5px;font-weight:700;color:{{ g.color }};white-space:nowrap">{{ g.pct }}</div>
+                    <div style="width:42%;max-width:20px;height:{{ g.costH }};border-radius:7px 7px 3px 3px;background:rgba(18,38,30,.12)"></div>
+                    <div style="width:42%;max-width:20px;height:{{ g.valH }};border-radius:7px 7px 3px 3px;background:{{ g.valBg }};box-shadow:inset 0 1px 0 rgba(255,255,255,.35)"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:14px;margin-top:8px">
+              <sc-for list="{{ gbars }}" as="g" hint-placeholder-count="7">
+                <div style="flex:1;min-width:0;text-align:center;font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.06em;color:#41504a">{{ g.t }}</div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:14px;margin-top:10px;font-size:11px;color:#6b7a73">
+              <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:3px;background:rgba(18,38,30,.14)"></div>Cost</div>
+              <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:3px;background:#17b866"></div>Value</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <!-- HOLDINGS -->
+      <div style="flex:1;box-sizing:border-box;padding:22px 24px 14px;border-radius:30px;background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.38));backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 1px #fff,inset 0 -10px 24px -18px rgba(255,255,255,.8),0 24px 48px -30px rgba(20,48,34,.3)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.16em;color:#6b7a73">HOLDINGS</div>
+          <div style="font-size:12px;color:#6b7a73">Cash {{ cash }}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(0,1.8fr) repeat(4,minmax(0,1fr)) 34px;gap:10px;padding:8px 12px;font-size:11px;font-weight:600;color:#8b9a93">
+          <div>Stock</div><div style="text-align:right">Shares</div><div style="text-align:right">Avg cost</div><div style="text-align:right">Value</div><div style="text-align:right">Return</div><div></div>
+        </div>
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="7">
+          <div style="display:grid;grid-template-columns:minmax(0,1.8fr) repeat(4,minmax(0,1fr)) 34px;gap:10px;align-items:center;padding:10px 12px;border-radius:16px;transition:background .2s ease-out" style-hover="background:rgba(255,255,255,.75)">
+            <div style="display:flex;align-items:center;gap:12px;min-width:0">
+              <div style="width:34px;height:34px;flex:none;border-radius:12px;display:grid;place-items:center;background:{{ r.color }};color:{{ r.ink }};font-family:Silkscreen,monospace;font-size:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.3)">{{ r.initial }}</div>
+              <div style="min-width:0">
+                <div style="display:flex;align-items:baseline;gap:7px;min-width:0"><div style="font-size:14px;font-weight:700;color:#121a16">{{ r.t }}</div><div style="font-size:11.5px;color:#6b7a73;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</div></div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+                  <div style="width:60px;height:4px;border-radius:2px;background:rgba(18,38,30,.08);overflow:hidden"><div style="width:{{ r.wPct }};height:100%;background:{{ r.color }}"></div></div>
+                  <div style="font-size:10.5px;color:#6b7a73">{{ r.weight }}</div>
+                </div>
+              </div>
+            </div>
+            <div style="text-align:right;font-size:13px;color:#2b3a34">{{ r.shares }}</div>
+            <div style="text-align:right;font-size:13px;color:#2b3a34">{{ r.cost }}</div>
+                        <div style="text-align:right;font-size:13px;font-weight:700;color:#121a16">{{ r.value }}</div>
+            <div style="text-align:right">
+              <div style="font-size:13px;font-weight:700;color:{{ r.plColor }}">{{ r.plPct }}</div>
+              <div style="font-size:11px;color:#6b7a73">{{ r.plAbs }}</div>
+            </div>
+            <div onClick="{{ openEdit }}" data-t="{{ r.t }}" title="Edit" style="width:30px;height:30px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff,0 4px 10px -6px rgba(20,48,34,.35);transition:transform .15s ease-out" style-hover="transform:scale(1.08)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#41504a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2.5 13.5 5 6 12.5 3 13l.5-3Z"></path></svg></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div ref="{{ colRef }}" style="width:340px;flex:none;padding:0 26px 26px 0;display:flex;flex-direction:column;gap:16px">
+      <div style="position:relative;margin-top:{{ panelTop }}px;border-radius:28px;background:linear-gradient(150deg,rgba(12,24,18,.9),rgba(16,40,29,.82));backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px rgba(61,220,132,.08),0 30px 60px -30px rgba(10,30,20,.75)">
+        <div style="display:flex;align-items:center;gap:7px;padding:14px 20px 0">
+          <div style="width:6px;height:6px;background:#3ddc84"></div>
+          <div style="width:6px;height:6px;background:rgba(61,220,132,.45)"></div>
+          <div style="width:6px;height:6px;background:rgba(61,220,132,.2)"></div>
+          <div style="margin-left:6px;font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.1em;color:#6ee6a4">rabit@portfolio</div>
+        </div>
+        <div style="padding:12px 22px 20px">
+          <div style="font-family:Silkscreen,monospace;font-size:11px;color:#6ee6a4;letter-spacing:.06em;margin-bottom:9px">&gt; NICE!</div>
+          <div style="font-family:Doto,monospace;font-weight:900;font-size:20px;line-height:1.25;color:#3ddc84;text-shadow:0 0 12px rgba(61,220,132,.5)">{{ botLine }}<span style="display:inline-block;width:10px;height:18px;margin-left:8px;vertical-align:-3px;background:#3ddc84;box-shadow:0 0 9px rgba(61,220,132,.8);animation:rb-cursor 1.1s steps(1) infinite"></span></div>
+        </div>
+      </div>
+
+      <div style="padding:22px;border-radius:28px;background:linear-gradient(150deg,rgba(255,255,255,.8),rgba(240,250,245,.46));backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,inset 0 -12px 26px -18px rgba(255,255,255,.8),0 24px 48px -30px rgba(20,48,34,.34)">
+        <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.16em;color:#6b7a73;margin-bottom:14px">ALLOCATION</div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:6px">
+          <div><div style="font-size:11.5px;color:#6b7a73">Top holding</div><div style="font-family:Doto,monospace;font-weight:900;font-size:30px;line-height:1.05;color:#121a16">{{ topT }}</div></div>
+          <div style="font-size:12px;color:#6b7a73;padding-bottom:4px">{{ topW }}</div>
+        </div>
+        <div style="position:relative;width:210px;height:210px;margin:2px auto 10px">
+          <svg width="210" height="210" viewBox="0 0 220 220" style="display:block">
+            <sc-for list="{{ slices }}" as="sl" hint-placeholder-count="7">
+              <path d="{{ sl.d }}" fill="{{ sl.color }}" stroke="{{ sl.color }}" stroke-width="6" stroke-linejoin="round"></path>
+            </sc-for>
+          </svg>
+          <sc-for list="{{ slices }}" as="sl" hint-placeholder-count="7">
+            <div style="position:absolute;left:{{ sl.px }};top:{{ sl.py }};transform:translate(-50%,-50%);color:{{ sl.ink }};font-weight:700;font-size:9px;line-height:1;letter-spacing:.01em;white-space:nowrap;pointer-events:none;text-shadow:{{ sl.glow }}">{{ sl.lbl }}</div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 14px">
+          <sc-for list="{{ slices }}" as="sl" hint-placeholder-count="7">
+            <div style="display:flex;align-items:center;gap:9px;font-size:12.5px">
+              <div style="width:9px;height:9px;border-radius:3px;background:{{ sl.color }}"></div>
+              <div style="flex:1;color:#41504a">{{ sl.t }}</div>
+              <div style="font-weight:600;color:#121a16">{{ sl.val }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="flex:1;padding:22px;border-radius:28px;background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.38));backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 1px #fff,inset 0 -10px 24px -18px rgba(255,255,255,.8),0 24px 48px -30px rgba(20,48,34,.3)">
+        <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.16em;color:#6b7a73;margin-bottom:14px">RETURN BY STOCK</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ perf }}" as="pf" hint-placeholder-count="7">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:44px;font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.06em;color:#41504a">{{ pf.t }}</div>
+              <div style="flex:1;height:10px;border-radius:5px;background:rgba(18,38,30,.06);overflow:hidden"><div style="width:{{ pf.w }};height:100%;border-radius:5px;background:{{ pf.color }}"></div></div>
+              <div style="width:54px;text-align:right;font-size:12px;font-weight:700;color:{{ pf.textColor }}">{{ pf.pct }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD STOCK -->
+  <sc-if value="{{ addOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeAdd }}" style="position:absolute;inset:0;z-index:40;display:grid;place-items:center;background:rgba(16,32,25,.3);backdrop-filter:blur(6px)">
+      <div onClick="{{ stopNotif }}" style="width:440px;border-radius:30px;padding:24px;background:linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.55);animation:rb-toast .18s ease-out both">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.01em;color:#121a16">Add stock</div>
+          <div onClick="{{ closeAdd }}" style="width:30px;height:30px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#5d6f67;font-size:16px" style-hover="background:rgba(18,38,30,.06)">×</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div><div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Ticker</div><input value="{{ fT }}" onInput="{{ onT }}" placeholder="e.g. MSFT" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:14px;border:1px solid rgba(18,38,30,.1);background:#fff;font-family:inherit;font-size:14px;color:#121a16;outline:0;text-transform:uppercase;font-weight:700"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Shares</div><input value="{{ fS }}" onInput="{{ onS }}" placeholder="0" inputmode="decimal" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:14px;border:1px solid rgba(18,38,30,.1);background:#fff;font-family:inherit;font-size:14px;color:#121a16;outline:0"></div>
+            <div><div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Buy price</div><input value="{{ fC }}" onInput="{{ onC }}" placeholder="$0.00" inputmode="decimal" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:14px;border:1px solid rgba(18,38,30,.1);background:#fff;font-family:inherit;font-size:14px;color:#121a16;outline:0"></div>
+          </div>
+          <div><div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Current price · optional</div><input value="{{ fP }}" onInput="{{ onP }}" placeholder="Uses buy price if empty" inputmode="decimal" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:14px;border:1px solid rgba(18,38,30,.1);background:#fff;font-family:inherit;font-size:14px;color:#121a16;outline:0"></div>
+        </div>
+        <sc-if value="{{ avgOn }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:14px;padding:14px 16px;border-radius:18px;background:rgba(23,184,102,.1);box-shadow:inset 0 0 0 1px rgba(23,184,102,.22)">
+            <div style="font-size:11px;font-weight:700;color:#0b7a45;letter-spacing:.02em">AUTO-AVERAGE</div>
+            <div style="font-size:12.5px;color:#2b3a34;margin-top:6px;line-height:1.55">{{ avgText }}</div>
+          </div>
+        </sc-if>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <div onClick="{{ closeAdd }}" style="flex:1;text-align:center;padding:12px;border-radius:999px;background:rgba(255,255,255,.75);box-shadow:inset 0 1px 1px #fff,0 8px 18px -12px rgba(20,48,34,.35);font-size:13px;font-weight:600;color:#2b3a34;cursor:pointer">Cancel</div>
+          <div onClick="{{ saveAdd }}" style="flex:1;text-align:center;padding:12px;border-radius:999px;background:{{ saveBg }};color:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 14px 26px -14px rgba(23,184,102,1)">{{ saveLabel }}</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- EDIT HOLDING -->
+  <sc-if value="{{ editOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeEdit }}" style="position:absolute;inset:0;z-index:41;display:grid;place-items:center;background:rgba(16,32,25,.3);backdrop-filter:blur(6px)">
+      <div onClick="{{ stopNotif }}" style="width:440px;border-radius:30px;padding:24px;background:linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.55);animation:rb-toast .18s ease-out both">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:{{ eColor }};color:{{ eInk }};font-family:Silkscreen,monospace;font-size:11px">{{ eInit }}</div>
+            <div><div style="font-size:20px;font-weight:700;color:#121a16">{{ eT }}</div><div style="font-size:12px;color:#5d6f67">{{ eSummary }}</div></div>
+          </div>
+          <div onClick="{{ closeEdit }}" style="width:30px;height:30px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#5d6f67;font-size:16px" style-hover="background:rgba(18,38,30,.06)">×</div>
+        </div>
+        <div style="display:flex;gap:2px;margin-top:18px;padding:4px;border-radius:999px;background:rgba(18,38,30,.05)">
+          <sc-for list="{{ eModes }}" as="m" hint-placeholder-count="3">
+            <div onClick="{{ pickEMode }}" data-m="{{ m.id }}" style="flex:1;text-align:center;padding:9px;border-radius:999px;font-size:12.5px;font-weight:600;cursor:pointer;color:{{ m.color }};background:{{ m.bg }};box-shadow:{{ m.shadow }}">{{ m.label }}</div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ eIsAdj }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+            <div><div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Shares you own</div><input value="{{ eS }}" onInput="{{ onES }}" placeholder="0" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:14px;border:1px solid rgba(18,38,30,.1);background:#fff;font-family:inherit;font-size:14px;color:#121a16;outline:0"></div>
+            <div><div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Average price</div><input value="{{ eC }}" onInput="{{ onEC }}" placeholder="$0.00" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:14px;border:1px solid rgba(18,38,30,.1);background:#fff;font-family:inherit;font-size:14px;color:#121a16;outline:0"></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ eIsBuy }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+            <div><div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Shares to add</div><input value="{{ eS }}" onInput="{{ onES }}" placeholder="0" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:14px;border:1px solid rgba(18,38,30,.1);background:#fff;font-family:inherit;font-size:14px;color:#121a16;outline:0"></div>
+            <div><div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Buy price</div><input value="{{ eC }}" onInput="{{ onEC }}" placeholder="$0.00" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:14px;border:1px solid rgba(18,38,30,.1);background:#fff;font-family:inherit;font-size:14px;color:#121a16;outline:0"></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ eIsSell }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:14px"><div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:6px">Shares to withdraw</div><input value="{{ eS }}" onInput="{{ onES }}" placeholder="0" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:14px;border:1px solid rgba(18,38,30,.1);background:#fff;font-family:inherit;font-size:14px;color:#121a16;outline:0"></div>
+        </sc-if>
+        <sc-if value="{{ eIsDel }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:14px;padding:14px 16px;border-radius:18px;background:rgba(168,68,58,.07);box-shadow:inset 0 0 0 1px rgba(168,68,58,.2);font-size:12.5px;color:#7a3a33;line-height:1.5">This removes {{ eT }} from your portfolio. A future Excel import will bring it back if it's still in the file.</div>
+        </sc-if>
+        <div style="margin-top:14px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff;font-size:12.5px;color:#2b3a34;line-height:1.5">{{ ePreview }}</div>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <div onClick="{{ closeEdit }}" style="flex:1;text-align:center;padding:12px;border-radius:999px;background:rgba(255,255,255,.75);box-shadow:inset 0 1px 1px #fff,0 8px 18px -12px rgba(20,48,34,.35);font-size:13px;font-weight:600;color:#2b3a34;cursor:pointer">Cancel</div>
+          <div onClick="{{ saveEdit }}" style="flex:1;text-align:center;padding:12px;border-radius:999px;background:{{ eBtnBg }};color:#fff;font-size:13px;font-weight:600;cursor:pointer">{{ eBtn }}</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toastOn }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:50%;bottom:30px;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:999px;background:linear-gradient(150deg,rgba(14,26,20,.92),rgba(18,40,30,.86));color:#eef4f0;font-size:13px;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 16px 30px -14px rgba(12,30,22,.8);animation:rb-toast .22s ease-out both"><span style="color:#3ddc84;font-weight:700">✓</span>{{ toastText }}</div>
+  </sc-if>
+
+  <sc-if value="{{ pageOff }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:55;display:grid;place-items:center;background:rgba(230,242,236,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)">
+      <div style="width:400px;box-sizing:border-box;padding:28px;border-radius:30px;background:linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8));border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.5);animation:rb-toast .2s ease-out both">
+        <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73">&gt; MODULE OFF</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.01em;color:#121a16;margin-top:10px">{{ pageName }} is turned off</div>
+        <div style="font-size:13.5px;line-height:1.55;color:#5d6f67;margin-top:8px">It's hidden from the sidebar and Home. Your data is still here.</div>
+        <div style="display:flex;gap:8px;margin-top:22px">
+          <div onClick="{{ enablePage }}" style="flex:1;text-align:center;padding:12px 18px;border-radius:999px;cursor:pointer;background:linear-gradient(150deg,#1fc172,#0f9a56);color:#fff;font-size:13.5px;font-weight:600;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 14px 26px -14px rgba(23,184,102,.95)" style-hover="transform:scale(1.02)">Turn it back on</div>
+          <a href="RaBit Home v2.dc.html" style="flex:1;text-align:center;padding:12px 18px;border-radius:999px;background:rgba(255,255,255,.8);box-shadow:inset 0 1px 1px #fff,0 8px 18px -12px rgba(20,48,34,.4);color:#1d2a24;font-size:13.5px;font-weight:600">Go Home</a>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- SETTINGS -->
+  <sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSettings }}" style="position:absolute;inset:0;z-index:60;display:grid;place-items:center;background:rgba(16,32,25,.3);backdrop-filter:blur(6px)">
+      <div onClick="{{ stopNotif }}" style="width:480px;max-height:88%;box-sizing:border-box;display:flex;flex-direction:column;border-radius:30px;background:linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.55);animation:rb-toast .18s ease-out both">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 24px 6px">
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.01em;color:#121a16">Settings</div>
+          <div onClick="{{ closeSettings }}" style="width:30px;height:30px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#5d6f67;font-size:16px" style-hover="background:rgba(18,38,30,.06)">×</div>
+        </div>
+        <div style="flex:1;min-height:0;overflow-y:auto;padding:0 24px 4px;scrollbar-width:thin;scrollbar-color:rgba(18,38,30,.16) transparent">
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">PROFILE</div>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="width:40px;height:40px;flex:none;border-radius:50%;background:linear-gradient(145deg,#0b7a45,#4fc389);display:grid;place-items:center;font-family:Silkscreen,monospace;font-size:13px;color:#fff">{{ userInitial }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:3px">Your name · used in greetings</div>
+              <input value="{{ prefName }}" onInput="{{ onPrefName }}" placeholder="Your name" style="width:100%;box-sizing:border-box;border:0;outline:0;background:transparent;font-family:inherit;font-size:15px;font-weight:700;color:#121a16">
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:18px 0 8px">
+            <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73">MODULES · {{ modOnCount }}/4 ON</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <div onClick="{{ allModsOn }}" style="padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:600;cursor:pointer;color:#0b7a45" style-hover="background:#fff">All on</div>
+              <div onClick="{{ allModsOff }}" style="padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:600;cursor:pointer;color:#5d6f67" style-hover="background:#fff;color:#a8443a">All off</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ modRows }}" as="md" hint-placeholder-count="4">
+              <div onClick="{{ toggleMod }}" data-id="{{ md.id }}" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:18px;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff;opacity:{{ md.op }};transition:opacity .2s ease-out">
+                <div style="width:36px;height:36px;flex:none;border-radius:12px;display:grid;place-items:center;background:{{ md.iconBg }};box-shadow:inset 0 1px 1px #fff;transition:background .2s ease-out">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="{{ md.iconStroke }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ md.d }}"></path></svg>
+                </div>
+                <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:#121a16">{{ md.label }}</div><div style="font-size:12px;color:#5d6f67;margin-top:3px;line-height:1.45">{{ md.desc }}</div></div>
+                <div style="width:42px;height:24px;flex:none;border-radius:12px;padding:3px;box-sizing:border-box;background:{{ md.sw.bg }};transition:background .2s ease-out"><div style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(12,40,26,.3);transform:translateX({{ md.sw.x }});transition:transform .2s ease-out"></div></div>
+              </div>
+            </sc-for>
+            <div style="padding:4px 4px 0;font-size:11.5px;line-height:1.5;color:#6b7a73">Home always stays on. Turned-off modules disappear from the sidebar and Home — your data is kept.</div>
+          </div>
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">TIME &amp; DATE</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="font-size:14px;font-weight:700;color:#121a16">Time format</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <sc-for list="{{ timeOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ pickPref }}" data-k="{{ o.key }}" data-v="{{ o.id }}" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .2s ease-out">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="font-size:14px;font-weight:700;color:#121a16">Week starts on</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <sc-for list="{{ weekOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ pickPref }}" data-k="{{ o.key }}" data-v="{{ o.id }}" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .2s ease-out">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+            <sc-if value="{{ showRoutineMod }}" hint-placeholder-val="{{ true }}">
+              <a href="RaBit Routine.dc.html#day-settings" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff;font-size:14px;font-weight:700;color:#121a16">Wake up &amp; bedtime<span style="font-size:12.5px;font-weight:600;color:#0b7a45">Edit →</span></a>
+            </sc-if>
+          </div>
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">RABIT</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+          <div onClick="{{ toggleRemind }}" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:18px;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="flex:1"><div style="font-size:14px;font-weight:700;color:#121a16">Reminders</div><div style="font-size:12px;color:#5d6f67;margin-top:3px;line-height:1.45">RaBit pops up before your events and deadlines.</div></div>
+            <div style="width:42px;height:24px;flex:none;border-radius:12px;padding:3px;box-sizing:border-box;background:{{ remindSw.bg }};transition:background .2s ease-out"><div style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(12,40,26,.3);transform:translateX({{ remindSw.x }});transition:transform .2s ease-out"></div></div>
+          </div>
+          <div onClick="{{ toggleSound }}" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:18px;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="flex:1"><div style="font-size:14px;font-weight:700;color:#121a16">Sound</div><div style="font-size:12px;color:#5d6f67;margin-top:3px;line-height:1.45">Play a soft 8-bit chime with reminders.</div></div>
+            <div style="width:42px;height:24px;flex:none;border-radius:12px;padding:3px;box-sizing:border-box;background:{{ soundSw.bg }};transition:background .2s ease-out"><div style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(12,40,26,.3);transform:translateX({{ soundSw.x }});transition:transform .2s ease-out"></div></div>
+          </div>
+          </div>
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">APPEARANCE</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="font-size:14px;font-weight:700;color:#121a16">Theme</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <sc-for list="{{ themeOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ pickPref }}" data-k="{{ o.key }}" data-v="{{ o.id }}" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .2s ease-out">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          </div>
+        </div>
+        <div style="padding:16px 24px 22px">
+          <div onClick="{{ closeSettings }}" style="text-align:center;padding:12px;border-radius:999px;background:linear-gradient(150deg,#1fc172,#0f9a56);color:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 14px 26px -14px rgba(23,184,102,1)">Done</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1180}}">
+const PALETTE = ["#9dd9b5", "#a9c2f0", "#c9b8f2", "#93d5cf", "#f4d29a", "#f2b1c4", "#c3cfc9", "#9fd0e0", "#e8b4a4", "#c8dc9a"];
+const DEFAULT = [
+  { t: "MSFT", name: "Microsoft Corporation", shares: 3.00487, cost: 397.7710, price: 517.5299, day: 0.92 },
+  { t: "NOW", name: "ServiceNow Inc", shares: 8.54, cost: 112.6721, price: 134.3970, day: -2.45 },
+  { t: "ORCL", name: "Oracle Corporation", shares: 6.08, cost: 143.3125, price: 142.3224, day: 3.06 },
+  { t: "ZETA", name: "Zeta Global Holdings Corp", shares: 20.24, cost: 21.4486, price: 32.6280, day: 0.71 },
+  { t: "MELI", name: "MercadoLibre Inc.", shares: 0.355438, cost: 1732.9605, price: 1696.5265, day: 0.68 },
+  { t: "RKLB", name: "Rocket Lab USA Inc.", shares: 7.67, cost: 72.4824, price: 73.9231, day: 4.91 },
+  { t: "UBER", name: "Uber Technologies Inc", shares: 4.23, cost: 68.1631, price: 68.1442, day: 0.34 }
+];
+const money = n => (n < 0 ? "-" : "") + "$" + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const pct = n => (n > 0 ? "+" : "") + n.toFixed(2) + "%";
+const num = v => { const x = parseFloat(String(v || "").replace(/[$,%\s]/g, "")); return isNaN(x) ? null : x; };
+const arc = (cx, cy, R, r, a0, a1) => {
+  const p = (rad, a) => [cx + rad * Math.cos(a), cy + rad * Math.sin(a)];
+  const large = a1 - a0 > Math.PI ? 1 : 0;
+  const [x0, y0] = p(R, a0), [x1, y1] = p(R, a1), [x2, y2] = p(r, a1), [x3, y3] = p(r, a0);
+  return "M" + x0 + " " + y0 + "A" + R + " " + R + " 0 " + large + " 1 " + x1 + " " + y1 + "L" + x2 + " " + y2 + "A" + r + " " + r + " 0 " + large + " 0 " + x3 + " " + y3 + "Z";
+};
+async function parseGBM(file) {
+  const buf = new Uint8Array(await file.arrayBuffer());
+  const dv = new DataView(buf.buffer);
+  let e = buf.length - 22; while (e > 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+  const cd = dv.getUint32(e + 16, true), n = dv.getUint16(e + 10, true), files = {};
+  let p = cd;
+  for (let i = 0; i < n; i++) {
+    const comp = dv.getUint16(p + 10, true), cs = dv.getUint32(p + 20, true), nl = dv.getUint16(p + 28, true), el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), lo = dv.getUint32(p + 42, true);
+    const name = new TextDecoder().decode(buf.slice(p + 46, p + 46 + nl));
+    const s0 = lo + 30 + dv.getUint16(lo + 26, true) + dv.getUint16(lo + 28, true);
+    files[name] = { comp, data: buf.slice(s0, s0 + cs) }; p += 46 + nl + el + cl;
+  }
+  const read = async nm => { const f = files[nm]; if (!f) return ""; const d = f.comp === 0 ? f.data : new Uint8Array(await new Response(new Blob([f.data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer()); return new TextDecoder().decode(d); };
+  const strs = [...(await read("xl/sharedStrings.xml")).matchAll(/<si>([\s\S]*?)<\/si>/g)].map(m => [...m[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(x => x[1]).join(""));
+  const sheet = await read("xl/worksheets/sheet1.xml");
+  const rows = [...sheet.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)].map(r => {
+    const o = {};
+    for (const c of r[1].matchAll(/<c r="([A-Z]+)\d+"([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
+      const v = (c[3] || "").match(/<v>([\s\S]*?)<\/v>/), is = (c[3] || "").match(/<t[^>]*>([\s\S]*?)<\/t>/);
+      o[c[1]] = v ? (/t="s"/.test(c[2]) ? strs[+v[1]] : v[1]) : (is ? is[1] : "");
+    }
+    return o;
+  });
+  const out = []; let cash = 0, mode = "";
+  for (const r of rows) {
+    const a = (r.A || "").trim();
+    if (/^Liquidez/i.test(a)) { mode = "cash"; continue; }
+    if (/^Emisora/i.test(a) || !a || /^Mercado/i.test(a)) continue;
+    if (mode === "cash") { cash += num(r.F) || 0; continue; }
+    const shares = num(r.B), cost = num(r.C), price = num(r.D);
+    if (shares && cost) out.push({ t: a.toUpperCase(), shares, cost, price: price || cost, day: num(r.I) || 0 });
+  }
+  return { holdings: out, cash };
+}
+
+const MOD_DEFS = [
+  { id: "calendar", label: "Calendar", desc: "Events, tasks and RaBit reminders. Routine keeps working without it.", d: "M5 3.6h8a2.4 2.4 0 0 1 2.4 2.4v7a2.4 2.4 0 0 1-2.4 2.4H5a2.4 2.4 0 0 1-2.4-2.4V6A2.4 2.4 0 0 1 5 3.6ZM2.6 7.2h12.8" },
+  { id: "routine", label: "Daily routine", desc: "Recurring week, wake-up and bedtime. Calendar keeps working without it.", d: "M2.6 9a6.4 6.4 0 1 0 12.8 0a6.4 6.4 0 1 0-12.8 0ZM9 5.4V9l2.4 1.6" },
+  { id: "notes", label: "Quick notes", desc: "Fast notes you can turn into calendar tasks.", d: "M4 3.2h7.2L14 6v8.8H4ZM6.4 8.4h5.2M6.4 11.2h3.4" },
+  { id: "portfolio", label: "Portfolio", desc: "Stock tracker with Excel import and value history.", d: "M3 6.5h12v8.5H3ZM6.5 6.5V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5M3 10.5h12" }
+];
+class Component extends DCLogic {
+  __prefs() {
+    const st = this.state || {};
+    if (st.__prefs) return st.__prefs;
+    const d = { name: "Sofía", timeFmt: "24h", weekStart: "mon", theme: "light", reminders: true, sound: false };
+    try { return { ...d, ...(JSON.parse(localStorage.getItem("rabit.prefs") || "{}")) }; } catch (e) { return d; }
+  }
+  __setPref(k, v) { const p = { ...this.__prefs(), [k]: v }; try { localStorage.setItem("rabit.prefs", JSON.stringify(p)); } catch (e) {} this.setState({ __prefs: p }); }
+  __prefVals() {
+    const p = this.__prefs();
+    const seg = (key, opts) => opts.map(([id, label]) => { const on = p[key] === id; return { id, key, label, color: on ? "#0b7a45" : "#5d6f67", bg: on ? "#fff" : "transparent", shadow: on ? "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)" : "none" }; });
+    const sw = on => ({ bg: on ? "linear-gradient(150deg,#1fc172,#0f9a56)" : "rgba(18,38,30,.16)", x: on ? "18px" : "0px" });
+    const nm = (p.name || "").trim() || "there";
+    return {
+      userName: nm, userInitial: nm.charAt(0).toUpperCase(), prefName: p.name,
+      onPrefName: e => this.__setPref("name", e.target.value),
+      timeOpts: seg("timeFmt", [["24h", "24-hour"], ["12h", "12-hour"]]),
+      weekOpts: seg("weekStart", [["mon", "Monday"], ["sun", "Sunday"]]),
+      themeOpts: seg("theme", [["light", "Light"], ["dark", "Dark"], ["auto", "Auto"]]),
+      pickPref: e => this.__setPref(e.currentTarget.dataset.k, e.currentTarget.dataset.v),
+      remindSw: sw(p.reminders), soundSw: sw(p.sound),
+      toggleRemind: () => this.__setPref("reminders", !p.reminders),
+      toggleSound: () => this.__setPref("sound", !p.sound)
+    };
+  }
+  __mods() {
+    const st = this.state || {};
+    if (st.__mods) return st.__mods;
+    try { const v = JSON.parse(localStorage.getItem("rabit.modules") || "null"); if (v) return { calendar: v.calendar !== false, routine: v.routine !== false, notes: v.notes !== false, portfolio: v.portfolio !== false }; } catch (e) {}
+    return { calendar: true, routine: true, notes: true, portfolio: true };
+  }
+  __modOk(id) { const m = this.__mods(); return id === "home" ? true : m[id] !== false; }
+  __settings() {
+    const m = this.__mods(), st = this.state || {};
+    const set = (k) => { const nm = { ...this.__mods(), [k]: !this.__mods()[k] }; try { localStorage.setItem("rabit.modules", JSON.stringify(nm)); } catch (e) {} this.setState({ __mods: nm }); };
+    const setAll = (v) => { const nm = { calendar: v, routine: v, notes: v, portfolio: v }; try { localStorage.setItem("rabit.modules", JSON.stringify(nm)); } catch (e) {} this.setState({ __mods: nm }); };
+    const sw = on => ({ bg: on ? "linear-gradient(150deg,#1fc172,#0f9a56)" : "rgba(18,38,30,.16)", x: on ? "18px" : "0px" });
+    return {
+      settingsOpen: !!st.__settings,
+      openSettings: () => this.setState({ __settings: true }),
+      closeSettings: () => this.setState({ __settings: false }),
+      toggleRoutineMod: () => set("routine"), toggleNotesMod: () => set("notes"),
+      routineSw: sw(m.routine), notesSw: sw(m.notes),
+      showRoutineMod: m.routine, showNotesMod: m.notes, showCalendarMod: m.calendar, showPortfolioMod: m.portfolio,
+      showSideCol: m.calendar || m.routine,
+      modOnCount: MOD_DEFS.filter(d => m[d.id]).length,
+      modRows: MOD_DEFS.map(d => ({ ...d, sw: sw(m[d.id]), op: m[d.id] ? 1 : .72, iconBg: m[d.id] ? "rgba(23,184,102,.12)" : "rgba(18,38,30,.05)", iconStroke: m[d.id] ? "#0b7a45" : "#8b9a93" })),
+      toggleMod: e => set(e.currentTarget.dataset.id),
+      allModsOn: () => setAll(true), allModsOff: () => setAll(false),
+      pageOff: m.portfolio === false, pageName: "Portfolio",
+      enablePage: () => { if (!this.__mods()["portfolio"]) set("portfolio"); }
+    };
+  }
+  __shell() {
+    const st = this.state || {};
+    return {
+      notifOpen: !!st.__notif,
+      toggleNotif: () => this.setState(s2 => ({ __notif: !(s2 && s2.__notif) })),
+      stopNotif: e => e.stopPropagation(),
+      notifs: [
+        { title: "Entrega proyecto Flutter", sub: "In 2 days · Mon 10:00", color: "#a8443a", href: "RaBit Calendar.dc.html#day-21" },
+        { title: "Maratón de estudio overlaps Read", sub: "Today · 22:00 · Routine", color: "#d9952a", href: "RaBit Routine.dc.html" },
+        { title: "Comprar materiales", sub: "Thu 24 · 14:00 · from Quick Notes", color: "#8a6fd6", href: "RaBit Calendar.dc.html#day-24" }
+      ],
+      onSearchKey: e => { if (e.key === "Enter" && e.target.value.trim()) location.href = "RaBit Quick Notes.dc.html#q=" + encodeURIComponent(e.target.value.trim()); }
+    };
+  }
+  __nav() {
+    const NAVS = [
+      { id: "home", label: "Home", href: "RaBit Home v2.dc.html", d: "M2.6 8.2 9 3l6.4 5.2V15a.8.8 0 0 1-.8.8H3.4a.8.8 0 0 1-.8-.8Z" },
+      { id: "calendar", label: "Calendar", href: "RaBit Calendar.dc.html", d: "M5 3.6h8a2.4 2.4 0 0 1 2.4 2.4v7a2.4 2.4 0 0 1-2.4 2.4H5a2.4 2.4 0 0 1-2.4-2.4V6A2.4 2.4 0 0 1 5 3.6ZM2.6 7.2h12.8M6 2.2v2.6M12 2.2v2.6" },
+      { id: "routine", label: "Routine", href: "RaBit Routine.dc.html", d: "M2.6 9a6.4 6.4 0 1 0 12.8 0a6.4 6.4 0 1 0-12.8 0ZM9 5.4V9l2.4 1.6" },
+      { id: "notes", label: "Quick Notes", href: "RaBit Quick Notes.dc.html", d: "M4 3.2h7.2L14 6v8.8H4ZM6.4 8.4h5.2M6.4 11.2h3.4" },
+      { id: "portfolio", label: "Portfolio", href: "RaBit Portfolio.dc.html", d: "M3 6.5h12v8.5H3ZM6.5 6.5V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5M3 10.5h12" }
+    ];
+    const hv = this.state && this.state.__hover;
+    return {
+      nav: NAVS.filter(n => this.__modOk(n.id)).map(n => {
+        const a = n.id === "portfolio", h = hv === n.id;
+        return { ...n, bg: a ? "#fff" : h ? "rgba(255,255,255,.7)" : "transparent",
+          shadow: a ? "inset 0 1px 1px #fff,0 8px 18px -10px rgba(20,48,34,.45)" : "none",
+          stroke: a ? "#0b7a45" : h ? "#1d2a24" : "#5d6f67", bar: a ? 1 : 0, labelOp: h ? 1 : 0, labelX: h ? "0px" : "-6px" };
+      }),
+      navEnter: e => this.setState({ __hover: e.currentTarget.dataset.id }),
+      navLeave: () => this.setState({ __hover: null })
+    };
+  }
+
+  viewRef = React.createRef();
+  colRef = React.createRef();
+  measurePanel = () => {
+    const v = this.viewRef.current, c = this.colRef.current;
+    if (!v || !c) return;
+    const cr = c.getBoundingClientRect(), vr = v.getBoundingClientRect();
+    const k = c.offsetWidth ? cr.width / c.offsetWidth : 1;
+    const top = Math.round((vr.top - cr.top) / k);
+    if (top > 0 && top !== (this.state && this.state.__panelTop)) this.setState({ __panelTop: top });
+  };
+  componentDidMount() {
+    this.measurePanel();
+    this.__pt = [setTimeout(this.measurePanel, 600), setTimeout(this.measurePanel, 1400)];
+    if (document.fonts) document.fonts.ready.then(this.measurePanel);
+    window.addEventListener("resize", this.measurePanel);
+    try { const v = JSON.parse(localStorage.getItem("rabit.portfolio.v2") || "null"); if (v && v.holdings) this.setState({ holdings: v.holdings, cash: v.cash || 0, source: v.source || "Saved", snaps: v.snaps }); } catch (e) {}
+  }
+  componentDidUpdate() { clearTimeout(this.__pu); this.__pu = setTimeout(this.measurePanel, 40); }
+  componentWillUnmount() { clearTimeout(this.__pu); clearTimeout(this._t); (this.__pt || []).forEach(clearTimeout); window.removeEventListener("resize", this.measurePanel); }
+  save(holdings, cash, source, toast, snaps) {
+    snaps = snaps || (this.state && this.state.snaps);
+    try { localStorage.setItem("rabit.portfolio.v2", JSON.stringify({ holdings, cash, source, snaps })); } catch (e) {}
+    clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: "" }), 2800);
+    this.setState({ holdings, cash, source, toast, snaps });
+  }
+  renderVals() {
+    const st = this.state || {};
+    const H = st.holdings || DEFAULT, cash = st.cash ?? 0;
+    const calc = H.map((h, i) => { const value = h.shares * h.price, costT = h.shares * h.cost; return { ...h, value, costT, pl: value - costT, plp: costT ? (value / costT - 1) * 100 : 0, color: "" }; });
+    calc.slice().sort((p, q) => q.value - p.value).forEach((h, i) => { h.color = i === 0 ? "#17b866" : PALETTE[(i - 1) % PALETTE.length]; });
+    const total = calc.reduce((a, h) => a + h.value, 0) + cash, invested = calc.reduce((a, h) => a + h.costT, 0);
+    const pl = total - cash - invested, plp = invested ? pl / invested * 100 : 0;
+    const dayAbs = calc.reduce((a, h) => a + h.value * (h.day / 100) / (1 + h.day / 100), 0);
+    const maxV = Math.max(1, ...calc.map(h => Math.max(h.value, h.costT)));
+    let a0 = -Math.PI / 2;
+    const slices = calc.slice().sort((p, q) => q.value - p.value).map((h, i) => {
+      const frac = total ? h.value / total : 0, a1 = a0 + frac * Math.PI * 2;
+      const R = 101, r = 61, gp = 6.5, m0 = (a0 + a1) / 2;
+      const oa0 = Math.min(m0 - 0.001, a0 + gp / R), oa1 = Math.max(m0 + 0.001, a1 - gp / R), ia0 = Math.min(m0 - 0.001, a0 + gp / r), ia1 = Math.max(m0 + 0.001, a1 - gp / r);
+      const P = (rad, ang) => (110 + rad * Math.cos(ang)).toFixed(2) + " " + (110 + rad * Math.sin(ang)).toFixed(2);
+      const d = "M" + P(R, oa0) + "A" + R + " " + R + " 0 " + (oa1 - oa0 > Math.PI ? 1 : 0) + " 1 " + P(R, oa1) + "L" + P(r, ia1) + "A" + r + " " + r + " 0 " + (ia1 - ia0 > Math.PI ? 1 : 0) + " 0 " + P(r, ia0) + "Z";
+      const mid = (a0 + a1) / 2, lx = 110 + 81 * Math.cos(mid), ly = 110 + 81 * Math.sin(mid);
+      a0 = a1;
+      const top = i === 0, show = frac >= 0.06;
+      return { t: h.t, color: h.color, d, val: money(h.value), lx, ly, bx: lx - 19, by: ly - 10, bw: top ? 38 : 0,
+        ink: top ? "#ffffff" : "#1d2a24", glow: top ? "0 1px 6px rgba(8,60,32,.45)" : "0 1px 0 rgba(255,255,255,.6)", lbl: show ? (frac * 100).toFixed(1) + "%" : "", px: (lx / 220 * 100) + "%", py: (ly / 220 * 100) + "%" };
+    });
+    const top = calc.slice().sort((p, q) => q.value - p.value)[0];
+    const best = calc.slice().sort((p, q) => q.plp - p.plp)[0];
+    const maxAbs = Math.max(1, ...calc.map(h => Math.abs(h.plp)));
+    const f = st.form || {}, fT = (f.t || "").toUpperCase().trim(), fS = num(f.s), fC = num(f.c), fP = num(f.p);
+    const exist = H.find(h => h.t === fT);
+    const valid = fT && fS > 0 && fC > 0;
+    const newAvg = exist && valid ? (exist.shares * exist.cost + fS * fC) / (exist.shares + fS) : null;
+    const green = "#0b7a45", red = "#a8443a";
+    return {
+      viewRef: this.viewRef, colRef: this.colRef, panelTop: (st.__panelTop ?? 128),
+      ...this.__nav(), ...this.__shell(), ...this.__settings(), ...this.__prefVals(),
+      isDark: this.__prefs().theme === "dark", isLight: this.__prefs().theme !== "dark",
+      themeLabel: this.__prefs().theme === "dark" ? "DARK" : "LIGHT",
+      toggleTheme: () => this.__setPref("theme", this.__prefs().theme === "dark" ? "light" : "dark"),
+      logoEnter: () => this.setState({ __logo: true }), logoLeave: () => this.setState({ __logo: false }),
+      logoW: st.__logo ? "110px" : "0px", logoOp: st.__logo ? 1 : 0, logoMl: st.__logo ? "2px" : "-9px",
+      holdCount: H.length, sourceLabel: st.source || "Updated Oct 3, 2026",
+      totalValue: money(total), totalCost: money(invested), cash: money(cash),
+      plPct: pct(plp), plAbs: (pl >= 0 ? "+" : "") + money(pl), plColor: pl >= 0 ? green : red, plBg: pl >= 0 ? "rgba(23,184,102,.14)" : "rgba(168,68,58,.1)",
+      dayAbs: (dayAbs >= 0 ? "+" : "") + money(dayAbs), dayColor: dayAbs >= 0 ? green : red,
+      bars: calc.map(h => ({ t: h.t, h: "100%", costH: (h.costT / maxV * 100) + "%", valH: (h.value / maxV * 100) + "%", valBg: h.pl >= 0 ? "linear-gradient(180deg,#2fd17f,#0f9a56)" : "linear-gradient(180deg,#d9776c,#a8443a)", pct: pct(h.plp), pctColor: h.pl >= 0 ? green : red, tip: h.t + " · cost " + money(h.costT) + " · value " + money(h.value) })),
+      rows: calc.map(h => ({ name: h.name || "", t: h.t, initial: h.t.slice(0, 2), color: h.color, ink: h.color === "#17b866" ? "#fff" : "#1d2a24", shares: h.shares.toFixed(h.shares < 1 ? 4 : 2), cost: money(h.cost), price: money(h.price), value: money(h.value), plPct: pct(h.plp), plAbs: (h.pl >= 0 ? "+" : "") + money(h.pl), plColor: h.pl >= 0 ? green : red, day: pct(h.day), dayColor: h.day >= 0 ? green : red, weight: (total ? h.value / total * 100 : 0).toFixed(1) + "%", costW: (h.costT / maxV * 100) + "%", valW: (h.value / maxV * 100) + "%", barBg: h.pl >= 0 ? "linear-gradient(90deg,#7add9f,#17b866)" : "linear-gradient(90deg,#e8a39b,#a8443a)", tip: "Cost " + money(h.costT) + " → value " + money(h.value), wPct: (total ? h.value / total * 100 : 0) + "%" })),
+      slices, topT: top ? top.t : "—", topW: top ? (top.value / total * 100).toFixed(1) + "% of portfolio" : "",
+      perf: calc.slice().sort((p, q) => q.plp - p.plp).map(h => ({ t: h.t, pct: pct(h.plp), w: (Math.abs(h.plp) / maxAbs * 100) + "%", color: h.plp >= 0 ? "linear-gradient(90deg,#7add9f,#17b866)" : "linear-gradient(90deg,#e8a39b,#a8443a)", textColor: h.plp >= 0 ? green : red })),
+      botLine: best ? best.t + " LEADS AT " + pct(best.plp) + ". PORTFOLIO " + pct(plp) + "." : "ADD YOUR FIRST STOCK.",
+      addOpen: !!st.addOpen, fT: f.t || "", fS: f.s || "", fC: f.c || "", fP: f.p || "",
+      onT: e => this.setState({ form: { ...f, t: e.target.value } }), onS: e => this.setState({ form: { ...f, s: e.target.value } }),
+      onC: e => this.setState({ form: { ...f, c: e.target.value } }), onP: e => this.setState({ form: { ...f, p: e.target.value } }),
+      avgOn: !!newAvg,
+      avgText: newAvg ? "You already own " + exist.shares.toFixed(4) + " " + fT + " @ " + money(exist.cost) + ". Adding " + fS + " @ " + money(fC) + " → " + (exist.shares + fS).toFixed(4) + " shares at a new average of " + money(newAvg) + "." : "",
+      saveLabel: exist && valid ? "Average & save" : "Add stock", saveBg: valid ? "linear-gradient(150deg,#1fc172,#0f9a56)" : "rgba(18,38,30,.25)",
+      openAdd: () => this.setState({ addOpen: true, form: {} }), closeAdd: () => this.setState({ addOpen: false }),
+      saveAdd: () => {
+        if (!valid) return;
+        let next;
+        if (exist) next = H.map(h => h.t === fT ? { ...h, shares: h.shares + fS, cost: newAvg, price: fP || h.price } : h);
+        else next = H.concat([{ t: fT, shares: fS, cost: fC, price: fP || fC, day: 0 }]);
+        this.setState({ addOpen: false });
+        this.save(next, cash, st.source || "GBM export + manual", exist ? fT + " averaged to " + money(newAvg) : fT + " added");
+      },
+      removeRow: e => { const t = e.currentTarget.dataset.t; this.save(H.filter(h => h.t !== t), cash, st.source, t + " removed"); },
+      onImport: async e => {
+        const file = e.target.files && e.target.files[0]; if (!file) return;
+        try { const r = await parseGBM(file); if (!r.holdings.length) throw new Error("empty"); const v2 = r.holdings.reduce((a, h) => a + h.shares * h.price, 0) + r.cash;
+          const d = new Date(file.lastModified || Date.now()).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+          const prev = (st.snaps && st.snaps.length) ? st.snaps : [{ d: "Sep 19, 2026", v: 5208.70 }, { d: "Oct 3, 2026", v: total }];
+          this.save(r.holdings, r.cash, file.name, r.holdings.length + " stocks imported · history updated", prev.concat([{ d, v: v2 }])); }
+        catch (err) { this.setState({ toast: "Couldn't read that file" }); }
+        e.target.value = "";
+      },
+      toastOn: !!st.toast, toastText: st.toast || "",
+      ...(() => {
+        const mode = st.chart || "history";
+        const mx = Math.max(1, ...calc.map(h => Math.max(h.value, h.costT)));
+        const mxc = Math.max(1, ...calc.map(h => Math.max(h.costT, Math.abs(h.pl))));
+        return {
+          isHist: mode === "history", isGain: mode === "gain", chartTitle: mode === "history" ? "VALUE OVER TIME" : "INVESTED VS GAIN",
+          chartModes: [["history", "History"], ["gain", "Invested vs gain"]].map(([id, label]) => ({ id, label, color: mode === id ? "#0b7a45" : "#5d6f67", bg: mode === id ? "#fff" : "transparent", shadow: mode === id ? "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)" : "none" })),
+          pickChart: e => this.setState({ chart: e.currentTarget.dataset.c }),
+          gbars: calc.map(h => ({ t: h.t, topH: (Math.max(h.costT, h.value) / mx * 86) + "%", costH: (h.costT / mx * 86) + "%", valH: (h.value / mx * 86) + "%", valBg: h.pl >= 0 ? "linear-gradient(180deg,#2fd17f,#0f9a56)" : "linear-gradient(180deg,#d9776c,#a8443a)", pct: pct(h.plp), color: h.pl >= 0 ? green : red, tip: h.t + " · invested " + money(h.costT) + " · now " + money(h.value) }))
+        };
+      })(),
+      ...(() => {
+        const snaps = (st.snaps && st.snaps.length) ? st.snaps : [{ d: "Sep 19, 2026", v: 5208.70 }, { d: "Oct 3, 2026", v: total }];
+        const ok = snaps.length >= 2;
+        const vs = snaps.map(x => x.v), lo = Math.min(...vs) * 0.96, hi = Math.max(...vs) * 1.02, span = Math.max(1, hi - lo);
+        const pts = snaps.map((x, i) => [snaps.length > 1 ? i / (snaps.length - 1) * 600 : 300, 196 - (x.v - lo) / span * 180]);
+        const lineD = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+        const hi2 = st.__hover;
+        const hp = ok && hi2 != null ? pts[hi2] : null;
+        return {
+          hasHistory: ok, noHistory: !ok, snapNote: snaps.length + (snaps.length === 1 ? " import" : " imports"),
+          lineD, areaD: ok ? lineD + " L600 200 L0 200 Z" : "", gridY: [20, 80, 140, 196],
+          snapLabels: ok ? [snaps[0].d, snaps[snaps.length - 1].d] : [],
+          hoverOn: !!hp, hoverX: hp ? (hp[0] / 6) + "%" : "0%", hoverY: hp ? (hp[1] / 2) + "%" : "0%",
+          hoverDate: hp ? snaps[hi2].d : "", hoverVal: hp ? money(snaps[hi2].v) : "",
+          onChartMove: e => { if (!ok) return; const r = e.currentTarget.getBoundingClientRect(); const fx = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)); const idx = Math.round(fx * (snaps.length - 1)); if (idx !== st.__hover) this.setState({ __hover: idx }); },
+          onChartLeave: () => this.setState({ __hover: null })
+        };
+      })(),
+      ...(() => {
+        const E = st.edit || {}, eh = H.find(h => h.t === E.t), mode = E.mode || "adjust";
+        const es = num(E.s), ec = num(E.c);
+        let preview = "", ok = false;
+        if (eh && mode === "adjust") { ok = es > 0 && ec > 0; preview = ok ? "Position set to " + es + " shares @ " + money(ec) + " · cost basis " + money(es * ec) : "Type the exact shares and average price from your broker."; }
+        if (eh && mode === "buy") { ok = es > 0 && ec > 0; preview = ok ? "New position: " + (eh.shares + es).toFixed(4) + " shares · new average " + money((eh.shares * eh.cost + es * ec) / (eh.shares + es)) : "Enter shares and price — RaBit averages it for you."; }
+        if (eh && mode === "sell") { ok = es > 0 && es <= eh.shares + 1e-9; preview = ok ? "Remaining: " + (eh.shares - es).toFixed(4) + " shares · average stays " + money(eh.cost) : "You own " + eh.shares.toFixed(4) + " shares."; }
+        if (eh && mode === "delete") { ok = true; preview = "Value removed: " + money(eh.shares * eh.price); }
+        const M = [["adjust", "Adjust"], ["buy", "Buy more"], ["sell", "Withdraw"], ["delete", "Delete"]].map(([id, label]) => ({ id, label, color: mode === id ? (id === "delete" ? "#a8443a" : "#0b7a45") : "#5d6f67", bg: mode === id ? "#fff" : "transparent", shadow: mode === id ? "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)" : "none" }));
+        return {
+          editOpen: !!eh, eT: eh ? eh.t : "", eInit: eh ? eh.t.slice(0, 2) : "", eColor: eh ? (calc.find(c => c.t === eh.t) || {}).color : "#17b866",
+          eInk: eh && (calc.find(c => c.t === eh.t) || {}).color === "#17b866" ? "#fff" : "#1d2a24", eSummary: eh ? eh.shares.toFixed(4) + " shares @ " + money(eh.cost) : "", eModes: M,
+          eIsAdj: mode === "adjust", eIsBuy: mode === "buy", eIsSell: mode === "sell", eIsDel: mode === "delete", eS: E.s || "", eC: E.c || "", ePreview: preview,
+          eBtn: mode === "delete" ? "Delete holding" : mode === "sell" ? "Withdraw" : mode === "adjust" ? "Save changes" : "Average & save",
+          eBtnBg: !ok ? "rgba(18,38,30,.25)" : mode === "delete" ? "#a8443a" : "linear-gradient(150deg,#1fc172,#0f9a56)",
+          openEdit: e => { const tk = e.currentTarget.dataset.t, hh = H.find(h => h.t === tk); this.setState({ edit: { t: tk, mode: "adjust", s: hh ? String(+hh.shares.toFixed(6)) : "", c: hh ? hh.cost.toFixed(2) : "" } }); },
+          closeEdit: () => this.setState({ edit: null }),
+          pickEMode: e => { const m = e.currentTarget.dataset.m; this.setState({ edit: { ...E, mode: m, s: m === "adjust" && eh ? String(+eh.shares.toFixed(6)) : "", c: m === "adjust" && eh ? eh.cost.toFixed(2) : "" } }); },
+          onES: e => this.setState({ edit: { ...E, s: e.target.value } }), onEC: e => this.setState({ edit: { ...E, c: e.target.value } }),
+          saveEdit: () => {
+            if (!eh || !ok) return;
+            let next = H, msg = "";
+            if (mode === "adjust") { next = H.map(h => h.t === eh.t ? { ...h, shares: es, cost: ec } : h); msg = eh.t + " updated"; }
+            if (mode === "buy") { const na = (eh.shares * eh.cost + es * ec) / (eh.shares + es); next = H.map(h => h.t === eh.t ? { ...h, shares: h.shares + es, cost: na } : h); msg = eh.t + " averaged to " + money(na); }
+            if (mode === "sell") { const left = eh.shares - es; next = left <= 1e-9 ? H.filter(h => h.t !== eh.t) : H.map(h => h.t === eh.t ? { ...h, shares: left } : h); msg = es + " " + eh.t + " withdrawn"; }
+            if (mode === "delete") { next = H.filter(h => h.t !== eh.t); msg = eh.t + " deleted"; }
+            this.setState({ edit: null });
+            this.save(next, cash, st.source || "GBM export + manual", msg);
+          }
+        };
+      })()
+    };
+  }
+}
+
+</script>
+</body>
+</html>
