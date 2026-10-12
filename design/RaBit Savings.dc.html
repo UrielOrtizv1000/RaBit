@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Doto:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#e9eeeb;color:#16211c;font-family:"Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#0b7a45;text-decoration:none}
+a:hover{color:#0f9a56}
+@keyframes rb-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes rb-pulse{0%,100%{box-shadow:0 0 0 0 rgba(23,184,102,.45)}70%{box-shadow:0 0 0 7px rgba(23,184,102,0)}}
+@keyframes rb-cursor{0%,50%{opacity:1}51%,100%{opacity:0}}
+@keyframes rb-fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes rb-drift{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-20px)}}
+@keyframes rb-pulse{0%,100%{box-shadow:0 0 0 0 rgba(23,184,102,.45)}70%{box-shadow:0 0 0 7px rgba(23,184,102,0)}}
+@keyframes rb-toast{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes rb-spin{to{transform:rotate(360deg)}}
+@keyframes rb-tilt{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}
+</style>
+</helmet>
+
+<div style="position:relative;width:1440px;min-height:100vh;overflow:clip;border-radius:22px;background:linear-gradient(160deg,#f1f4f2 0%,#e6ebe8 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)">
+  <!-- ambient color behind the glass -->
+  <div style="position:absolute;left:-120px;top:-140px;width:620px;height:520px;border-radius:50%;background:rgba(122,221,159,.55);filter:blur(90px);animation:rb-drift 18s ease-in-out infinite"></div>
+  <div style="position:absolute;right:-160px;top:120px;width:560px;height:520px;border-radius:50%;background:rgba(168,205,236,.5);filter:blur(100px)"></div>
+  <div style="position:absolute;left:420px;bottom:-220px;width:640px;height:460px;border-radius:50%;background:rgba(246,214,182,.45);filter:blur(110px)"></div>
+
+<div style="position:relative;width:1440px;min-height:100vh;background:linear-gradient(160deg,rgba(255,255,255,.42),rgba(255,255,255,.2));display:flex;flex-direction:column">
+
+  <!-- TOP BAR -->
+  <div style="display:flex;align-items:center;gap:22px;padding:26px 26px 6px">
+    <div onMouseEnter="{{ logoEnter }}" onMouseLeave="{{ logoLeave }}" onClick="{{ toggleTheme }}" title="Switch light / dark" style="cursor:pointer;transition:box-shadow .3s ease-out,transform .2s ease-out;display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:999px;background:linear-gradient(150deg,rgba(14,26,20,.9),rgba(18,40,30,.82));border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 12px 24px -14px rgba(10,30,20,.8)">
+      <div style="font-family:Silkscreen,monospace;font-weight:700;font-size:13px;color:#3ddc84;text-shadow:0 0 9px rgba(61,220,132,.7)">&gt;</div>
+      <div style="font-family:Silkscreen,monospace;font-weight:700;font-size:14px;letter-spacing:.06em;color:#3ddc84;text-shadow:0 0 10px rgba(61,220,132,.55)">RABIT</div>
+      <div style="width:6px;height:13px;background:#3ddc84;box-shadow:0 0 8px rgba(61,220,132,.8);animation:rb-cursor 1.1s steps(1) infinite"></div>
+      <div style="display:flex;align-items:center;gap:8px;overflow:hidden;white-space:nowrap;max-width:{{ logoW }};opacity:{{ logoOp }};margin-left:{{ logoMl }};transition:max-width .4s cubic-bezier(.2,.8,.3,1),opacity .25s ease-out,margin-left .3s ease-out">
+        <div style="width:1px;height:14px;flex:none;background:rgba(61,220,132,.3)"></div>
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3ddc84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 5px rgba(61,220,132,.7));animation:rb-tilt 2.4s ease-in-out infinite"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg></sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ true }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3ddc84" stroke-width="2" stroke-linecap="round" style="filter:drop-shadow(0 0 5px rgba(61,220,132,.7));animation:rb-spin 6s linear infinite"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></sc-if>
+        <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.1em;color:#3ddc84;text-shadow:0 0 8px rgba(61,220,132,.5)">{{ themeLabel }}</div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex">
+      <div style="display:flex;align-items:center;gap:10px;width:380px;padding:11px 18px;border-radius:999px;background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.4));backdrop-filter:blur(20px) saturate(170%);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 1px rgba(255,255,255,.95),0 10px 24px -18px rgba(20,48,34,.4);color:#6b7a73;font-size:13px;transition:background .2s ease-out" style-hover="background:rgba(255,255,255,.85)">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#6b7a73" stroke-width="1.6"><circle cx="7" cy="7" r="4.6"></circle><path d="M10.5 10.5 14 14"></path></svg>
+        <input onKeyDown="{{ onSearchKey }}" placeholder="Search jars…" style="flex:1;min-width:0;border:0;outline:0;background:transparent;font-family:inherit;font-size:13px;color:#121a16">
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div onClick="{{ toggleNotif }}" title="Notifications" style="position:relative;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,0 10px 22px -16px rgba(20,48,34,.45);transition:transform .15s ease-out" style-hover="transform:scale(1.05)">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="#2b3a34" stroke-width="1.5" stroke-linejoin="round"><path d="M4.5 7.2a4.5 4.5 0 0 1 9 0c0 3.3 1.2 4.3 1.2 4.3H3.3s1.2-1 1.2-4.3Z"></path><path d="M7.4 14a1.7 1.7 0 0 0 3.2 0"></path></svg>
+        <div style="position:absolute;top:10px;right:11px;width:6px;height:6px;border-radius:50%;background:#17b866;box-shadow:0 0 0 2px #fff"></div>
+        <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ stopNotif }}" style="position:absolute;right:-6px;top:52px;z-index:50;width:320px;padding:10px;border-radius:24px;cursor:default;background:linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 30px 60px -24px rgba(12,40,26,.45);animation:rb-toast .18s ease-out both">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px 10px">
+              <div style="font-size:14px;font-weight:700;color:#121a16">Notifications</div>
+              <div style="font-size:11px;font-weight:600;color:#0b7a45">3 new</div>
+            </div>
+            <sc-for list="{{ notifs }}" as="nt" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:16px;transition:background .2s ease-out" style-hover="background:rgba(255,255,255,.85)">
+                <div style="width:8px;height:8px;flex:none;border-radius:50%;background:{{ nt.color }}"></div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:600;color:#121a16;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ nt.title }}</div>
+                  <div style="font-size:11.5px;color:#5d6f67;margin-top:2px">{{ nt.sub }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <div onClick="{{ openSettings }}" title="Settings" style="width:42px;height:42px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,0 10px 22px -16px rgba(20,48,34,.45);transition:transform .15s ease-out" style-hover="transform:scale(1.05)">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2b3a34" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border-radius:999px;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,0 10px 22px -16px rgba(20,48,34,.45)">
+        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,#0b7a45,#4fc389);display:grid;place-items:center;font-family:Silkscreen,monospace;font-size:11px;color:#fff">{{ userInitial }}</div>
+        <div style="font-size:13px;font-weight:600;color:#1d2a24">{{ userName }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:stretch;min-height:0;padding:14px 0 0">
+
+    <!-- FLOATING DOCK -->
+    <div style="position:relative;z-index:10;flex:none;display:flex;justify-content:flex-start;align-items:flex-start;padding:0 20px 26px 26px;box-sizing:border-box">
+      <div style="position:sticky;top:26px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px;height:max-content;border-radius:26px;background:linear-gradient(160deg,rgba(255,255,255,.66),rgba(255,255,255,.32));backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,inset 0 -10px 20px -14px rgba(255,255,255,.7),0 22px 44px -26px rgba(20,48,34,.4)">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+          <div onMouseEnter="{{ navEnter }}" onMouseLeave="{{ navLeave }}" data-id="{{ n.id }}" style="position:relative;width:46px;height:46px;box-sizing:border-box;border-radius:17px;display:grid;place-items:center;background:{{ n.bg }};box-shadow:{{ n.shadow }};transition:background .2s ease-out,box-shadow .2s ease-out">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="{{ n.stroke }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ n.d }}"></path></svg>
+            <div style="position:absolute;top:8px;right:8px;width:7px;height:7px;border-radius:50%;background:#e0902a;box-shadow:0 0 0 2px rgba(255,255,255,.9);opacity:{{ n.dotOp }};transition:opacity .3s ease"></div>
+            <div style="position:absolute;bottom:5px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#fff;opacity:{{ n.bar }}"></div>
+            <div style="position:absolute;left:58px;top:50%;transform:translate({{ n.labelX }},-50%);opacity:{{ n.labelOp }};transition:opacity .18s ease-out,transform .18s ease-out;pointer-events:none;padding:7px 12px;border-radius:999px;background:linear-gradient(150deg,rgba(14,26,20,.9),rgba(18,40,30,.84));backdrop-filter:blur(14px);color:#eef4f0;font-size:11.5px;font-weight:600;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 10px 22px -10px rgba(12,30,22,.7)">{{ n.label }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div style="flex:1;min-width:0;padding:10px 26px 26px 0;display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;animation:rb-fade .4s cubic-bezier(.22,1,.36,1) both">
+        <div>
+          <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.16em;color:#6b7a73;margin-bottom:8px">SAVINGS</div>
+          <div style="font-size:36px;font-weight:700;letter-spacing:-.025em;color:#121a16">Your jars</div>
+        </div>
+        <div onClick="{{ openNewGoal }}" style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;font-weight:600;color:#0b7a45;transition:transform .35s cubic-bezier(.22,1,.36,1)" style-hover="transform:translateX(-2px)">
+          Create new
+          <div style="width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(150deg,#1fc172,#0f9a56);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 12px 22px -12px rgba(23,184,102,.9)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M8 3v10M3 8h10"></path></svg></div>
+        </div>
+      </div>
+
+      <!-- STREAK -->
+      <div ref="{{ viewRef }}" style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:30px;align-items:center;padding:22px 26px;border-radius:30px;background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.38));backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 1px #fff,inset 0 -10px 24px -18px rgba(255,255,255,.8),0 24px 48px -30px rgba(20,48,34,.3);animation:rb-fade .5s .05s cubic-bezier(.22,1,.36,1) both">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="width:58px;height:58px;border-radius:20px;display:grid;place-items:center;background:linear-gradient(150deg,#14261d,#10241a);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 14px 24px -14px rgba(10,30,20,.8)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="#3ddc84" style="filter:drop-shadow(0 0 6px rgba(61,220,132,.7))"><path d="M12 2c.6 3.2 2.7 4.6 4.2 6.6 1.3 1.7 2 3.4 2 5.4a6.2 6.2 0 0 1-12.4 0c0-2.1.9-3.7 2.2-5 .2 1.5.9 2.6 2 3.2-.4-3.6.4-6.9 2-10.2Z"></path></svg>
+          </div>
+          <div>
+            <div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:Doto,monospace;font-weight:900;font-size:40px;line-height:1;color:#121a16">{{ streak }}</div><div style="font-size:14px;font-weight:600;color:#121a16">{{ streakUnit }}</div></div>
+            <div style="font-size:12px;color:#6b7a73;margin-top:5px">{{ streakSub }}</div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ weeks }}" as="wk" hint-placeholder-count="12">
+              <div title="{{ wk.tip }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px">
+                <div style="width:100%;height:34px;border-radius:10px;background:{{ wk.bg }};box-shadow:{{ wk.ring }};transition:background .5s ease"></div>
+                <div style="font-family:Silkscreen,monospace;font-size:8px;letter-spacing:.06em;color:{{ wk.ink }}">{{ wk.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="text-align:right;min-width:170px">
+          <div style="font-size:12px;color:#6b7a73;margin-bottom:5px">This week</div>
+          <div style="font-size:24px;font-weight:700;letter-spacing:-.02em;color:#121a16">{{ weekIn }}<span style="font-size:14px;font-weight:600;color:#9aa8a1"> / {{ weekPlan }}</span></div>
+          <div style="display:flex;justify-content:flex-end;align-items:center;gap:7px;font-size:12px;font-weight:600;color:{{ weekColor }};margin-top:6px"><div style="width:6px;height:6px;border-radius:50%;background:{{ weekDot }}"></div>{{ weekMsg }}</div>
+        </div>
+      </div>
+
+      <!-- JARS -->
+      <div ref="{{ wrapRef }}" onPointerDown="{{ onDown }}" onPointerMove="{{ onMove }}" onPointerUp="{{ onUp }}" onPointerCancel="{{ onUp }}" onClickCapture="{{ onClickCap }}" style="overflow:hidden;margin:-12px -6px -34px;padding:12px 6px 34px;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:{{ dragCursor }}">
+      <div ref="{{ trackRef }}" style="display:flex;gap:16px;will-change:transform">
+        <sc-for list="{{ goals }}" as="g" hint-placeholder-count="3">
+          <div data-card="{{ g.id }}" style="flex:0 0 calc((100% - 32px) / 3);display:flex">
+          <div style="flex:1;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;padding:14px;border-radius:32px;background:{{ g.shellBg }};backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);border:0;box-shadow:0 24px 48px -30px rgba(20,48,34,.3);transition:transform .5s cubic-bezier(.22,1,.36,1)" style-hover="transform:translateY(-4px)">
+            <div style="position:relative;height:226px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:14px">
+              <div style="position:absolute;bottom:7px;left:50%;width:160px;height:14px;margin-left:-80px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(20,48,34,.26),transparent 70%)"></div>
+              <div data-jar="{{ g.id }}" data-n="{{ g.coins }}" onPointerDown="{{ poke }}" style="position:relative;width:146px;height:196px;transform-origin:50% 100%">
+                <div style="position:absolute;left:26px;right:26px;top:0;height:18px;border-radius:8px;background:{{ g.lidBg }};border:1px solid {{ g.lidBorder }};transition:background .8s ease,border-color .8s ease;box-shadow:inset 0 -4px 8px -4px rgba(18,38,30,.2),0 6px 12px -8px rgba(18,38,30,.35)"></div>
+                <div style="position:absolute;left:33px;right:33px;top:16px;height:12px;background:linear-gradient(90deg,rgba(255,255,255,.65),rgba(255,255,255,.18),rgba(255,255,255,.6));border-left:1.5px solid rgba(255,255,255,.95);border-right:1.5px solid rgba(255,255,255,.95)"></div>
+                <div style="position:absolute;left:0;right:0;top:26px;bottom:0;border-radius:40px 40px 48px 48px;overflow:hidden;background:linear-gradient(105deg,rgba(255,255,255,.7),rgba(255,255,255,.18) 38%,rgba(255,255,255,.1) 62%,rgba(255,255,255,.5));border:1.5px solid rgba(255,255,255,.95);box-shadow:inset 0 0 0 1px rgba(18,38,30,.05),inset 0 -16px 28px -16px rgba(18,38,30,.25),0 26px 36px -26px rgba(20,48,34,.5)">
+                  <div data-coins="1" style="position:absolute;inset:0;pointer-events:none"></div>
+                  <div style="position:absolute;left:16px;top:20px;bottom:28px;width:13px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.08))"></div>
+                  <div style="position:absolute;right:20px;top:26px;width:6px;height:40px;border-radius:4px;background:rgba(255,255,255,.55)"></div>
+                </div>
+                
+                
+                </div>
+            </div>
+            <div style="position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 20px 18px;border-radius:24px;background:{{ g.cardBg }};transition:background .6s ease;box-shadow:0 18px 36px -24px rgba(20,48,34,.35)">
+              <sc-if value="{{ g.important }}" hint-placeholder-val="{{ false }}"><div title="Important" style="position:absolute;left:14px;top:14px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(224,144,42,.14)"><svg width="13" height="13" viewBox="0 0 16 16" fill="#e0902a"><path d="M8 1.6l1.95 4 4.4.6-3.2 3.1.78 4.4L8 11.6l-3.93 2.1.78-4.4L1.65 6.2l4.4-.6Z"></path></svg></div></sc-if>
+              <div onClick="{{ openEditGoal }}" data-id="{{ g.id }}" title="Edit goal" style="position:absolute;right:12px;top:12px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#8b9a93;transition:background .3s ease,color .3s ease" style-hover="background:rgba(18,38,30,.06);color:#121a16"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 2.5 13.5 5.5 5.5 13.5H2.5V10.5Z"></path></svg></div>
+              <div style="display:flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:600;color:#fff;background:{{ g.pillBg }}">
+                <div style="width:12px;height:12px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.3)"><div style="width:4px;height:4px;border-radius:50%;background:#fff"></div></div>{{ g.pill }}
+              </div>
+              <div style="font-size:21px;font-weight:700;letter-spacing:-.02em;color:#121a16;margin-top:12px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.name }}</div>
+              <div style="font-size:11.5px;color:#8b9a93;margin-top:3px">{{ g.amtLabel }}</div>
+              <div style="display:flex;align-items:baseline;justify-content:center;margin-top:2px">
+                <div style="font-size:32px;font-weight:800;letter-spacing:-.03em;color:#121a16">{{ g.saved }}</div>
+                <div style="font-size:20px;font-weight:700;color:#b3beb9">{{ g.targetTail }}</div>
+              </div>
+              <div style="width:100%;height:8px;border-radius:4px;background:{{ g.track }};overflow:hidden;margin-top:12px"><div style="width:{{ g.w }};height:100%;border-radius:4px;background:{{ g.color }};transition:width 1.4s cubic-bezier(.22,1,.36,1)"></div></div>
+              <div style="width:100%;display:flex;flex-direction:column;gap:3px;margin-top:12px;min-height:34px">
+                <div style="font-size:12.5px;font-weight:600;color:{{ g.msgColor }}">{{ g.msg }}</div>
+                <div style="font-size:11.5px;color:#8b9a93">{{ g.sub }}</div>
+              </div>
+              <div style="width:100%;display:flex;gap:8px;margin-top:14px">
+                <div onClick="{{ openAdd }}" data-id="{{ g.id }}" style="flex:1;padding:13px;border-radius:14px;cursor:pointer;font-size:13.5px;font-weight:600;color:#fff;background:linear-gradient(150deg,#26342d,#18221d);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 12px 20px -14px rgba(12,24,18,.9);transition:transform .35s cubic-bezier(.22,1,.36,1)" style-hover="transform:scale(1.03)">Add money</div>
+                <div onClick="{{ openWithdraw }}" data-id="{{ g.id }}" title="Withdraw" style="width:46px;flex:none;border-radius:14px;display:grid;place-items:center;cursor:pointer;color:#5d6f67;background:rgba(18,38,30,.05);transition:background .3s ease" style-hover="background:rgba(18,38,30,.09)"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3.5v9M4 8.5l4 4 4-4"></path></svg></div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </sc-for>
+        <div onClick="{{ openNewGoal }}" style="flex:0 0 calc((100% - 32px) / 3);box-sizing:border-box;min-height:460px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:32px;cursor:pointer;border:1.5px dashed rgba(18,38,30,.14);color:#6b7a73;font-size:13.5px;font-weight:600;transition:border-color .35s ease,color .35s ease,background .35s ease" style-hover="border-color:rgba(23,184,102,.5);color:#0b7a45;background:rgba(255,255,255,.3)">
+          <div style="width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(18,38,30,.05)"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"></path></svg></div>
+          New jar
+        </div>
+      </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:2px">
+        <div onClick="{{ prevSlide }}" style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#41504a;opacity:{{ prevOp }};background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.38));backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 1px #fff,0 10px 20px -14px rgba(20,48,34,.4);transition:opacity .3s ease,transform .3s cubic-bezier(.22,1,.36,1)" style-hover="transform:scale(1.08)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3 5 8l5 5"></path></svg></div>
+        <div style="display:flex;gap:7px">
+          <sc-for list="{{ dots }}" as="dt" hint-placeholder-count="2">
+            <div onClick="{{ goSlide }}" data-i="{{ dt.i }}" style="height:7px;width:{{ dt.w }};border-radius:4px;cursor:pointer;background:{{ dt.bg }};transition:width .45s cubic-bezier(.22,1,.36,1),background .3s ease"></div>
+          </sc-for>
+        </div>
+        <div onClick="{{ nextSlide }}" style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#41504a;opacity:{{ nextOp }};background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.38));backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 1px #fff,0 10px 20px -14px rgba(20,48,34,.4);transition:opacity .3s ease,transform .3s cubic-bezier(.22,1,.36,1)" style-hover="transform:scale(1.08)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3 5 5-5 5"></path></svg></div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div ref="{{ colRef }}" style="width:340px;flex:none;padding:0 26px 26px 0;display:flex;flex-direction:column;gap:16px">
+      <div style="position:relative;margin-top:{{ panelTop }}px;border-radius:28px;background:linear-gradient(150deg,rgba(12,24,18,.9),rgba(16,40,29,.82));backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px rgba(61,220,132,.08),0 30px 60px -30px rgba(10,30,20,.75)">
+        <div style="display:flex;align-items:center;gap:7px;padding:14px 20px 0">
+          <div style="width:6px;height:6px;background:#3ddc84"></div>
+          <div style="width:6px;height:6px;background:rgba(61,220,132,.45)"></div>
+          <div style="width:6px;height:6px;background:rgba(61,220,132,.2)"></div>
+          <div style="margin-left:6px;font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.1em;color:#6ee6a4">rabit@savings</div>
+        </div>
+        <div style="padding:12px 22px 20px">
+          <div style="font-family:Silkscreen,monospace;font-size:11px;color:#6ee6a4;letter-spacing:.06em;margin-bottom:9px">{{ botHead }}</div>
+          <div style="font-family:Doto,monospace;font-weight:900;font-size:20px;line-height:1.25;color:#3ddc84;text-shadow:0 0 12px rgba(61,220,132,.5);opacity:{{ botOp }};transition:opacity .22s ease">{{ botLine }}<span style="display:inline-block;width:10px;height:18px;margin-left:8px;vertical-align:-3px;background:#3ddc84;box-shadow:0 0 9px rgba(61,220,132,.8);animation:rb-cursor 1.1s steps(1) infinite"></span></div>
+        </div>
+      </div>
+
+      <!-- CALCULATOR -->
+      <div style="padding:22px;border-radius:28px;background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.38));backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 1px #fff,inset 0 -10px 24px -18px rgba(255,255,255,.8),0 24px 48px -30px rgba(20,48,34,.3)">
+        <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.16em;color:#6b7a73;margin-bottom:6px">WHAT CAN I SAVE?</div>
+        <div style="font-size:13px;color:#5d6f67;margin-bottom:16px">Tell RaBit what you can put away.</div>
+        <div style="display:flex;align-items:center;gap:6px;padding:4px 16px;border-radius:18px;background:rgba(18,38,30,.05)">
+          <div style="font-size:22px;font-weight:700;color:#6b7a73">$</div>
+          <input value="{{ cPer }}" onInput="{{ onCPer }}" inputMode="decimal" style="flex:1;min-width:0;border:0;outline:0;background:transparent;font-family:inherit;font-size:24px;font-weight:700;letter-spacing:-.02em;color:#121a16;padding:10px 0">
+          <div style="font-family:Silkscreen,monospace;font-size:9px;letter-spacing:.1em;color:#6b7a73">{{ cUnit }}</div>
+        </div>
+        <div style="margin-top:12px"><div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+            <sc-for list="{{ cFreqs }}" as="o" hint-placeholder-count="2">
+              <div onClick="{{ pickCFreq }}" data-v="{{ o.id }}" style="flex:1;text-align:center;padding:9px 10px;border-radius:999px;cursor:pointer;font-size:12.5px;font-weight:600;white-space:nowrap;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .35s cubic-bezier(.22,1,.36,1),color .3s ease,box-shadow .35s ease">{{ o.label }}</div>
+            </sc-for>
+          </div></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 8px">
+          <div style="font-size:12px;color:#6b7a73">For</div>
+          <div style="font-size:13px;font-weight:700;color:#121a16">{{ cLen }}</div>
+        </div>
+        <input type="range" min="1" max="{{ cMax }}" value="{{ cN }}" onInput="{{ onCN }}" style="width:100%;accent-color:#17b866;cursor:pointer">
+        <div style="margin-top:16px;padding:16px 18px;border-radius:20px;background:linear-gradient(150deg,rgba(23,184,102,.14),rgba(23,184,102,.06))">
+          <div style="font-size:12px;color:#0b7a45">{{ cByLabel }}</div>
+          <div style="font-family:Doto,monospace;font-weight:900;font-size:34px;line-height:1.1;color:#0b5e37;margin-top:4px">{{ cTotal }}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+          <sc-for list="{{ cCovers }}" as="cv" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:10px;font-size:12.5px">
+              <div style="width:8px;height:8px;border-radius:3px;background:{{ cv.color }}"></div>
+              <div style="flex:1;min-width:0;color:#41504a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ cv.name }}</div>
+              <div style="font-weight:700;color:{{ cv.ink }}">{{ cv.txt }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div onClick="{{ calcToGoal }}" style="margin-top:16px;text-align:center;padding:12px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:600;color:#0b7a45;background:rgba(23,184,102,.1);transition:background .3s ease" style-hover="background:rgba(23,184,102,.18)">Turn this into a jar</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONGRATS -->
+  <sc-if value="{{ cheerOn }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeCheer }}" style="position:fixed;inset:0;z-index:44;display:grid;place-items:center;background:rgba(16,32,25,.34);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:rb-toast .35s ease both">
+      <div onClick="{{ stopNotif }}" style="width:420px;padding:30px;border-radius:32px;text-align:center;background:linear-gradient(150deg,rgba(12,24,18,.95),rgba(16,40,29,.9));border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 40px 80px -30px rgba(10,30,20,.8);animation:rb-fade .5s cubic-bezier(.22,1,.36,1) both">
+        <div style="width:64px;height:64px;margin:0 auto 18px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(150deg,#1fc172,#0f9a56);box-shadow:0 0 30px rgba(61,220,132,.5)"><svg width="28" height="28" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.4 3 3 6-6.6"></path></svg></div>
+        <div style="font-family:Silkscreen,monospace;font-size:11px;letter-spacing:.12em;color:#6ee6a4">&gt; GOAL COMPLETE</div>
+        <div style="font-family:Doto,monospace;font-weight:900;font-size:30px;line-height:1.15;color:#3ddc84;text-shadow:0 0 14px rgba(61,220,132,.5);margin:10px 0 8px">{{ cheerName }}</div>
+        <div style="font-size:13.5px;line-height:1.5;color:#b9cfc4">{{ cheerText }}</div>
+        <div onClick="{{ closeCheer }}" style="margin-top:22px;padding:13px;border-radius:999px;cursor:pointer;font-size:13.5px;font-weight:600;color:#0c1a13;background:#3ddc84;transition:transform .35s cubic-bezier(.22,1,.36,1)" style-hover="transform:scale(1.03)">Nice!</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- MOVE MONEY -->
+  <sc-if value="{{ moveOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeMove }}" style="position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(16,32,25,.3);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:rb-toast .3s ease both">
+      <div onClick="{{ stopNotif }}" style="width:460px;padding:26px;border-radius:30px;background:linear-gradient(150deg,rgba(255,255,255,.97),rgba(245,250,247,.94));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid #fff;box-shadow:0 40px 80px -30px rgba(12,40,26,.5);animation:rb-fade .4s cubic-bezier(.22,1,.36,1) both">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+          <div style="width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:{{ mvSoft }}"><div style="width:12px;height:12px;border-radius:4px;background:{{ mvColor }}"></div></div>
+          <div style="flex:1"><div style="font-size:17px;font-weight:700;color:#121a16">{{ mvName }}</div><div style="font-size:12px;color:#6b7a73;margin-top:2px">{{ mvSummary }}</div></div>
+        </div>
+        <div style="margin-bottom:14px"><div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+            <sc-for list="{{ mvModes }}" as="o" hint-placeholder-count="2">
+              <div onClick="{{ pickMvMode }}" data-v="{{ o.id }}" style="flex:1;text-align:center;padding:9px 10px;border-radius:999px;cursor:pointer;font-size:12.5px;font-weight:600;white-space:nowrap;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .35s cubic-bezier(.22,1,.36,1),color .3s ease,box-shadow .35s ease">{{ o.label }}</div>
+            </sc-for>
+          </div></div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 18px;border-radius:20px;background:rgba(18,38,30,.05)">
+          <div style="font-size:30px;font-weight:700;color:#6b7a73">$</div>
+          <input value="{{ mvAmt }}" onInput="{{ onMvAmt }}" onKeyDown="{{ mvKey }}" placeholder="0" inputMode="decimal" autofocus="{{ true }}" style="flex:1;min-width:0;border:0;outline:0;background:transparent;font-family:inherit;font-size:34px;font-weight:700;letter-spacing:-.02em;color:#121a16;padding:8px 0">
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <sc-for list="{{ mvQuick }}" as="q" hint-placeholder-count="3">
+            <div onClick="{{ pickQuick }}" data-v="{{ q.v }}" style="flex:1;text-align:center;padding:8px;border-radius:999px;cursor:pointer;font-size:12px;font-weight:600;color:{{ q.ink }};background:{{ q.bg }};transition:background .3s ease,color .3s ease" style-hover="background:rgba(23,184,102,.16);color:#0b7a45">{{ q.label }}</div>
+          </sc-for>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:{{ mvPrevColor }};margin:16px 2px 20px;min-height:38px">{{ mvPreview }}</div>
+        <div style="display:flex;gap:10px">
+          <div onClick="{{ closeMove }}" style="padding:13px 20px;border-radius:999px;cursor:pointer;font-size:13.5px;font-weight:600;color:#5d6f67" style-hover="background:rgba(18,38,30,.05)">Cancel</div>
+          <div onClick="{{ saveMove }}" style="flex:1;text-align:center;padding:13px;border-radius:999px;cursor:pointer;font-size:13.5px;font-weight:600;color:#fff;background:{{ mvBtnBg }};transition:background .3s ease">{{ mvBtn }}</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- GOAL EDITOR -->
+  <sc-if value="{{ goalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeGoal }}" style="position:fixed;inset:0;z-index:41;display:grid;place-items:center;background:rgba(16,32,25,.3);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:rb-toast .3s ease both">
+      <div onClick="{{ stopNotif }}" style="width:460px;padding:26px;border-radius:30px;background:linear-gradient(150deg,rgba(255,255,255,.97),rgba(245,250,247,.94));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid #fff;box-shadow:0 40px 80px -30px rgba(12,40,26,.5);animation:rb-fade .4s cubic-bezier(.22,1,.36,1) both">
+        <div style="font-family:Silkscreen,monospace;font-size:10px;letter-spacing:.16em;color:#6b7a73;margin-bottom:6px">{{ gfHead }}</div>
+        <input value="{{ gfName }}" onInput="{{ onGfName }}" placeholder="What are you saving for?" autofocus="{{ true }}" style="width:100%;box-shadow:{{ gfNameRing }};transition:box-shadow .3s ease;border:0;outline:0;background:transparent;font-family:inherit;font-size:24px;font-weight:700;letter-spacing:-.02em;color:#121a16;padding:4px 0 14px">
+        <div style="font-size:12px;color:#6b7a73;margin-bottom:7px">Goal amount</div>
+        <input value="{{ gfTarget }}" onInput="{{ onGfTarget }}" placeholder="e.g. 10,000" inputMode="decimal" style="box-shadow:{{ gfTargetRing }};transition:box-shadow .3s ease;width:100%;box-sizing:border-box;padding:13px 16px;border-radius:16px;border:0;outline:0;font-family:inherit;font-size:15px;font-weight:600;color:#121a16;background:rgba(18,38,30,.05)">
+        <div style="font-size:12px;color:#6b7a73;margin:16px 0 7px">How do you want to plan it?</div>
+        <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+            <sc-for list="{{ gfModes }}" as="o" hint-placeholder-count="2">
+              <div onClick="{{ pickGfMode }}" data-v="{{ o.id }}" style="flex:1;text-align:center;padding:9px 10px;border-radius:999px;cursor:pointer;font-size:12.5px;font-weight:600;white-space:nowrap;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .35s cubic-bezier(.22,1,.36,1),color .3s ease,box-shadow .35s ease">{{ o.label }}</div>
+            </sc-for>
+          </div>
+        <sc-if value="{{ gfHasPlan }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-top:12px;animation:rb-fade .35s cubic-bezier(.22,1,.36,1) both">
+          <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+            <sc-for list="{{ gfFreqs }}" as="o" hint-placeholder-count="2">
+              <div onClick="{{ pickGfFreq }}" data-v="{{ o.id }}" style="flex:1;text-align:center;padding:9px 10px;border-radius:999px;cursor:pointer;font-size:12.5px;font-weight:600;white-space:nowrap;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .35s cubic-bezier(.22,1,.36,1),color .3s ease,box-shadow .35s ease">{{ o.label }}</div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ gfIsDate }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:center;gap:8px;padding:0 14px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <input value="{{ gfN }}" onInput="{{ onGfN }}" inputMode="numeric" style="width:44px;border:0;outline:0;background:transparent;font-family:inherit;font-size:15px;font-weight:700;color:#121a16;padding:9px 0">
+              <div style="font-size:12.5px;color:#6b7a73">{{ gfNUnit }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ gfIsAmt }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:6px;padding:0 14px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <div style="font-size:14px;font-weight:700;color:#6b7a73">$</div>
+              <input value="{{ gfPer }}" onInput="{{ onGfPer }}" inputMode="decimal" style="flex:1;min-width:0;border:0;outline:0;background:transparent;font-family:inherit;font-size:15px;font-weight:700;color:#121a16;padding:9px 0">
+              <div style="font-size:12px;color:#6b7a73">{{ gfPerUnit }}</div>
+            </div>
+          </sc-if>
+        </div>
+        </sc-if>
+        <div style="margin-top:14px;padding:14px 16px;border-radius:18px;background:linear-gradient(150deg,rgba(23,184,102,.13),rgba(23,184,102,.05));min-height:44px">
+          <div style="font-size:11.5px;color:#0b7a45">{{ gfResLabel }}</div>
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.02em;color:#0b5e37;margin-top:3px">{{ gfRes }}</div>
+        </div>
+        <div onClick="{{ toggleGfImp }}" style="display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 16px;border-radius:18px;cursor:pointer;background:{{ gfImpBg }};transition:background .35s ease">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="{{ gfImpFill }}" stroke="#e0902a" stroke-width="1.3" stroke-linejoin="round"><path d="M8 1.6l1.95 4 4.4.6-3.2 3.1.78 4.4L8 11.6l-3.93 2.1.78-4.4L1.65 6.2l4.4-.6Z"></path></svg>
+          <div style="flex:1"><div style="font-size:13.5px;font-weight:600;color:#121a16">Mark as important</div><div style="font-size:11.5px;color:#6b7a73;margin-top:1px">Important jars always come first</div></div>
+          <div style="width:40px;height:22px;flex:none;border-radius:999px;padding:2px;box-sizing:border-box;background:{{ gfImpSw }};transition:background .35s ease"><div style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.2);transform:translateX({{ gfImpX }});transition:transform .4s cubic-bezier(.22,1,.36,1)"></div></div>
+        </div>
+        <div style="font-size:12px;color:#6b7a73;margin:16px 0 10px">Jar color</div>
+        <div style="display:flex;gap:10px">
+          <sc-for list="{{ gfSw }}" as="c" hint-placeholder-count="8">
+            <div onClick="{{ pickGfColor }}" data-v="{{ c.v }}" style="width:26px;height:26px;border-radius:50%;cursor:pointer;background:{{ c.v }};box-shadow:{{ c.ring }};transform:scale({{ c.scale }});transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease"></div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ gfErrOn }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:8px;margin-top:18px;font-size:12.5px;font-weight:600;color:#9a6a14;animation:rb-fade .3s cubic-bezier(.22,1,.36,1) both"><div style="width:6px;height:6px;border-radius:50%;background:#e0902a"></div>{{ gfErr }}</div>
+        </sc-if>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:22px">
+          <sc-if value="{{ gfCanDel }}" hint-placeholder-val="{{ false }}"><div onClick="{{ delGoal }}" style="padding:13px 16px;border-radius:999px;cursor:pointer;font-size:13.5px;font-weight:600;color:#a8443a" style-hover="background:rgba(192,74,66,.08)">Delete</div></sc-if>
+          <div style="flex:1"></div>
+          <div onClick="{{ closeGoal }}" style="padding:13px 20px;border-radius:999px;cursor:pointer;font-size:13.5px;font-weight:600;color:#5d6f67" style-hover="background:rgba(18,38,30,.05)">Cancel</div>
+          <div onClick="{{ saveGoal }}" style="padding:13px 24px;border-radius:999px;cursor:pointer;font-size:13.5px;font-weight:600;color:#fff;background:{{ gfBtnBg }};transition:background .3s ease">{{ gfBtn }}</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toastOn }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:34px;transform:translateX(-50%);z-index:45;padding:12px 20px;border-radius:999px;background:linear-gradient(150deg,rgba(14,26,20,.92),rgba(18,40,30,.86));backdrop-filter:blur(14px);color:#eef4f0;font-size:13px;font-weight:600;box-shadow:0 16px 30px -16px rgba(12,30,22,.8);animation:rb-toast .35s cubic-bezier(.22,1,.36,1) both">{{ toastText }}</div>
+  </sc-if>
+
+  <!-- SETTINGS -->
+  <sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSettings }}" style="position:absolute;inset:0;z-index:60;display:grid;place-items:center;background:rgba(16,32,25,.3);backdrop-filter:blur(6px)">
+      <div onClick="{{ stopNotif }}" style="width:480px;max-height:88%;box-sizing:border-box;display:flex;flex-direction:column;border-radius:30px;background:linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 40px 90px -30px rgba(12,40,26,.55);animation:rb-toast .18s ease-out both">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 24px 6px">
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.01em;color:#121a16">Settings</div>
+          <div onClick="{{ closeSettings }}" style="width:30px;height:30px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#5d6f67;font-size:16px" style-hover="background:rgba(18,38,30,.06)">×</div>
+        </div>
+        <div style="flex:1;min-height:0;overflow-y:auto;padding:0 24px 4px;scrollbar-width:thin;scrollbar-color:rgba(18,38,30,.16) transparent">
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">PROFILE</div>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="width:40px;height:40px;flex:none;border-radius:50%;background:linear-gradient(145deg,#0b7a45,#4fc389);display:grid;place-items:center;font-family:Silkscreen,monospace;font-size:13px;color:#fff">{{ userInitial }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11.5px;font-weight:600;color:#5d6f67;margin-bottom:3px">Your name · used in greetings</div>
+              <input value="{{ prefName }}" onInput="{{ onPrefName }}" placeholder="Your name" style="width:100%;box-sizing:border-box;border:0;outline:0;background:transparent;font-family:inherit;font-size:15px;font-weight:700;color:#121a16">
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:18px 0 8px">
+            <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73">MODULES · {{ modOnCount }}/4 ON</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <div onClick="{{ allModsOn }}" style="padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:600;cursor:pointer;color:#0b7a45" style-hover="background:#fff">All on</div>
+              <div onClick="{{ allModsOff }}" style="padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:600;cursor:pointer;color:#5d6f67" style-hover="background:#fff;color:#a8443a">All off</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ modRows }}" as="md" hint-placeholder-count="4">
+              <div onClick="{{ toggleMod }}" data-id="{{ md.id }}" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:18px;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff;opacity:{{ md.op }};transition:opacity .2s ease-out">
+                <div style="width:36px;height:36px;flex:none;border-radius:12px;display:grid;place-items:center;background:{{ md.iconBg }};box-shadow:inset 0 1px 1px #fff;transition:background .2s ease-out">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="{{ md.iconStroke }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ md.d }}"></path></svg>
+                </div>
+                <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:#121a16">{{ md.label }}</div><div style="font-size:12px;color:#5d6f67;margin-top:3px;line-height:1.45">{{ md.desc }}</div></div>
+                <div style="width:42px;height:24px;flex:none;border-radius:12px;padding:3px;box-sizing:border-box;background:{{ md.sw.bg }};transition:background .2s ease-out"><div style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(12,40,26,.3);transform:translateX({{ md.sw.x }});transition:transform .2s ease-out"></div></div>
+              </div>
+            </sc-for>
+            <div style="padding:4px 4px 0;font-size:11.5px;line-height:1.5;color:#6b7a73">Home always stays on. Turned-off modules disappear from the sidebar and Home — your data is kept.</div>
+          </div>
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">TIME &amp; DATE</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="font-size:14px;font-weight:700;color:#121a16">Time format</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <sc-for list="{{ timeOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ pickPref }}" data-k="{{ o.key }}" data-v="{{ o.id }}" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .2s ease-out">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="font-size:14px;font-weight:700;color:#121a16">Week starts on</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <sc-for list="{{ weekOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ pickPref }}" data-k="{{ o.key }}" data-v="{{ o.id }}" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .2s ease-out">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+            <sc-if value="{{ showRoutineMod }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff;font-size:14px;font-weight:700;color:#121a16">Wake up &amp; bedtime<span style="font-size:12.5px;font-weight:600;color:#0b7a45">Edit →</span></div>
+            </sc-if>
+          </div>
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">RABIT</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+          <div onClick="{{ toggleRemind }}" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:18px;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="flex:1"><div style="font-size:14px;font-weight:700;color:#121a16">Reminders</div><div style="font-size:12px;color:#5d6f67;margin-top:3px;line-height:1.45">RaBit pops up before your events and deadlines.</div></div>
+            <div style="width:42px;height:24px;flex:none;border-radius:12px;padding:3px;box-sizing:border-box;background:{{ remindSw.bg }};transition:background .2s ease-out"><div style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(12,40,26,.3);transform:translateX({{ remindSw.x }});transition:transform .2s ease-out"></div></div>
+          </div>
+          <div onClick="{{ toggleSound }}" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:18px;cursor:pointer;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="flex:1"><div style="font-size:14px;font-weight:700;color:#121a16">Sound</div><div style="font-size:12px;color:#5d6f67;margin-top:3px;line-height:1.45">Play a soft 8-bit chime with reminders.</div></div>
+            <div style="width:42px;height:24px;flex:none;border-radius:12px;padding:3px;box-sizing:border-box;background:{{ soundSw.bg }};transition:background .2s ease-out"><div style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(12,40,26,.3);transform:translateX({{ soundSw.x }});transition:transform .2s ease-out"></div></div>
+          </div>
+          </div>
+          <div style="font-family:Silkscreen,monospace;font-size:9.5px;letter-spacing:.16em;color:#6b7a73;margin:18px 0 8px">APPEARANCE</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 1px #fff">
+            <div style="font-size:14px;font-weight:700;color:#121a16">Theme</div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(18,38,30,.05)">
+              <sc-for list="{{ themeOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ pickPref }}" data-k="{{ o.key }}" data-v="{{ o.id }}" style="padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:{{ o.color }};background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:background .2s ease-out">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          </div>
+        </div>
+        <div style="padding:16px 24px 22px">
+          <div onClick="{{ closeSettings }}" style="text-align:center;padding:12px;border-radius:999px;background:linear-gradient(150deg,#1fc172,#0f9a56);color:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 14px 26px -14px rgba(23,184,102,1)">Done</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1180}}">
+const CW = 40, CM = 10;
+const W0 = new Date(2026, 8, 28);
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const wDate = w => { const d = new Date(W0.getTime() + (w - CW) * 7 * 864e5); return MON[d.getMonth()] + " " + d.getDate(); };
+const mDate = m => MON[((m - 1) % 12 + 12) % 12] + " " + (2026 + Math.floor((m - 1) / 12));
+const GOALS = [
+  { id: "g1", name: "PlayStation 5 Pro", target: 14000, saved: 3200, color: "#17b866", freq: "week", n: 20, start: 34, important: true },
+  { id: "g2", name: "New Backpack", target: 1800, saved: 1950, color: "#8a6fd6", freq: "week", n: 6, start: 33 },
+  { id: "g3", name: "Viaje a Japón", target: 60000, saved: 21500, color: "#4b7fd6", freq: "month", n: 12, start: 3 },
+  { id: "g4", name: "Audífonos", target: 4500, saved: 0, color: "#c98a1e", freq: "week", n: 10, start: 40 }
+];
+const MOVES = [
+  { id: "m1", goal: "g1", amt: 400, w: 40, mo: 10, d: "Oct 3" },
+  { id: "m2", goal: "g1", amt: 800, w: 39, mo: 9, d: "Sep 26" },
+  { id: "m3", goal: "g2", amt: 450, w: 38, mo: 9, d: "Sep 18" },
+  { id: "m4", goal: "g1", amt: 700, w: 38, mo: 9, d: "Sep 17" },
+  { id: "m5", goal: "g3", amt: 3000, w: 37, mo: 9, d: "Sep 12" },
+  { id: "m6", goal: "g1", amt: 600, w: 36, mo: 9, d: "Sep 4" },
+  { id: "m7", goal: "g2", amt: 500, w: 34, mo: 8, d: "Aug 22" },
+  { id: "m8", goal: "g1", amt: 700, w: 34, mo: 8, d: "Aug 20" },
+  { id: "m9", goal: "g2", amt: 500, w: 33, mo: 8, d: "Aug 14" },
+  { id: "m10", goal: "g2", amt: 500, w: 32, mo: 8, d: "Aug 7" },
+  { id: "m11", goal: "g3", amt: 2500, w: 31, mo: 8, d: "Aug 1" },
+  { id: "m12", goal: "g1", amt: 0, w: 30, mo: 7, d: "Jul 24" }
+];
+const SW = ["#17b866", "#2aa6a0", "#4b7fd6", "#8a6fd6", "#d0579a", "#c98a1e", "#a8443a", "#5d6f67"];
+const money = n => (n < 0 ? "-" : "") + "$" + Math.round(Math.abs(n)).toLocaleString("en-US");
+const num = v => { const x = parseFloat(String(v || "").replace(/[$,\s]/g, "")); return isNaN(x) ? null : x; };
+const lighten = (hex, k) => { const h = hex.replace("#", ""); const c = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); return "rgb(" + c.map(v => Math.round(v + (255 - v) * k)).join(",") + ")"; };
+const per = f => f === "week" ? "/wk" : "/mo";
+const plan = (g, M) => {
+  if (g.freq === "none") { const dThis = M.filter(m => m.goal === g.id && m.w === CW).reduce((a, m) => a + m.amt, 0); return { cur: CW, rem: 1, dThis, now: 0, next: 0, left: Math.max(0, g.target - g.saved), end: "", done: g.saved >= g.target, free: true }; }
+  const cur = g.freq === "week" ? CW : CM, el = cur - g.start, rem = Math.max(1, g.n - el);
+  const dThis = M.filter(m => m.goal === g.id && (g.freq === "week" ? m.w === CW : m.mo === CM)).reduce((a, m) => a + m.amt, 0);
+  const before = g.saved - dThis, left = Math.max(0, g.target - g.saved);
+  const now = Math.max(0, (g.target - before) / rem);
+  const next = rem > 1 ? left / (rem - 1) : left;
+  const end = g.freq === "week" ? wDate(g.start + g.n - 1) : mDate(g.start + g.n - 1);
+  return { cur, rem, dThis, now, next, left, end, done: g.saved >= g.target };
+};
+const MOD_DEFS = [
+  { id: "calendar", label: "Calendar", desc: "Events, tasks and RaBit reminders. Routine keeps working without it.", d: "M5 3.6h8a2.4 2.4 0 0 1 2.4 2.4v7a2.4 2.4 0 0 1-2.4 2.4H5a2.4 2.4 0 0 1-2.4-2.4V6A2.4 2.4 0 0 1 5 3.6ZM2.6 7.2h12.8" },
+  { id: "routine", label: "Daily routine", desc: "Recurring week, wake-up and bedtime. Calendar keeps working without it.", d: "M2.6 9a6.4 6.4 0 1 0 12.8 0a6.4 6.4 0 1 0-12.8 0ZM9 5.4V9l2.4 1.6" },
+  { id: "notes", label: "Quick notes", desc: "Fast notes you can turn into calendar tasks.", d: "M4 3.2h7.2L14 6v8.8H4ZM6.4 8.4h5.2M6.4 11.2h3.4" },
+  { id: "savings", label: "Savings", desc: "Savings goals, deposits and monthly progress.", d: "M9 2.4a6.6 6.6 0 1 0 0 13.2a6.6 6.6 0 1 0 0-13.2ZM11.1 6.6c-.4-.7-1.2-1.1-2.1-1.1-1.2 0-2.1.7-2.1 1.6 0 2.1 4.3 1.1 4.3 3.4 0 .9-.9 1.7-2.2 1.7-1 0-1.8-.4-2.2-1.2M9 4.4v1.1M9 12.2v1.1" }
+];
+class Component extends DCLogic {
+  __prefs() {
+    const st = this.state || {};
+    if (st.__prefs) return st.__prefs;
+    const d = { name: "Sofía", timeFmt: "24h", weekStart: "mon", theme: "light", reminders: true, sound: false };
+    try { return { ...d, ...(JSON.parse(localStorage.getItem("rabit.prefs") || "{}")) }; } catch (e) { return d; }
+  }
+  __setPref(k, v) { const p = { ...this.__prefs(), [k]: v }; try { localStorage.setItem("rabit.prefs", JSON.stringify(p)); } catch (e) {} this.setState({ __prefs: p }); }
+  __prefVals() {
+    const p = this.__prefs();
+    const seg = (key, opts) => opts.map(([id, label]) => { const on = p[key] === id; return { id, key, label, color: on ? "#0b7a45" : "#5d6f67", bg: on ? "#fff" : "transparent", shadow: on ? "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)" : "none" }; });
+    const sw = on => ({ bg: on ? "linear-gradient(150deg,#1fc172,#0f9a56)" : "rgba(18,38,30,.16)", x: on ? "18px" : "0px" });
+    const nm = (p.name || "").trim() || "there";
+    return {
+      userName: nm, userInitial: nm.charAt(0).toUpperCase(), prefName: p.name,
+      onPrefName: e => this.__setPref("name", e.target.value),
+      timeOpts: seg("timeFmt", [["24h", "24-hour"], ["12h", "12-hour"]]),
+      weekOpts: seg("weekStart", [["mon", "Monday"], ["sun", "Sunday"]]),
+      themeOpts: seg("theme", [["light", "Light"], ["dark", "Dark"], ["auto", "Auto"]]),
+      pickPref: e => this.__setPref(e.currentTarget.dataset.k, e.currentTarget.dataset.v),
+      remindSw: sw(p.reminders), soundSw: sw(p.sound),
+      toggleRemind: () => this.__setPref("reminders", !p.reminders),
+      toggleSound: () => this.__setPref("sound", !p.sound)
+    };
+  }
+  __mods() {
+    const st = this.state || {};
+    if (st.__mods) return st.__mods;
+    try { const v = JSON.parse(localStorage.getItem("rabit.modules") || "null"); if (v) return { calendar: v.calendar !== false, routine: v.routine !== false, notes: v.notes !== false, savings: v.savings !== false }; } catch (e) {}
+    return { calendar: true, routine: true, notes: true, savings: true };
+  }
+  __modOk(id) { const m = this.__mods(); return id === "home" ? true : m[id] !== false; }
+  __settings() {
+    const m = this.__mods(), st = this.state || {};
+    const set = (k) => { const nm = { ...this.__mods(), [k]: !this.__mods()[k] }; try { localStorage.setItem("rabit.modules", JSON.stringify(nm)); } catch (e) {} this.setState({ __mods: nm }); };
+    const setAll = (v) => { const nm = { calendar: v, routine: v, notes: v, savings: v }; try { localStorage.setItem("rabit.modules", JSON.stringify(nm)); } catch (e) {} this.setState({ __mods: nm }); };
+    const sw = on => ({ bg: on ? "linear-gradient(150deg,#1fc172,#0f9a56)" : "rgba(18,38,30,.16)", x: on ? "18px" : "0px" });
+    return {
+      settingsOpen: !!st.__settings,
+      openSettings: () => this.setState({ __settings: true }),
+      closeSettings: () => this.setState({ __settings: false }),
+      toggleRoutineMod: () => set("routine"), toggleNotesMod: () => set("notes"),
+      routineSw: sw(m.routine), notesSw: sw(m.notes),
+      showRoutineMod: m.routine, showNotesMod: m.notes, showCalendarMod: m.calendar, showSavingsMod: m.savings,
+      showSideCol: m.calendar || m.routine,
+      modOnCount: MOD_DEFS.filter(d => m[d.id]).length,
+      modRows: MOD_DEFS.map(d => ({ ...d, sw: sw(m[d.id]), op: m[d.id] ? 1 : .72, iconBg: m[d.id] ? "rgba(23,184,102,.12)" : "rgba(18,38,30,.05)", iconStroke: m[d.id] ? "#0b7a45" : "#8b9a93" })),
+      toggleMod: e => set(e.currentTarget.dataset.id),
+      allModsOn: () => setAll(true), allModsOff: () => setAll(false),
+      pageOff: m.savings === false, pageName: "Savings",
+      enablePage: () => { if (!this.__mods()["savings"]) set("savings"); }
+    };
+  }
+  __shell() {
+    const st = this.state || {};
+    return {
+      notifOpen: !!st.__notif,
+      toggleNotif: () => this.setState(s2 => ({ __notif: !(s2 && s2.__notif) })),
+      stopNotif: e => e.stopPropagation(),
+      notifs: [
+        { title: "$400 left for PlayStation 5 Pro", sub: "This week · plan $800/wk", color: "#e0902a" },
+        { title: "New Backpack completed", sub: "Sep 18 · jar full", color: "#17b866" },
+        { title: "Viaje a Japón monthly deposit", sub: "October · $7,700 planned", color: "#4b7fd6" }
+      ],
+      onSearchKey: () => {}
+    };
+  }
+  __nav() {
+    const NAVS = [
+      { id: "home", label: "Home", dotOp: 0, d: "M2.6 8.2 9 3l6.4 5.2V15a.8.8 0 0 1-.8.8H3.4a.8.8 0 0 1-.8-.8Z" },
+      { id: "calendar", label: "Calendar", dotOp: 0, d: "M5 3.6h8a2.4 2.4 0 0 1 2.4 2.4v7a2.4 2.4 0 0 1-2.4 2.4H5a2.4 2.4 0 0 1-2.4-2.4V6A2.4 2.4 0 0 1 5 3.6ZM2.6 7.2h12.8M6 2.2v2.6M12 2.2v2.6" },
+      { id: "notes", label: "Quick Notes", dotOp: 0, d: "M4 3.2h7.2L14 6v8.8H4ZM6.4 8.4h5.2M6.4 11.2h3.4" },
+      { id: "savings", label: "Savings", dotOp: 1, d: "M9 2.4a6.6 6.6 0 1 0 0 13.2a6.6 6.6 0 1 0 0-13.2ZM11.1 6.6c-.4-.7-1.2-1.1-2.1-1.1-1.2 0-2.1.7-2.1 1.6 0 2.1 4.3 1.1 4.3 3.4 0 .9-.9 1.7-2.2 1.7-1 0-1.8-.4-2.2-1.2M9 4.4v1.1M9 12.2v1.1" }
+    ];
+    const hv = this.state && this.state.__hover;
+    return {
+      nav: NAVS.filter(n => this.__modOk(n.id)).map(n => {
+        const a = n.id === "savings", h = hv === n.id;
+        return { ...n, bg: a ? "linear-gradient(150deg,#1fc172,#0f9a56)" : h ? "rgba(255,255,255,.7)" : "transparent",
+          shadow: a ? "inset 0 1px 0 rgba(255,255,255,.35),0 12px 22px -12px rgba(23,184,102,.9)" : "none",
+          stroke: a ? "#fff" : h ? "#1d2a24" : "#5d6f67", bar: a ? 1 : 0, labelOp: h ? 1 : 0, labelX: h ? "0px" : "-6px" };
+      }),
+      navEnter: e => this.setState({ __hover: e.currentTarget.dataset.id }),
+      navLeave: () => this.setState({ __hover: null })
+    };
+  }
+
+  viewRef = React.createRef();
+  colRef = React.createRef();
+  wrapRef = React.createRef();
+  trackRef = React.createRef();
+  ph = { x: 0, v: 0, drag: false, slide: 0, jars: {} };
+  __step() { const w = this.wrapRef.current; return w ? ((w.clientWidth - 12 - 32) / 3) + 16 : 300; }
+  __maxSlide() { const st = this.state || {}; return Math.max(0, (st.goals || GOALS).length + 1 - 3); }
+  __go(i) { const p = this.ph; p.slide = Math.max(0, Math.min(this.__maxSlide(), i)); try { localStorage.setItem("rabit.savings.slide", String(p.slide)); } catch (e) {} this.setState({ slide: p.slide }); }
+  __coinEl(r) {
+    const d = document.createElement("div"), z = (r * 2).toFixed(1);
+    d.style.cssText = "position:absolute;left:0;top:0;width:" + z + "px;height:" + z + "px;border-radius:50%;display:grid;place-items:center;will-change:transform;" +
+      "background:radial-gradient(circle at 34% 30%,#fff6c4 0,#f6d365 26%,#e3a92b 60%,#b47a10 100%);" +
+      "box-shadow:inset 0 0 0 1.5px rgba(150,98,6,.6),inset 0 0 0 3.5px rgba(255,233,150,.45),inset 0 -2px 3px rgba(90,56,0,.25),0 1px 2px rgba(60,40,0,.3);" +
+      "font:800 " + Math.round(r * 1.05) + "px/1 'Plus Jakarta Sans',sans-serif;color:rgba(150,98,6,.85)";
+    d.textContent = "$";
+    return d;
+  }
+  __glass(c, bounce) {
+    // jar interior = rounded rect (closed by the lid). Coins collide with the glass on every side.
+    const W = 143, H = 167, P = 3, RB = 42, RT = 36, r = c.r;
+    const hit = (nx, ny) => { const vn = c.vx * nx + c.vy * ny; if (vn > 0) { c.vx -= (1 + bounce) * vn * nx; c.vy -= (1 + bounce) * vn * ny; c.vx *= 0.94; c.vy *= 0.94; } };
+    if (c.x < P + r) { c.x = P + r; hit(-1, 0); }
+    if (c.x > W - P - r) { c.x = W - P - r; hit(1, 0); }
+    if (c.y > H - P - r) { c.y = H - P - r; hit(0, 1); c.vx *= 0.9; }
+    if (c.y < P + r) { c.y = P + r; hit(0, -1); }
+    const corners = [[P + RB, H - P - RB, RB, 1], [W - P - RB, H - P - RB, RB, 1], [P + RT, P + RT, RT, -1], [W - P - RT, P + RT, RT, -1]];
+    for (const [cx, cy, R, dir] of corners) {
+      const inX = cx < W / 2 ? c.x < cx : c.x > cx, inY = dir > 0 ? c.y > cy : c.y < cy;
+      if (!inX || !inY) continue;
+      const ex = c.x - cx, ey = c.y - cy, dd = Math.sqrt(ex * ex + ey * ey) || 1, lim = R - r;
+      if (dd > lim) { const nx = ex / dd, ny = ey / dd; c.x = cx + nx * lim; c.y = cy + ny * lim; hit(nx, ny); }
+    }
+  }
+  __sim(C, a, acc) {
+    const rad = a * Math.PI / 180, sn = Math.sin(rad), cs = Math.cos(rad);
+    const g = 0.42, fx = g * sn - acc * 0.3 * cs, fy = g * cs + acc * 0.3 * sn, VMAX = 7;
+    for (const c of C) {
+      c.vx = (c.vx + fx) * 0.985; c.vy = (c.vy + fy) * 0.985;
+      const sp = Math.hypot(c.vx, c.vy); if (sp > VMAX) { c.vx *= VMAX / sp; c.vy *= VMAX / sp; }
+      c.x += c.vx; c.y += c.vy;
+    }
+    for (let it = 0; it < 6; it++) {
+      for (let i = 0; i < C.length; i++) for (let k = i + 1; k < C.length; k++) {
+        const A = C[i], B = C[k], dx = B.x - A.x, dy = B.y - A.y, m = A.r + B.r, d2 = dx * dx + dy * dy;
+        if (d2 >= m * m) continue;
+        const d = Math.sqrt(d2) || 0.01, nx = d2 ? dx / d : 1, ny = d2 ? dy / d : 0, o = (m - d) / 2;
+        A.x -= nx * o; A.y -= ny * o; B.x += nx * o; B.y += ny * o;
+        const rv = (B.vx - A.vx) * nx + (B.vy - A.vy) * ny;
+        if (rv < 0) { const j = rv * 0.6; A.vx += j * nx; A.vy += j * ny; B.vx -= j * nx; B.vy -= j * ny; }
+      }
+      for (const c of C) this.__glass(c, 0.35);
+    }
+    for (const c of C) { this.__glass(c, 0.35); if (Math.abs(c.vx) < 0.01) c.vx = 0; if (Math.abs(c.vy) < 0.01) c.vy = 0; c.rot += c.vx * 4.5; }
+  }
+  __tick = () => {
+    const p = this.ph, T = this.trackRef.current;
+    if (T) {
+      const step = this.__step();
+      if (!p.drag) { const tx = -p.slide * step; p.v += (tx - p.x) * 0.075; p.v *= 0.8; p.x += p.v; if (Math.abs(tx - p.x) < 0.05 && Math.abs(p.v) < 0.05) { p.x = tx; p.v = 0; } }
+      const vel = p.x - (p.lx ?? p.x); p.lx = p.x;
+      const acc = vel - (p.lv ?? 0); p.lv = vel;
+      p.acc = (p.acc || 0) * 0.55 + Math.max(-12, Math.min(12, acc)) * 0.45;
+      T.style.transform = "translate3d(" + p.x.toFixed(2) + "px,0,0)";
+      T.querySelectorAll("[data-jar]").forEach(el => {
+        const id = el.dataset.jar, n = +el.dataset.n || 0;
+        const j = p.jars[id] || (p.jars[id] = p.dropId === id ? { a: -6, w: 0, coins: [], host: null, dy: -280, vy: 0, wait: 26, sq: 0 } : { a: 0, w: 0, coins: [], host: null, dy: 0, vy: 0, wait: 0, sq: 0 });
+        if (j.wait > 0) j.wait--;
+        else if (j.dy < 0 || j.vy) {
+          j.vy += 1.25; j.dy += j.vy;
+          if (j.dy >= 0) { j.dy = 0; if (j.vy > 3) { j.sq = Math.min(.16, j.vy * .012); j.kick = (Math.random() > .5 ? 1 : -1) * Math.min(2.2, j.vy * .12); j.vy *= -0.32; } else { j.vy = 0; } }
+        }
+        j.sq *= 0.82; if (j.sq < .002) j.sq = 0;
+        const sh = el.previousElementSibling; if (sh) { const k = Math.max(0.25, 1 + j.dy / 300); sh.style.transform = "scaleX(" + k.toFixed(3) + ")"; sh.style.opacity = k.toFixed(3); }
+        const load = 0.6 + Math.min(1, n / 58) * 0.6;
+        j.w += -p.acc * 0.55 / load - j.a * 0.06 + (j.kick || 0); j.kick = 0; j.w *= 0.87; j.a += j.w;
+        if (j.a > 16) { j.a = 16; j.w *= -0.3; } if (j.a < -16) { j.a = -16; j.w *= -0.3; }
+        if (Math.abs(j.a) < 0.03 && Math.abs(j.w) < 0.03) { j.a = 0; j.w = 0; }
+        el.style.transformOrigin = j.a >= 0 ? "84% 100%" : "16% 100%";
+        el.style.transform = (j.dy ? "translateY(" + j.dy.toFixed(1) + "px) " : "") + (j.a ? "rotate(" + j.a.toFixed(2) + "deg) " : "") + (j.sq ? "scale(" + (1 + j.sq * .6).toFixed(3) + "," + (1 - j.sq).toFixed(3) + ")" : "") || "none";
+        const host = el.querySelector("[data-coins]"); if (!host) return;
+        const C = j.coins;
+        j.sp = (j.sp || 0) + 1;
+        const rate = j.boot === undefined ? 1 : j.boot ? 1 : 5;
+        if (C.length >= n) j.boot = false;
+        if (C.length < n && j.sp >= rate) { j.sp = 0; const r = 8.6 + Math.random() * 1.4; C.push({ x: 58 + Math.random() * 27, y: r + 4, vx: (Math.random() - .5) * 1.4, vy: 1.5, r, rot: Math.random() * 360, el: null }); if (!j.boot) j.kick = (j.kick || 0) + (Math.random() - .5) * .25; }
+        if (j.boot === undefined) j.boot = true;
+        while (false) { const r = 8.6 + Math.random() * 1.4; C.push({ x: 40 + Math.random() * 63, y: r + 6 + Math.random() * 20, vx: (Math.random() - .5) * 1.2, vy: 0, r, rot: Math.random() * 360, el: null }); }
+        while (C.length > n) { const c = C.pop(); if (c.el) c.el.remove(); }
+        if (j.host !== host) { host.innerHTML = ""; j.host = host; C.forEach(c => { c.el = null; }); }
+        C.forEach(c => { if (!c.el) { c.el = this.__coinEl(c.r); host.appendChild(c.el); } });
+        this.__sim(C, j.a, p.acc);
+        if (p.sparkId === id) { p.sparkId = null; j.spark = 140; }
+        if (j.spark > 0) {
+          j.spark--;
+          if (j.spark % 3 === 0) {
+            const d = document.createElement("div"), z = 6 + Math.random() * 9, hue = Math.random() > .4 ? "#3ddc84" : "#fff3b0";
+            d.style.cssText = "position:absolute;left:" + (20 + Math.random() * 106) + "px;top:" + (40 + Math.random() * 90) + "px;width:" + z + "px;height:" + z + "px;pointer-events:none;z-index:5;background:" + hue + ";clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);filter:drop-shadow(0 0 4px " + hue + ")";
+            el.appendChild(d);
+            const dx = (Math.random() - .5) * 120, dy = -60 - Math.random() * 90;
+            const an = d.animate([{ transform: "translate(0,0) scale(.2) rotate(0deg)", opacity: 0 }, { transform: "translate(" + dx * .4 + "px," + dy * .4 + "px) scale(1.1) rotate(90deg)", opacity: 1, offset: .3 }, { transform: "translate(" + dx + "px," + dy + "px) scale(.3) rotate(200deg)", opacity: 0 }], { duration: 1100 + Math.random() * 700, easing: "cubic-bezier(.22,1,.36,1)" });
+            an.onfinish = () => d.remove();
+          }
+        }
+        C.forEach(c => { c.el.style.transform = "translate(" + (c.x - c.r).toFixed(1) + "px," + (c.y - c.r).toFixed(1) + "px) rotate(" + c.rot.toFixed(0) + "deg)"; });
+      });
+      if (p.drag) p.v *= 0.6;
+    }
+    this.__raf = requestAnimationFrame(this.__tick);
+  };
+  measurePanel = () => {
+    const v = this.viewRef.current, c = this.colRef.current;
+    if (!v || !c) return;
+    const cr = c.getBoundingClientRect(), vr = v.getBoundingClientRect();
+    const k = c.offsetWidth ? cr.width / c.offsetWidth : 1;
+    const top = Math.round((vr.top - cr.top) / k);
+    if (top > 0 && top !== (this.state && this.state.__panelTop)) this.setState({ __panelTop: top });
+  };
+  componentDidMount() {
+    this.measurePanel();
+    this.__pt = [setTimeout(this.measurePanel, 600), setTimeout(this.measurePanel, 1400), setTimeout(() => this.setState({ ready: true }), 120)];
+    if (document.fonts) document.fonts.ready.then(this.measurePanel);
+    window.addEventListener("resize", this.measurePanel);
+    try { const sl = +localStorage.getItem("rabit.savings.slide"); if (sl > 0) { this.ph.slide = sl; setTimeout(() => { this.ph.x = -Math.min(sl, this.__maxSlide()) * this.__step(); }, 0); } } catch (e) {}
+    this.__raf = requestAnimationFrame(this.__tick);
+    try { const v = JSON.parse(localStorage.getItem("rabit.savings.v2") || "null"); if (v && v.goals) this.setState({ goals: v.goals, moves: v.moves || [] }); } catch (e) {}
+  }
+  __rects() { const T = this.trackRef.current; if (!T) return null; const m = {}; T.querySelectorAll("[data-card]").forEach(el => { m[el.dataset.card] = el.getBoundingClientRect().left; }); return m; }
+  setState(u, cb) { const r = this.__rects(); if (r) this.__flipFrom = r; return super.setState(u, cb); }
+  getSnapshotBeforeUpdate() {
+    const T = this.trackRef.current; if (!T) return null;
+    const m = {}; T.querySelectorAll("[data-card]").forEach(el => { m[el.dataset.card] = el.getBoundingClientRect().left; }); return m;
+  }
+  componentDidUpdate(pp, ps, snap0) {
+    clearTimeout(this.__pu); this.__pu = setTimeout(this.measurePanel, 40);
+    const snap = this.__flipFrom || snap0; this.__flipFrom = null;
+    const T = this.trackRef.current; if (!T || !snap) return;
+    const follow = this.ph.followId; this.ph.followId = null;
+    let moved = false;
+    T.querySelectorAll("[data-card]").forEach(el => {
+      const id = el.dataset.card, was = snap[id];
+      if (was == null) { if (this.ph.dropId === id && el.animate) el.animate([{ opacity: 0, transform: "translateY(26px) scale(.92)" }, { opacity: 1, transform: "none" }], { duration: 750, easing: "cubic-bezier(.22,1,.36,1)" }); return; }
+      const dx = was - el.getBoundingClientRect().left; if (Math.abs(dx) < 2) return;
+      moved = true;
+      const kids = [el, ...el.querySelectorAll("*")], saved = kids.map(n => n.style.transition);
+      kids.forEach(n => { n.style.transition = "none"; });
+      requestAnimationFrame(() => requestAnimationFrame(() => kids.forEach((n, i) => { n.style.transition = saved[i]; })));
+      const hero = id === follow;
+      el.style.position = "relative"; el.style.zIndex = hero ? "3" : "1";
+      const frames = hero
+        ? [{ transform: "translateX(" + dx + "px)" }, { transform: "translateX(" + (dx * 0.55) + "px) translateY(-18px) scale(1.04)", offset: 0.45 }, { transform: "translateY(-6px) scale(1.01)", offset: 0.85 }, { transform: "none" }]
+        : [{ transform: "translateX(" + dx + "px)" }, { transform: "none" }];
+      const an = el.animate(frames, { duration: hero ? 1500 : 1300, delay: hero ? 0 : 80, easing: "cubic-bezier(.45,.05,.25,1)", fill: "backwards" });
+      an.onfinish = () => { el.style.zIndex = ""; };
+    });
+    if (follow && moved) {
+      const idx = [...T.children].findIndex(c => c.dataset && c.dataset.card === follow);
+      if (idx >= 0) setTimeout(() => this.__go(idx - 1), 120);
+    }
+  }
+
+  componentWillUnmount() { cancelAnimationFrame(this.__raf); clearTimeout(this.__pu); clearTimeout(this._t); (this.__pt || []).forEach(clearTimeout); window.removeEventListener("resize", this.measurePanel); }
+  save(patch, toast) {
+    const st = this.state || {};
+    const next = { goals: st.goals || GOALS, moves: st.moves || MOVES, ...patch };
+    try { localStorage.setItem("rabit.savings.v2", JSON.stringify({ goals: next.goals, moves: next.moves })); } catch (e) {}
+    clearTimeout(this._t); if (toast) this._t = setTimeout(() => this.setState({ toast: "" }), 2600);
+    this.setState({ ...next, toast: toast || "" });
+  }
+  renderVals() {
+    const st = this.state || {}, ready = !!st.ready;
+    const G = st.goals || GOALS, M = st.moves || MOVES;
+    const byId = id => G.find(g => g.id === id);
+    const seg = (cur, opts) => opts.map(([id, label]) => ({ id, label, color: cur === id ? (id === "out" ? "#a8443a" : "#0b7a45") : "#5d6f67", bg: cur === id ? "#fff" : "transparent", shadow: cur === id ? "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)" : "none" }));
+    // streak (weeks with a deposit)
+    const wIn = w => M.filter(m => m.w === w && m.amt > 0).reduce((a, m) => a + m.amt, 0);
+    let streak = 0; for (let w = wIn(CW) > 0 ? CW : CW - 1; w > 0 && wIn(w) > 0; w--) streak++;
+    let best = 0, run = 0; for (let w = 20; w <= CW; w++) { run = wIn(w) > 0 ? run + 1 : 0; best = Math.max(best, run); }
+    const weeks = []; for (let w = CW - 11; w <= CW; w++) { const v = wIn(w), isCur = w === CW; weeks.push({ label: isCur ? "NOW" : wDate(w).split(" ")[1], ink: isCur ? "#0b7a45" : "#9aa8a1", bg: v > 0 ? "linear-gradient(160deg,#2fd17f,#0f9a56)" : "rgba(18,38,30,.06)", ring: isCur ? "0 0 0 2px #fff,0 0 0 3.5px #17b866" : v > 0 ? "inset 0 1px 0 rgba(255,255,255,.35)" : "none", tip: "Week of " + wDate(w) + " · " + money(v) }); }
+    const P = G.map(g => ({ g, p: plan(g, M) }));
+    const wk = P.filter(x => x.g.freq === "week" && !x.p.done);
+    const weekPlan = wk.reduce((a, x) => a + x.p.now, 0), weekInV = wk.reduce((a, x) => a + Math.max(0, x.p.dThis), 0);
+    const doneG = P.filter(x => x.p.done);
+    const behind = P.filter(x => !x.p.done && x.p.dThis < x.p.now - .5);
+    // calculator
+    const cf = st.cFreq || "week", cp = num(st.cPer ?? "500") || 0, cMax = cf === "week" ? 52 : 24, cn = Math.min(cMax, st.cN || (cf === "week" ? 12 : 6));
+    const cTot = cp * cn, cEnd = cf === "week" ? wDate(CW + cn) : mDate(CM + cn);
+    let pool = cTot;
+    const cCovers = P.filter(x => !x.p.done).map(x => { const need = x.p.left, got = Math.min(need, pool); pool -= got; const pc = need ? got / need * 100 : 100; return { name: x.g.name, color: x.g.color, txt: pc >= 100 ? "Covered" : Math.round(pc) + "%", ink: pc >= 100 ? "#0b7a45" : "#41504a" }; });
+    // move modal
+    const mv = st.move, mg = mv && byId(mv.goal), mode = mv ? mv.mode : "add", amt = mv ? num(mv.amt) : null;
+    const mp = mg ? plan(mg, M) : null;
+    const mvOk = !!(mg && amt > 0 && (mode === "add" || amt <= mg.saved));
+    let mvPreview = "";
+    if (mg) {
+      if (!(amt > 0)) mvPreview = mode === "add" && mp.free ? money(mp.left) + " left to fill this jar." : mode === "add" ? "Planned " + (mg.freq === "week" ? "this week" : "this month") + ": " + money(Math.max(0, mp.now - mp.dThis)) + " left." : "How much are you taking out?";
+      else if (mode === "out" && amt > mg.saved) mvPreview = "You only have " + money(mg.saved) + " in this jar.";
+      else { const ns = mg.saved + (mode === "add" ? amt : -amt), nl = Math.max(0, mg.target - ns), nd = mp.dThis + (mode === "add" ? amt : -amt);
+        if (ns >= mg.target) mvPreview = "This fills the jar! Goal complete.";
+        else if (mp.free) mvPreview = "New balance: " + money(ns) + " · " + Math.round(Math.min(100, ns / mg.target * 100)) + "% of goal";
+        else { const nxt = mp.rem > 1 ? nl / (mp.rem - 1) : nl; mvPreview = (nd >= mp.now ? "Above plan — " : "Below plan — ") + "RaBit recalculates the rest to " + money(nxt) + per(mg.freq) + " for " + (mp.rem - 1) + (mg.freq === "week" ? " more weeks." : " more months."); } }
+    }
+    // goal form
+    const gf = st.gform, gT = gf ? num(gf.target) : null, gCur = gf && gf.id ? ((byId(gf.id) || {}).saved || 0) : 0, gLeft = gT ? Math.max(0, gT - gCur) : 0;
+    const gN = gf ? Math.max(1, Math.round(num(gf.n) || 0)) : 1, gPer = gf ? num(gf.per) : null;
+    let gfRes = "—", gfResLabel = "", gOk = false, nFinal = gN;
+    if (gf) {
+      const u = gf.freq === "week" ? "week" : "month";
+      if (gf.mode === "free") { gfResLabel = "No plan"; gfRes = "Add money whenever you want"; gOk = gT > 0; }
+      else if (gf.mode === "date") { gfResLabel = "You need to save"; if (gT > 0 && num(gf.n) > 0) { gfRes = money(gLeft / gN) + " per " + u; gOk = true; } }
+      else { gfResLabel = "You'll reach it"; if (gT > 0 && gPer > 0) { nFinal = Math.max(1, Math.ceil(gLeft / gPer)); gfRes = "in " + nFinal + " " + u + (nFinal === 1 ? "" : "s") + " · " + (gf.freq === "week" ? wDate(CW + nFinal - 1) : mDate(CM + nFinal - 1)); gOk = true; } }
+      gOk = gOk && !!(gf.name || "").trim();
+    }
+    const cheer = st.cheer && byId(st.cheer);
+    return {
+      viewRef: this.viewRef, colRef: this.colRef, panelTop: (st.__panelTop ?? 104),
+      wrapRef: this.wrapRef, trackRef: this.trackRef, dragCursor: st.dragging ? "grabbing" : "grab",
+      ...(() => {
+        const p = this.ph, mx = Math.max(0, G.length + 1 - 3), cur = Math.min(st.slide ?? p.slide, mx);
+        return {
+          dots: Array.from({ length: mx + 1 }, (_, i) => ({ i, w: i === cur ? "22px" : "7px", bg: i === cur ? "#17b866" : "rgba(18,38,30,.16)" })),
+          prevOp: cur > 0 ? 1 : .35, nextOp: cur < mx ? 1 : .35,
+          prevSlide: () => this.__go(p.slide - 1), nextSlide: () => this.__go(p.slide + 1),
+          goSlide: e => this.__go(+e.currentTarget.dataset.i),
+          onDown: e => { if (e.button !== 0) return; p.down = true; p.drag = false; p.moved = 0; p.sx = e.clientX; p.x0 = p.x; p.pid = e.pointerId; },
+          onMove: e => {
+            if (!p.down) return;
+            if (!p.drag) {
+              if (Math.abs(e.clientX - p.sx) < 6) return;
+              p.drag = true; p.x0 = p.x; p.sx = e.clientX; p.v = 0;
+              try { e.currentTarget.setPointerCapture(p.pid); } catch (er) {}
+              this.setState({ dragging: true });
+            }
+            const step = this.__step(), minX = -this.__maxSlide() * step;
+            let nx = p.x0 + (e.clientX - p.sx);
+            if (nx > 0) nx = nx * 0.35; if (nx < minX) nx = minX + (nx - minX) * 0.35;
+            p.v = nx - p.x; p.x = nx; p.moved = Math.max(p.moved, 7, Math.abs(e.clientX - p.sx));
+          },
+          onUp: () => { p.down = false; if (!p.drag) return; p.drag = false; const i = Math.round(-(p.x + p.v * 9) / this.__step()); this.__go(i); this.setState({ dragging: false }); },
+          onClickCap: e => { if (p.moved > 6 && !p.down) { e.stopPropagation(); e.preventDefault(); } p.moved = 0; },
+          poke: e => { const j = p.jars[e.currentTarget.dataset.jar]; if (j) { j.kick = (Math.random() > .5 ? 1 : -1) * 1.8; j.coins.forEach(c => { c.vy -= 1.5 + Math.random() * 2; c.vx += (Math.random() - .5) * 2; }); } }
+        };
+      })(),
+      ...this.__nav(), ...this.__shell(), ...this.__settings(), ...this.__prefVals(),
+      isDark: this.__prefs().theme === "dark", isLight: this.__prefs().theme !== "dark",
+      themeLabel: this.__prefs().theme === "dark" ? "DARK" : "LIGHT",
+      toggleTheme: () => this.__setPref("theme", this.__prefs().theme === "dark" ? "light" : "dark"),
+      logoEnter: () => this.setState({ __logo: true }), logoLeave: () => this.setState({ __logo: false }),
+      logoW: st.__logo ? "110px" : "0px", logoOp: st.__logo ? 1 : 0, logoMl: st.__logo ? "2px" : "-9px",
+      streak: String(streak), streakUnit: streak === 1 ? "week streak" : "week streak",
+      streakSub: "Best " + best + " weeks · " + doneG.length + (doneG.length === 1 ? " goal" : " goals") + " completed",
+      weeks,
+      weekIn: money(weekInV), weekPlan: money(weekPlan),
+      weekMsg: weekInV >= weekPlan - .5 ? "Week covered" : money(weekPlan - weekInV) + " to go", weekColor: weekInV >= weekPlan - .5 ? "#0b7a45" : "#9a6a14", weekDot: weekInV >= weekPlan - .5 ? "#17b866" : "#e0902a",
+      goals: P.map((x, i) => ({ ...x, i })).sort((x, y) => { const r = q => q.p.done && q.g.id !== st.celebrate ? 2 : q.g.important ? 0 : 1; return r(x) - r(y) || x.i - y.i; }).map(({ g, p }) => {
+        const pc = g.target ? Math.min(100, g.saved / g.target * 100) : 0, u = g.freq === "week" ? "week" : "month";
+        let msg, sub, msgColor;
+        if (p.done) { msg = "Goal reached — congrats!"; sub = money(g.saved - g.target) + " extra saved"; msgColor = "#0b7a45"; }
+        else if (p.free) { msg = "No plan · add whenever you want"; sub = money(p.left) + " to go"; msgColor = "#41504a"; }
+        else if (p.dThis >= p.now - .5) { const ahead = p.dThis > p.now * 1.05; msg = ahead ? "Ahead of plan" : "This " + u + " covered"; sub = "Next: " + money(p.next) + per(g.freq) + " · ends " + p.end; msgColor = "#0b7a45"; }
+        else { msg = money(p.now - Math.max(0, p.dThis)) + " left this " + u; sub = p.rem > 1 ? "Skip it and it becomes " + money(p.left / (p.rem - 1)) + per(g.freq) : "Last " + u + " of the plan"; msgColor = "#9a6a14"; }
+        return { id: g.id, name: g.name, color: g.color, done: p.done, important: !!g.important && !p.done,
+          coins: p.done ? 58 : Math.round(pc / 100 * 58), lidBg: "linear-gradient(180deg," + lighten(g.color, .25) + "," + g.color + ")", lidBorder: lighten(g.color, .45),
+          shellBg: p.done ? "linear-gradient(145deg,rgba(214,246,226,.85),rgba(190,236,207,.5))" : "linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.38))",
+          cardBg: p.done ? "linear-gradient(160deg,#effbf3,#ddf5e6)" : "#fff",
+          fillTop: lighten(g.color, .35), fillH: ready ? Math.max(0, pc * 0.86) + "%" : "0%", surfOp: pc > 1 ? .9 : 0,
+          tilt: p.done ? "7deg" : pc < 1 ? "-14deg" : "0deg", tiltN: p.done ? 7 : pc < 1 ? -14 : 0,
+          pct: Math.round(pc) + "%", pctInk: pc > 45 ? "#fff" : "#41504a", pctGlow: pc > 45 ? "0 1px 8px rgba(0,0,0,.25)" : "0 1px 0 rgba(255,255,255,.8)",
+          pill: p.done ? "Completed" : "In progress", pillBg: p.done ? "linear-gradient(150deg,#1fc172,#0f9a56)" : "linear-gradient(150deg,#f0a23c,#e0902a)",
+          amtLabel: p.done ? "Amount saved" : p.free ? "Amount needed" : "Plan: " + money(p.now) + per(g.freq),
+          saved: money(g.saved), targetTail: p.done ? "" : "/" + Math.round(g.target).toLocaleString("en-US"),
+          track: lighten(g.color, .85), w: ready ? pc + "%" : "0%", msg, sub, msgColor };
+      }),
+      botOp: st.proud && st.blinkOff ? 0.15 : 1,
+      botHead: st.proud ? "> CONGRATS!" : behind.length ? "> HEADS UP" : "> NICE!",
+      botLine: st.proud ? st.proud.slice(0, st.typeN ?? st.proud.length) : behind.length ? money(behind[0].p.now - Math.max(0, behind[0].p.dThis)).toUpperCase() + " LEFT FOR " + behind[0].g.name.toUpperCase() + " THIS WEEK." : "ALL JARS ON TRACK. " + streak + "-WEEK STREAK.",
+      cPer: st.cPer ?? "500", onCPer: e => this.setState({ cPer: e.target.value }), cUnit: cf === "week" ? "/ WEEK" : "/ MONTH",
+      cFreqs: seg(cf, [["week", "Weekly"], ["month", "Monthly"]]), pickCFreq: e => this.setState({ cFreq: e.currentTarget.dataset.v, cN: null }),
+      cN: cn, cMax, onCN: e => this.setState({ cN: +e.target.value }),
+      cLen: cn + " " + (cf === "week" ? "week" : "month") + (cn === 1 ? "" : "s"),
+      cByLabel: "By " + cEnd + " you'd have", cTotal: money(cTot), cCovers,
+      calcToGoal: () => this.setState({ gform: { id: null, name: "", target: String(Math.round(cTot)), mode: "amount", freq: cf, n: String(cn), per: String(cp), color: SW[G.length % SW.length] } }),
+      cheerOn: !!cheer, cheerName: cheer ? cheer.name.toUpperCase() : "", cheerText: cheer ? "You saved " + money(cheer.saved) + ". Streak at " + streak + (streak === 1 ? " week" : " weeks") + " — RaBit is proud of you." : "",
+      closeCheer: () => this.setState({ cheer: null }),
+      openAdd: e => this.setState({ move: { goal: e.currentTarget.dataset.id, mode: "add", amt: "" } }),
+      openWithdraw: e => this.setState({ move: { goal: e.currentTarget.dataset.id, mode: "out", amt: "" } }),
+      closeMove: () => this.setState({ move: null }),
+      moveOpen: !!mg, mvName: mg ? mg.name : "", mvColor: mg ? mg.color : "#17b866", mvSoft: mg ? mg.color + "1f" : "transparent",
+      mvSummary: mg ? money(mg.saved) + " of " + money(mg.target) + (mp.free ? " · no plan" : " · plan " + money(mp.now) + per(mg.freq)) : "",
+      mvModes: seg(mode, [["add", "Add money"], ["out", "Withdraw"]]),
+      pickMvMode: e => { const m = e.currentTarget.dataset.v; this.setState(s => ({ move: { ...s.move, mode: m, err: "" } })); },
+      mvAmt: mv ? mv.amt : "", onMvAmt: e => { const v = e.target.value; this.setState(s => ({ move: { ...s.move, amt: v, err: "" } })); },
+      mvQuick: mp && mode === "out" ? [["-500", "−$500"], ["-1000", "−$1,000"], ["empty", "Empty jar"]].map(([v, label]) => ({ v, label, ink: v === "empty" ? "#a8443a" : "#41504a", bg: v === "empty" ? "rgba(192,74,66,.1)" : "rgba(18,38,30,.05)" })) : mp ? (mp.free ? [["500", "+$500"], ["1000", "+$1,000"], ["all", "Rest " + money(mp.left)]] : [["plan", "Plan " + money(Math.max(0, mp.now - mp.dThis))], ["half", "Half"], ["all", "Rest " + money(mp.left)]]).map(([v, label]) => ({ v, label, ink: v === "plan" ? "#0b7a45" : "#41504a", bg: v === "plan" ? "rgba(23,184,102,.1)" : "rgba(18,38,30,.05)" })) : [],
+      pickQuick: e => { const v = e.currentTarget.dataset.v, base = Math.max(0, mp.now - mp.dThis);
+        if (mode === "out") { const cur = num(this.state.move.amt) || 0; const a2 = v === "empty" ? mg.saved : Math.min(mg.saved, cur + Math.abs(+v)); this.setState(s => ({ move: { ...s.move, amt: String(Math.round(a2)), err: "" } })); return; } const a = v === "plan" ? base : v === "half" ? base / 2 : v === "all" ? mp.left : (num(this.state.move.amt) || 0) + (+v); this.setState(s => ({ move: { ...s.move, mode: "add", amt: String(Math.round(a)), err: "" } })); },
+      mvPreview: mv && mv.err ? mv.err : mvPreview, mvPrevColor: (mv && mv.err) || (mg && mode === "out" && amt > mg.saved) ? "#a8443a" : "#5d6f67",
+      mvBtn: mode === "add" ? "Add to jar" : "Withdraw", mvBtnBg: mode === "add" ? "linear-gradient(150deg,#26342d,#18221d)" : "#a8443a",
+      mvKey: e => { if (e.key === "Enter") this.__saveMove(); if (e.key === "Escape") this.setState({ move: null }); },
+      saveMove: () => this.__saveMove(),
+      openNewGoal: () => this.setState({ gform: { id: null, name: "", target: "", mode: "free", freq: "week", n: "12", per: "", color: SW[G.length % SW.length] } }),
+      openEditGoal: e => { const g = byId(e.currentTarget.dataset.id); if (!g) return; const p = plan(g, M); this.setState({ gform: { id: g.id, important: !!g.important, name: g.name, target: String(g.target), mode: g.freq === "none" ? "free" : "date", freq: g.freq === "none" ? "week" : g.freq, n: String(p.rem), per: String(Math.round(p.now)), color: g.color } }); },
+      closeGoal: () => this.setState({ gform: null }),
+      goalOpen: !!gf, gfHead: gf && gf.id ? "EDIT JAR" : "NEW JAR", gfName: gf ? gf.name : "", gfTarget: gf ? gf.target : "",
+      gfModes: seg(gf ? gf.mode : "free", [["free", "Just a goal"], ["date", "Deadline"], ["amount", "What I can save"]]),
+      pickGfMode: e => { const v = e.currentTarget.dataset.v; this.setState(s => ({ gform: { ...s.gform, mode: v, freq: s.gform.freq === "none" ? "week" : s.gform.freq } })); },
+      gfHasPlan: !!(gf && gf.mode !== "free"),
+      gfFreqs: seg(gf ? gf.freq : "week", [["week", "Weekly"], ["month", "Monthly"]]),
+      pickGfFreq: e => { const v = e.currentTarget.dataset.v; this.setState(s => ({ gform: { ...s.gform, freq: v } })); },
+      gfIsDate: !!(gf && gf.mode === "date"), gfIsAmt: !!(gf && gf.mode === "amount"),
+      gfN: gf ? gf.n : "", onGfN: e => { const v = e.target.value; this.setState(s => ({ gform: { ...s.gform, n: v } })); }, gfNUnit: gf && gf.freq === "month" ? "months" : "weeks",
+      gfPer: gf ? gf.per : "", onGfPer: e => { const v = e.target.value; this.setState(s => ({ gform: { ...s.gform, per: v } })); }, gfPerUnit: gf && gf.freq === "month" ? "/mo" : "/wk",
+      gfRes, gfResLabel,
+      onGfName: e => { const v = e.target.value; this.setState(s => ({ gform: { ...s.gform, name: v, err: "" } })); },
+      onGfTarget: e => { const v = e.target.value; this.setState(s => ({ gform: { ...s.gform, target: v, err: "" } })); },
+      gfSw: SW.map(v => ({ v, scale: gf && gf.color === v ? 1.15 : 1, ring: gf && gf.color === v ? "0 0 0 2px #fff,0 0 0 4px " + v : "none" })),
+      pickGfColor: e => { const v = e.currentTarget.dataset.v; this.setState(s => ({ gform: { ...s.gform, color: v } })); },
+      gfCanDel: !!(gf && gf.id),
+      toggleGfImp: () => this.setState(s2 => ({ gform: { ...s2.gform, important: !s2.gform.important } })),
+      gfImpBg: gf && gf.important ? "rgba(224,144,42,.1)" : "rgba(18,38,30,.04)", gfImpFill: gf && gf.important ? "#e0902a" : "none",
+      gfImpSw: gf && gf.important ? "linear-gradient(150deg,#f0a23c,#e0902a)" : "rgba(18,38,30,.16)", gfImpX: gf && gf.important ? "18px" : "0px", gfBtn: gf && gf.id ? "Save" : "Create jar", gfBtnBg: "linear-gradient(150deg,#1fc172,#0f9a56)",
+      gfErrOn: !!(gf && gf.err), gfErr: gf && gf.err ? gf.err : "",
+      gfNameRing: gf && gf.err && !(gf.name || "").trim() ? "inset 0 -2px 0 #e0902a" : "none",
+      gfTargetRing: gf && gf.err && !(gT > 0) ? "inset 0 0 0 1.5px #e0902a" : "none",
+      saveGoal: () => {
+        if (!gOk) {
+          const miss = [!(gf.name || "").trim() && "a name", !(gT > 0) && "an amount", gf.mode === "date" && !(num(gf.n) > 0) && "how long", gf.mode === "amount" && !(gPer > 0) && "how much you can save"].filter(Boolean);
+          this.setState(s2 => ({ gform: { ...s2.gform, err: "Add " + miss.join(", ").replace(/, ([^,]*)$/, " and $1") + " to create the jar." } }));
+          return;
+        }
+        const cur = gf.freq === "week" ? CW : CM;
+        const free = gf.mode === "free";
+        const g = { name: gf.name.trim(), target: gT, color: gf.color, important: !!gf.important, freq: free ? "none" : gf.freq, n: free ? 0 : nFinal, start: free ? CW : cur };
+        if (gf.id) this.save({ goals: G.map(x => x.id === gf.id ? { ...x, ...g } : x) }, g.name + " re-planned");
+        else {
+          const nid = "g" + Date.now();
+          this.ph.dropId = nid;
+          this.save({ goals: [...G, { id: nid, saved: 0, ...g }] }, g.name + " jar created");
+          setTimeout(() => { const T = this.trackRef.current; if (!T) return; const idx = [...T.children].findIndex(c => c.dataset && c.dataset.card === nid); this.__go(idx - 1); }, 30);
+        }
+        this.setState({ gform: null });
+      },
+      delGoal: () => { if (!gf || !gf.id) return; const g = byId(gf.id); this.save({ goals: G.filter(x => x.id !== gf.id) }, (g ? g.name : "Jar") + " deleted"); this.setState({ gform: null }); },
+      toastOn: !!st.toast, toastText: st.toast || ""
+    };
+  }
+  __celebrate(g) {
+    const txt = g.name.toUpperCase() + " IS DONE. RABIT IS PROUD OF YOU.";
+    clearInterval(this.__ty); clearTimeout(this.__cel);
+    setTimeout(() => { this.ph.sparkId = g.id; }, 500);
+    this.setState({ celebrate: g.id, proud: txt, typeN: 0 });
+    clearInterval(this.__bl); clearTimeout(this.__blEnd);
+    this.__ty = setInterval(() => {
+      const n = (this.state.typeN || 0) + 1; this.setState({ typeN: n });
+      if (n >= txt.length) {
+        clearInterval(this.__ty);
+        this.__bl = setInterval(() => this.setState(s2 => ({ blinkOff: !s2.blinkOff })), 480);
+        this.__blEnd = setTimeout(() => { clearInterval(this.__bl); this.setState({ proud: null, blinkOff: false, typeN: 0 }); }, 10000);
+      }
+    }, 55);
+    this.__cel = setTimeout(() => { this.ph.followId = g.id; this.setState({ celebrate: null }); }, 3200);
+  }
+  __saveMove() {
+    const st = this.state || {}, G = st.goals || GOALS, M = st.moves || MOVES, mv = st.move;
+    if (!mv) return;
+    const g = G.find(x => x.id === mv.goal), a = num(mv.amt);
+    if (!g || !(a > 0) || (mv.mode === "out" && a > g.saved)) { this.setState(s2 => ({ move: { ...s2.move, err: !(a > 0) ? "Type an amount first." : "You only have " + money(g ? g.saved : 0) + " in this jar." } })); return; }
+    const sgn = mv.mode === "add" ? a : -a, wasDone = g.saved >= g.target, nowDone = g.saved + sgn >= g.target;
+    this.save({ goals: G.map(x => x.id === g.id ? { ...x, saved: x.saved + sgn } : x), moves: [{ id: "m" + Date.now(), goal: g.id, amt: sgn, w: CW, mo: CM, d: "Oct 4" }, ...M] }, (sgn > 0 ? money(a) + " added to " : money(a) + " withdrawn from ") + g.name);
+    this.setState({ move: null });
+    if (!wasDone && nowDone) this.__celebrate(g);
+  }
+}
+
+</script>
+</body>
+</html>
