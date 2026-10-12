@@ -7,6 +7,7 @@ import { useData } from "../../store/data";
 import { useUi } from "../../store/ui";
 import { t } from "../../i18n";
 import { ago } from "./lists";
+import { dragScroll } from "../../lib/dragScroll";
 import { trashDaysLeft } from "../../domain/logic";
 import { EASE, FAINT, GREEN, Ico, INK, MUTED, Pill, RED, popCard, reset, silk, useAutosave, type SaveStatus } from "./ui";
 
@@ -40,9 +41,12 @@ export function NotePane({ id, onStatus, onCreated, onDelete, onRestore, onPurge
   const [pinned, setPinned] = useState(note?.pinned ?? false);
   const [flash, setFlash] = useState(false);
   const [ed, setEd] = useState<TagEd | null>(null);
+  const [drag] = useState(dragScroll);
+  const [tagQ, setTagQ] = useState<string | null>(null); // null = búsqueda cerrada
   const idRef = useRef<string | null>(id);
   const titleRef = useRef<HTMLInputElement>(null);
   const trashed = !!note && note.deletedAt !== null;
+  const shownTags = tagQ?.trim() ? tags.filter((tg) => tg.name.toLowerCase().includes(tagQ.trim().toLowerCase())) : tags;
   const validTag = tags.some((t) => t.id === tagId) ? tagId : null;
   const tag = tags.find((t) => t.id === validTag) ?? null;
 
@@ -78,7 +82,7 @@ export function NotePane({ id, onStatus, onCreated, onDelete, onRestore, onPurge
     showToast(t("Added to tasks"));
   };
 
-  const openEd = (t: Tag | null) => setEd(t ? { orig: t, name: t.name, color: t.color } : { orig: null, name: "", color: TAG_COLORS[tags.length % TAG_COLORS.length] });
+  const openEd = (t: Tag | null, name = "") => setEd(t ? { orig: t, name: t.name, color: t.color } : { orig: null, name, color: TAG_COLORS[tags.length % TAG_COLORS.length] });
   const nameTaken = ed ? tags.some((t) => t.name.toLowerCase() === ed.name.trim().toLowerCase() && t.id !== ed.orig?.id) : false;
   const saveTag = async () => {
     if (!ed || !ed.name.trim() || nameTaken) return;
@@ -132,10 +136,35 @@ export function NotePane({ id, onStatus, onCreated, onDelete, onRestore, onPurge
         />
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, marginTop: 20 }}>
-        <div role="radiogroup" aria-label={t("Tag")} style={{ display: "flex", flexWrap: "wrap", gap: 2, padding: 3, borderRadius: 22, background: "rgba(18,38,30,.05)" }}>
-          {tags.length === 0 && <span style={{ padding: "7px 13px", fontSize: 12, color: FAINT }}>{t("No tags yet")}</span>}
-          {tags.map((tg) => {
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 20 }}>
+        <div
+          role="radiogroup"
+          data-tour="note-tags"
+          aria-label={t("Tag")}
+          className="rb-noscroll"
+          onWheel={(e) => {
+            if (e.deltaY) e.currentTarget.scrollLeft += e.deltaY;
+          }}
+          {...drag}
+          style={{
+            display: "flex",
+            flexWrap: "nowrap",
+            flex: "0 1 auto",
+            minWidth: 0,
+            maxWidth: 400,
+            overflowX: "auto",
+            cursor: "grab",
+            touchAction: "pan-x",
+            userSelect: "none",
+            gap: 2,
+            padding: 3,
+            borderRadius: 22,
+            background: "rgba(18,38,30,.05)",
+          }}
+        >
+          {tags.length === 0 && <span style={{ padding: "7px 13px", fontSize: 12, color: FAINT, whiteSpace: "nowrap" }}>{t("No tags yet")}</span>}
+          {shownTags.length === 0 && tags.length > 0 && <span style={{ padding: "7px 13px", fontSize: 12, color: FAINT, whiteSpace: "nowrap" }}>{t("No matching tags")}</span>}
+          {shownTags.map((tg) => {
             const on = tg.id === validTag;
             return (
               <button
@@ -157,6 +186,7 @@ export function NotePane({ id, onStatus, onCreated, onDelete, onRestore, onPurge
                   fontSize: 12,
                   fontWeight: 600,
                   whiteSpace: "nowrap",
+                  flex: "none",
                   color: on ? "#1d2a24" : MUTED,
                   background: on ? "#fff" : "transparent",
                   boxShadow: on ? "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)" : "none",
@@ -170,6 +200,73 @@ export function NotePane({ id, onStatus, onCreated, onDelete, onRestore, onPurge
             );
           })}
         </div>
+        {tagQ !== null ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 4, flex: "none", padding: "0 6px 0 12px", height: 32, borderRadius: 999, background: "rgba(18,38,30,.05)" }}>
+            <input
+              autoFocus
+              aria-label={t("Search tags")}
+              placeholder={t("Search tags")}
+              value={tagQ}
+              disabled={trashed}
+              onChange={(e) => setTagQ(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  e.stopPropagation();
+                  setTagQ(null);
+                }
+              }}
+              style={{ ...reset, width: 90, border: 0, outline: 0, background: "transparent", fontFamily: "inherit", fontSize: 11.5, color: INK, cursor: "text" }}
+            />
+            {tagQ.trim() && shownTags.length === 0 && !trashed && (
+              <button
+                type="button"
+                aria-label={t("Create tag “{name}”", { name: tagQ.trim() })}
+                title={t("Create tag “{name}”", { name: tagQ.trim() })}
+                className="ip-h-green"
+                onClick={() => {
+                  openEd(null, tagQ.trim().slice(0, 24));
+                  setTagQ(null);
+                }}
+                style={{ ...reset, width: 24, height: 24, borderRadius: "50%", display: "grid", placeItems: "center", color: GREEN, background: "#fff" }}
+              >
+                {Ico.plus(10, 2)}
+              </button>
+            )}
+            <button
+              type="button"
+              aria-label={t("Close")}
+              onClick={() => setTagQ(null)}
+              style={{ ...reset, width: 22, height: 22, borderRadius: "50%", fontSize: 14, lineHeight: 1, color: MUTED }}
+            >
+              ×
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            aria-label={t("Search tags")}
+            title={t("Search tags")}
+            className="ip-h-green"
+            onClick={() => setTagQ("")}
+            style={{
+              ...reset,
+              flex: "none",
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              display: "grid",
+              placeItems: "center",
+              color: MUTED,
+              background: "rgba(18,38,30,.05)",
+              transition: `background .3s ease,color .3s ease,transform .35s ${EASE}`,
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+              <circle cx="7" cy="7" r="4.6" />
+              <path d="M10.5 10.5 14 14" />
+            </svg>
+          </button>
+        )}
         <div style={{ position: "relative" }}>
           <button
             type="button"
@@ -314,7 +411,19 @@ export function NotePane({ id, onStatus, onCreated, onDelete, onRestore, onPurge
           <button
             type="button"
             onClick={() => void toTask()}
-            style={{ ...reset, display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 600, color: GREEN, padding: "6px 4px", borderRadius: 8 }}
+            style={{
+              ...reset,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              whiteSpace: "nowrap",
+              flex: "none",
+              fontSize: 12.5,
+              fontWeight: 600,
+              color: GREEN,
+              padding: "6px 4px",
+              borderRadius: 8,
+            }}
           >
             {flash ? t("✓ Added to tasks") : t("+ Add to tasks")}
           </button>

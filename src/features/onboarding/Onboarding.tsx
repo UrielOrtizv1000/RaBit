@@ -13,7 +13,7 @@ const MODS: { id: keyof Modules; desc: string; soon?: boolean }[] = [
   { id: "calendar", desc: "Events, tasks and RaBit reminders." },
   { id: "routine", desc: "Your recurring week, wake-up and bedtime." },
   { id: "notes", desc: "Fast notes you can turn into tasks." },
-  { id: "savings", desc: "Set goals and track what you save.", soon: true },
+  { id: "savings", desc: "Set goals and track what you save." },
 ];
 const IDS = MODS.map((m) => m.id);
 const E = "cubic-bezier(.22,1,.36,1)";

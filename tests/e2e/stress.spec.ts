@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+// The first-run tutorial overlays the app; these tests are not about it.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("rabit.tutorial.seen", "off"));
+});
+
 /** Parte del store que usan estas pruebas (expuesto solo en desarrollo como window.__rabit). */
 interface DevStore {
   addEvent: (e: { title: string; date: string; start?: string; end?: string }) => Promise<unknown>;
