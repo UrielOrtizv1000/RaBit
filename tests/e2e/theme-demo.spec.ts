@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+// The first-run tutorial overlays the app; these tests are not about it.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("rabit.tutorial.seen", "off"));
+});
+
 test("dark/light theme toggle persists and demo data can be loaded and cleared", async ({ page }) => {
   await page.goto("/");
   await page.getByPlaceholder("How should RaBit call you?").fill("Tester");
@@ -18,6 +23,7 @@ test("dark/light theme toggle persists and demo data can be loaded and cleared",
 
   await page.getByLabel("Settings").click();
   await page.getByRole("button", { name: "Load" }).click();
+  await expect(page.getByText("Demo data loaded")).toBeVisible({ timeout: 15_000 }); // seeding takes a moment
   await page.getByRole("dialog", { name: "Settings" }).getByRole("button", { name: "Done", exact: true }).click();
   await expect(page.getByText("Submit report").first()).toBeVisible();
 
