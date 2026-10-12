@@ -22,10 +22,6 @@ import { SettingsModal } from "../features/settings/SettingsModal";
 import { Onboarding } from "../features/onboarding/Onboarding";
 import { ItemPanel } from "../components/ItemPanel/ItemPanel";
 import { Toaster } from "../components/Toaster";
-import { Tutorial } from "../components/Tutorial";
-import { startUpdater } from "../services/updater";
-import { maybeStartTour } from "../components/tourState";
-import { TOURS, type TourId } from "../components/tours";
 import { useTheme } from "./useTheme";
 import { setLang, t } from "../i18n";
 import { applyGlass } from "../services/glass";
@@ -57,22 +53,6 @@ export function App() {
     boot().catch((e: unknown) => setErr(String(e)));
   }, []);
   useEffect(() => (ready ? startReminders() : undefined), [ready]);
-  useEffect(() => (ready ? startUpdater() : undefined), [ready]); // revisión silenciosa al iniciar y cada 6 h
-  // Tutoriales guiados: el principal tras el onboarding; después uno la primera vez que se visita cada página o ventana.
-  const onboarded = !!user?.onboardingDone;
-  const settingsOpen = useUi((s) => s.settingsOpen);
-  useEffect(() => {
-    if (!ready || !onboarded) return;
-    const id: TourId = page === "home" ? "main" : page;
-    if (!(id in TOURS)) return;
-    const h = setTimeout(() => maybeStartTour(id), page === "home" ? 300 : 800);
-    return () => clearTimeout(h);
-  }, [ready, onboarded, page]);
-  useEffect(() => {
-    if (!ready || !onboarded || !(settingsOpen || (panel && page !== "notes"))) return;
-    const h = setTimeout(() => maybeStartTour(settingsOpen ? "settings" : "panel"), 600);
-    return () => clearTimeout(h);
-  }, [ready, onboarded, settingsOpen, panel, page]);
 
   // Atajos: Ctrl/Cmd+N crea en la pestaña activa, Esc cierra, Ctrl/Cmd+K enfoca la búsqueda.
   useEffect(() => {
@@ -122,11 +102,6 @@ export function App() {
         </div>
       ) : (
         <div
-          id="rb-overlay"
-          onScroll={(e) => {
-            // esta capa nunca debe desplazarse (un foco o scrollIntoView dentro de una página escalada la movería)
-            if (e.currentTarget.scrollLeft || e.currentTarget.scrollTop) e.currentTarget.scrollTo(0, 0);
-          }}
           style={{
             position: "relative",
             flex: 1,
@@ -183,7 +158,6 @@ export function App() {
           </div>
           {panel && <ItemPanel />}
           <SettingsModal />
-          <Tutorial />
           <Toaster />
         </div>
       )}

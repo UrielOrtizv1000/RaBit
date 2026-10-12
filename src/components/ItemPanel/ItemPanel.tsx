@@ -251,44 +251,39 @@ export function ItemPanel({ inline = false }: { inline?: boolean }) {
             {inline ? (
               <div style={silk(10, ".16em")}>{t("YOUR NOTES")}</div>
             ) : (
-              <div data-tour="panel-tabs">
-                <Seg<PanelKind>
-                  role="tablist"
-                  label={t("Item type")}
-                  options={kindOptions()}
-                  value={kind}
-                  onChange={pickKind}
-                  size={9.5}
-                  pad="7px 10px"
-                  font={{ fontFamily: "Silkscreen,monospace", letterSpacing: ".07em", fontWeight: 400 }}
-                  stretch={false}
-                />
-              </div>
+              <Seg<PanelKind>
+                role="tablist"
+                label={t("Item type")}
+                options={kindOptions()}
+                value={kind}
+                onChange={pickKind}
+                size={9.5}
+                pad="7px 10px"
+                font={{ fontFamily: "Silkscreen,monospace", letterSpacing: ".07em", fontWeight: 400 }}
+                stretch={false}
+              />
             )}
-            <div data-tour="panel-new" style={{ flex: "none" }}>
-              <Pill
-                onClick={startNew}
-                className="ip-h-scale"
-                style={{
-                  padding: "9px 13px",
-                  whiteSpace: "nowrap",
-                  color: "#fff",
-                  background: greenGrad,
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,.35),0 10px 20px -12px rgba(23,184,102,.95)",
-                  flex: "none",
-                }}
-              >
-                {Ico.plus()}
-                {L.newLabel}
-              </Pill>
-            </div>
+            <Pill
+              onClick={startNew}
+              className="ip-h-scale"
+              style={{
+                padding: "9px 13px",
+                whiteSpace: "nowrap",
+                color: "#fff",
+                background: greenGrad,
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,.35),0 10px 20px -12px rgba(23,184,102,.95)",
+                flex: "none",
+              }}
+            >
+              {Ico.plus()}
+              {L.newLabel}
+            </Pill>
           </div>
           <div style={{ padding: "0 22px 4px", fontSize: 22, fontWeight: 700, letterSpacing: "-.02em", color: INK }} aria-live="polite">
             {headline}
           </div>
           <div style={{ padding: "10px 22px 12px", display: "flex", flexDirection: "column", gap: 10 }}>
             <label
-              data-tour="panel-search"
               className="ip-focus-within"
               style={{
                 display: "flex",
@@ -343,7 +338,7 @@ export function ItemPanel({ inline = false }: { inline?: boolean }) {
       </div>
 
       {/* RIGHT: detail */}
-      <div data-tour="panel-detail" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 22px 0 30px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <button

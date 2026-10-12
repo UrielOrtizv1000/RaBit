@@ -6,7 +6,6 @@
 import type { SqlAdapter, SqlValue } from "./adapter";
 import { systemLang } from "../i18n";
 import type { CalEvent, Note, RoutineBlock, Settings, Tag, Task, User } from "../domain/types";
-import type { SavingsFreq, SavingsGoal, SavingsMove } from "../domain/savings";
 
 type Row = Record<string, SqlValue>;
 const b = (v: SqlValue) => v === 1;
@@ -18,27 +17,16 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: "light",
   timeFormat: "24h",
   weekStart: 1,
-  reminders: false,
-  sound: false,
-  fontSize: "medium",
+  reminders: true,
+  sound: true,
   language: systemLang(),
-  glass: false,
+  glass: true,
 };
 
 /** Une ajustes guardados con los valores por defecto (y migra módulos antiguos: portfolio → savings). */
 export function normalizeSettings(raw: Partial<Settings>): Settings {
   const m = (raw.modules ?? {}) as unknown as Record<string, boolean | undefined>;
-  const fontSize = raw.fontSize === "small" || raw.fontSize === "large" ? raw.fontSize : "medium";
-  // Recordatorios y sonido siguen en desarrollo y el efecto cristal se retiró: se mantienen apagados aunque el archivo guardado diga otra cosa.
-  return {
-    ...DEFAULT_SETTINGS,
-    ...raw,
-    fontSize,
-    reminders: false,
-    sound: false,
-    glass: false,
-    modules: { calendar: m.calendar ?? true, routine: m.routine ?? true, notes: m.notes ?? true, savings: m.savings ?? m.portfolio ?? true },
-  };
+  return { ...DEFAULT_SETTINGS, ...raw, modules: { calendar: m.calendar ?? true, routine: m.routine ?? true, notes: m.notes ?? true, savings: m.savings ?? m.portfolio ?? true } };
 }
 
 export interface Snapshotted {
@@ -49,7 +37,6 @@ export interface Snapshotted {
   events: CalEvent[];
   notes: Note[];
   routine: RoutineBlock[];
-  savings: { goals: SavingsGoal[]; moves: SavingsMove[] };
 }
 
 const toTask = (r: Row): Task => ({
@@ -107,27 +94,6 @@ export async function loadAll(db: SqlAdapter): Promise<Snapshotted> {
       color: s(r.color),
       everyWeeks: n(r.every_weeks),
     })),
-    savings: {
-      goals: (await db.select("SELECT * FROM savings_goals ORDER BY rowid")).map((r) => ({
-        id: s(r.id),
-        name: s(r.name),
-        target: n(r.target),
-        saved: n(r.saved),
-        color: s(r.color),
-        freq: s(r.freq) as SavingsFreq,
-        n: n(r.n),
-        start: n(r.start),
-        important: b(r.important),
-        deadline: r.deadline === null || r.deadline === undefined ? null : s(r.deadline),
-        eventId: r.event_id === null || r.event_id === undefined ? null : s(r.event_id),
-      })),
-      moves: (await db.select("SELECT * FROM savings_moves ORDER BY moved_at DESC, rowid DESC")).map((r) => ({
-        id: s(r.id),
-        goalId: s(r.goal_id),
-        amt: n(r.amt),
-        at: n(r.moved_at),
-      })),
-    },
   };
 }
 
@@ -200,23 +166,4 @@ export const repo = {
       r.everyWeeks,
     ]),
   deleteRoutine: (db: SqlAdapter, id: string) => db.execute("DELETE FROM routine_blocks WHERE id=?", [id]),
-  saveGoal: (db: SqlAdapter, g: SavingsGoal) =>
-    db.execute("INSERT OR REPLACE INTO savings_goals (id,name,target,saved,color,freq,n,start,important,deadline,event_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)", [
-      g.id,
-      g.name,
-      g.target,
-      g.saved,
-      g.color,
-      g.freq,
-      g.n,
-      g.start,
-      i(g.important),
-      g.deadline,
-      g.eventId,
-    ]),
-  deleteGoal: async (db: SqlAdapter, id: string) => {
-    await db.execute("DELETE FROM savings_moves WHERE goal_id=?", [id]);
-    await db.execute("DELETE FROM savings_goals WHERE id=?", [id]);
-  },
-  saveMove: (db: SqlAdapter, m: SavingsMove) => db.execute("INSERT OR REPLACE INTO savings_moves (id,goal_id,amt,moved_at) VALUES (?,?,?,?)", [m.id, m.goalId, m.amt, m.at]),
 };

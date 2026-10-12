@@ -8,7 +8,7 @@ import type { CSSProperties } from "react";
 import { addDays, fmtTime, fromISO, fromMin, MONTHS, startOfWeek, todayISO, toMin, WEEKDAYS } from "../../domain/dates";
 import { eventsOn, routineOccursOn } from "../../domain/logic";
 import { t, tn } from "../../i18n";
-import { ROUTINE_COLORS, routineColor, TITLE_MAX, type HHMM, type ISODate, type RoutineBlock } from "../../domain/types";
+import { EVENT_COLORS, TITLE_MAX, type HHMM, type ISODate, type RoutineBlock } from "../../domain/types";
 import { useData } from "../../store/data";
 import { useUi } from "../../store/ui";
 import { compactTime, layoutOverlap, minutesRange } from "../../domain/timegrid";
@@ -85,7 +85,7 @@ function itemsFor(date: ISODate, routine: RoutineBlock[], events: ReturnType<typ
   for (const r of routine) {
     if (!routineOccursOn(r, date, ANCHOR)) continue;
     const { sM, eM } = minutesRange(r.start, r.end);
-    out.push({ key: `r:${r.id}:${date}`, kind: "routine", id: r.id, title: r.title, color: routineColor(r.color), sM, eM, block: r });
+    out.push({ key: `r:${r.id}:${date}`, kind: "routine", id: r.id, title: r.title, color: r.color, sM, eM, block: r });
   }
   for (const e of eventsOn(events, date)) {
     if (e.allDay) continue;
@@ -163,7 +163,6 @@ export function RoutinePage(): JSX.Element {
         setDraft(null);
         setRemoving(false);
         setDayDraft(null);
-        setSelId(null);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -216,16 +215,7 @@ export function RoutinePage(): JSX.Element {
 
   const openDraftNew = (dayIdx?: number, startMin?: number): void => {
     const s = startMin === undefined ? 9 * 60 : Math.max(0, Math.min(startMin, 22 * 60 + 30));
-    setDraft({
-      mode: "add",
-      ids: [],
-      title: "",
-      start: fromMin(s),
-      end: fromMin(Math.min(s + 60, 1439)),
-      color: ROUTINE_COLORS[0],
-      days: [dayIdx ?? dayOfRoutine(today)],
-      every: 1,
-    });
+    setDraft({ mode: "add", ids: [], title: "", start: fromMin(s), end: fromMin(Math.min(s + 60, 1439)), color: EVENT_COLORS[0], days: [dayIdx ?? dayOfRoutine(today)], every: 1 });
   };
 
   const openEdit = (): void => {
@@ -237,7 +227,7 @@ export function RoutinePage(): JSX.Element {
       title: selBlock.title,
       start: selBlock.start,
       end: selBlock.end,
-      color: routineColor(selBlock.color),
+      color: selBlock.color,
       days: g.map((x) => x.day),
       every: Math.max(1, selBlock.everyWeeks),
     });
@@ -307,7 +297,7 @@ export function RoutinePage(): JSX.Element {
     <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 20, minHeight: "100%" }}>
       <style>{SHARED_CSS}</style>
       <PageHeader eyebrow={eyebrow} title={t("Routine")}>
-        <div data-tour="rt-nav" style={PILL_GROUP}>
+        <div style={PILL_GROUP}>
           <div className="rbc-btn" onClick={() => setOffset(offset - 1)} style={navBtn}>
             ‹
           </div>
@@ -335,14 +325,14 @@ export function RoutinePage(): JSX.Element {
             ›
           </div>
         </div>
-        <div data-tour="rt-add" className="rbc-primary" onClick={() => openDraftNew()} style={PRIMARY_BTN}>
+        <div className="rbc-primary" onClick={() => openDraftNew()} style={PRIMARY_BTN}>
           <PlusIcon />
           {t("ADD ROUTINE")}
         </div>
       </PageHeader>
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 20, minWidth: 0, minHeight: 706 }}>
-        <div data-tour="rt-grid" style={{ flex: 1, display: "flex", gap: 26, minWidth: 0, minHeight: 0 }}>
+        <div style={{ flex: 1, display: "flex", gap: 26, minWidth: 0, minHeight: 0 }}>
           <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 20 }}>
             <div style={{ ...GLASS_CARD, flex: 1, padding: "18px 20px 20px" }}>
               <div style={{ display: "flex", paddingLeft: 58, marginBottom: 8 }}>
@@ -579,33 +569,8 @@ export function RoutinePage(): JSX.Element {
               {selBlock ? (
                 <div style={{ ...SIDE_CARD, flex: "none", padding: 20 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <button
-                        type="button"
-                        aria-label={t("Back")}
-                        title={t("Back")}
-                        onClick={() => setSelId(null)}
-                        className="rbc-scale"
-                        style={{
-                          width: 28,
-                          height: 28,
-                          padding: 0,
-                          border: 0,
-                          borderRadius: "50%",
-                          display: "grid",
-                          placeItems: "center",
-                          cursor: "pointer",
-                          background: "rgba(255,255,255,.75)",
-                          boxShadow: "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)",
-                        }}
-                      >
-                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#0b7a45" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M10 3 5 8l5 5" />
-                        </svg>
-                      </button>
-                      <div style={SILK_LABEL}>{t("ROUTINE")}</div>
-                    </div>
-                    <div style={{ width: 9, height: 9, borderRadius: 2, border: `2px solid ${routineColor(selBlock.color)}`, boxSizing: "border-box" }} />
+                    <div style={SILK_LABEL}>{t("ROUTINE")}</div>
+                    <div style={{ width: 9, height: 9, borderRadius: 2, border: `2px solid ${selBlock.color}`, boxSizing: "border-box" }} />
                   </div>
                   <div style={{ fontSize: 22, fontWeight: 700, color: "#16211c", marginBottom: 4 }}>{selBlock.title}</div>
                   <div style={{ fontSize: 13, color: "#5d6f67" }}>
@@ -1217,7 +1182,7 @@ function RoutineModal({
                   border: "1px solid rgba(18,38,30,.09)",
                 }}
               >
-                {ROUTINE_COLORS.map((c) => (
+                {EVENT_COLORS.map((c) => (
                   <div
                     key={c}
                     onClick={() => set({ color: c })}

@@ -15,16 +15,4 @@ export const MIGRATIONS: { version: number; sql: string[] }[] = [
       `CREATE INDEX idx_events_date ON events(date)`,
     ],
   },
-  {
-    version: 2,
-    sql: [
-      `CREATE TABLE savings_goals (id TEXT PRIMARY KEY, name TEXT NOT NULL, target REAL NOT NULL, saved REAL NOT NULL DEFAULT 0, color TEXT NOT NULL, freq TEXT NOT NULL DEFAULT 'none', n INTEGER NOT NULL DEFAULT 0, start INTEGER NOT NULL DEFAULT 0, important INTEGER NOT NULL DEFAULT 0)`,
-      `CREATE TABLE savings_moves (id TEXT PRIMARY KEY, goal_id TEXT NOT NULL, amt REAL NOT NULL, moved_at INTEGER NOT NULL)`,
-      `CREATE INDEX idx_savings_moves_goal ON savings_moves(goal_id)`,
-    ],
-  },
-  {
-    version: 3,
-    sql: [`ALTER TABLE savings_goals ADD COLUMN deadline TEXT`, `ALTER TABLE savings_goals ADD COLUMN event_id TEXT`],
-  },
 ];

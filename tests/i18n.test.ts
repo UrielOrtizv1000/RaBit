@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { TOURS } from "../src/components/tours";
 
 const ES: Record<string, string> = {};
 const mods = import.meta.glob<{ es: Record<string, string> }>("../src/i18n/es/*.ts", { eager: true });
@@ -36,11 +35,6 @@ describe("i18n", () => {
 
   it("every t('…') in the source has a Spanish translation", () => {
     expect([...new Set(missing)]).toEqual([]);
-  });
-
-  it("every tutorial step (title and text) has a Spanish translation", () => {
-    const lacking = Object.entries(TOURS).flatMap(([id, steps]) => steps.flatMap((s) => [s.title, s.body].filter((k) => !(k in ES)).map((k) => `${id}: ${k}`)));
-    expect(lacking).toEqual([]);
   });
 
   it("placeholders {x} are preserved in translations", () => {

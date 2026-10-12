@@ -13,16 +13,12 @@
  */
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { setZoom } from "../lib/zoom";
-import { useData } from "../store/data";
-import type { FontSize } from "../domain/types";
 
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 1.5; // en ventanas amplias la interfaz crece un poco (texto más legible)
 const PAD_BOTTOM = 58; // zona segura inferior (la de Routine: las tarjetas terminan aquí)
 /** Escala común a TODAS las páginas según el tamaño de la ventana (1600×980 = 1.0): así el padding se ve igual en todas. */
-const baseZoom = (size: FontSize): number => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.min(window.innerWidth / 1600, window.innerHeight / 980) * SIZE_FACTOR[size]));
-/** Tamaño del texto (Ajustes): multiplica la escala base; si el contenido no cabe a ese tamaño, la búsqueda lo reduce hasta que quepa. */
-const SIZE_FACTOR: Record<FontSize, number> = { small: 0.88, medium: 1, large: 1.14 };
+const baseZoom = (): number => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.min(window.innerWidth / 1600, window.innerHeight / 980)));
 
 /**
  * Hace que la página quepa SIEMPRE en el área disponible, sin scroll:
@@ -32,7 +28,6 @@ const SIZE_FACTOR: Record<FontSize, number> = { small: 0.88, medium: 1, large: 1
 export function FitPage({ children, pageKey }: { children: ReactNode; pageKey: string }) {
   const box = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
-  const fontSize = useData((s) => s.settings.fontSize);
 
   useLayoutEffect(() => {
     const b = box.current,
@@ -51,7 +46,7 @@ export function FitPage({ children, pageKey }: { children: ReactNode; pageKey: s
         el.style.paddingRight = `${26 / z}px`;
         return el.scrollHeight * z;
       };
-      const zMax = baseZoom(fontSize);
+      const zMax = baseZoom();
       let z = zMax;
       if (natural(zMax) > h - 1) {
         let lo = MIN_ZOOM,
@@ -91,7 +86,7 @@ export function FitPage({ children, pageKey }: { children: ReactNode; pageKey: s
       window.removeEventListener("resize", schedule);
       setZoom(1);
     };
-  }, [pageKey, fontSize]);
+  }, [pageKey]);
 
   return (
     <div
