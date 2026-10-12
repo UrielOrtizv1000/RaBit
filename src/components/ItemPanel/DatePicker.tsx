@@ -125,6 +125,7 @@ export function DateField({ value, onChange, busy, variant, disabled }: Props) {
               padding: 16,
               borderRadius: 22,
               ...popCard,
+              background: "linear-gradient(150deg,#ffffff,#f5faf7)", // sólido: nada se transparenta a través del calendario
               animation: `rb-in .32s ${EASE} both`,
             }}
           >
