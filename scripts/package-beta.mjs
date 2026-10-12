@@ -11,7 +11,8 @@
  * en la ventana, el menú Inicio y «Aplicaciones»; el nombre del archivo es solo del instalador.
  */
 import { spawnSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, readdirSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,7 +22,16 @@ const bundle = join(targetDir, "release", "bundle");
 const out = join(root, "installers");
 
 if (!process.argv.includes("--skip-build")) {
-  const r = spawnSync("npm", ["run", "tauri", "build"], { cwd: root, stdio: "inherit", shell: true, env: { ...process.env, CARGO_TARGET_DIR: targetDir } });
+  // `createUpdaterArtifacts` (tauri.conf.json) exige la clave privada de firma. En un build local sin ella se desactiva
+  // solo para esta ejecución; los instaladores funcionan igual (el release oficial los firma, ver docs/UPDATES.md).
+  const args = ["run", "tauri", "build"];
+  if (!process.env.TAURI_SIGNING_PRIVATE_KEY) {
+    const cfg = join(tmpdir(), "rabit-local-build.json");
+    writeFileSync(cfg, JSON.stringify({ bundle: { createUpdaterArtifacts: false } }));
+    args.push("--", "--config", cfg);
+    console.log("Sin TAURI_SIGNING_PRIVATE_KEY: build local sin artefactos del actualizador.");
+  }
+  const r = spawnSync("npm", args, { cwd: root, stdio: "inherit", shell: true, env: { ...process.env, CARGO_TARGET_DIR: targetDir } });
   if (r.status !== 0) {
     console.error("\n`tauri build` falló. Si RaBit está abierta, ciérrala (Windows no deja sobrescribir rabit.exe en uso).");
     process.exit(r.status ?? 1);

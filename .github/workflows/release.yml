@@ -1,0 +1,86 @@
+# Publica una versión de RaBit cuando se crea un tag `v*` (p. ej. v1.3.0).
+#
+# Compila para Windows y macOS, FIRMA los artefactos del actualizador y sube al release los instaladores y el
+# `latest.json` que las apps instaladas consultan para actualizarse solas. Pasos y secretos: docs/UPDATES.md.
+#
+# Secretos del repositorio necesarios:
+#   TAURI_SIGNING_PRIVATE_KEY            contenido de la clave privada (npx tauri signer generate)
+#   TAURI_SIGNING_PRIVATE_KEY_PASSWORD   su contraseña (vacía si no se puso)
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest
+    outputs:
+      notes: ${{ steps.notes.outputs.notes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # package.json, tauri.conf.json y Cargo.toml deben estar en la misma versión que el tag
+      - run: npm run release:check -- "${{ github.ref_name }}"
+      - run: npm run typecheck
+      - run: npm test
+      # Las notas del release (lo que la app muestra como "What's new") salen de CHANGELOG.md
+      - id: notes
+        run: |
+          {
+            echo 'notes<<RABIT_NOTES_EOF'
+            node scripts/release-notes.mjs "${{ github.ref_name }}"
+            echo 'RABIT_NOTES_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+  publish:
+    name: Build ${{ matrix.label }}
+    needs: checks
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Windows
+            os: windows-latest
+            args: ""
+            rust_targets: ""
+          - label: macOS (universal)
+            os: macos-latest
+            args: "--target universal-apple-darwin"
+            rust_targets: "aarch64-apple-darwin,x86_64-apple-darwin"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_targets }}
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
+      - run: npm ci
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "RaBit ${{ github.ref_name }}"
+          releaseBody: ${{ needs.checks.outputs.notes }}
+          releaseDraft: false
+          prerelease: false
+          # genera y sube latest.json (versión, notas, URLs y firmas por plataforma)
+          includeUpdaterJson: true
+          args: ${{ matrix.args }}
