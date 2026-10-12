@@ -51,6 +51,7 @@ export function Dock() {
             <button
               key={n.id}
               aria-label={t(n.label)}
+              data-tour={`nav-${n.id}`}
               aria-current={active ? "page" : undefined}
               onClick={() => setPage(n.id)}
               onMouseEnter={() => setHover(n.id)}

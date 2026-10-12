@@ -2,18 +2,21 @@
  * Barra superior fija: logo (cambia tema), búsqueda global, notificaciones, ajustes y chip de usuario.
  * La búsqueda escribe en `useUi().search`; el panel y las listas lo leen para filtrar.
  */
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useUi } from "../store/ui";
 import { useData } from "../store/data";
 import { t } from "../i18n";
 import { darkPill, glassPill, silk } from "../components/ui/glass";
+import { UpdateButton } from "./UpdateButton";
+import { buildNotifs, NOTIF_MAX, type Notif } from "../domain/notifications";
+import { fmtTime, fromMin, relDay, todayISO } from "../domain/dates";
 
-interface Notif {
-  title: string;
-  sub: string;
-  color: string;
+/** Segunda línea del aviso: «Vencida · ayer», «Hoy · 10:00», «Todo el día»… */
+function subOf(n: Notif, tf: "12h" | "24h"): string {
+  if (n.overdue) return `${t("Overdue")} · ${relDay(n.date)}`;
+  if (n.allDay) return t("All day");
+  return n.time ? `${t("Today")} · ${fmtTime(n.time, tf)}` : t("Today");
 }
-const NOTIFS: Notif[] = [];
 
 export function Topbar({ onSettings }: { onSettings: () => void }) {
   const { setPage, setSearch } = useUi();
@@ -23,12 +26,41 @@ export function Topbar({ onSettings }: { onSettings: () => void }) {
   const name = useData((s) => s.user?.name ?? "");
   const [logoHover, setLogoHover] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const bell = useRef<HTMLDivElement>(null);
+  const tasks = useData((s) => s.tasks);
+  const events = useData((s) => s.events);
+  const tf = useData((s) => s.settings.timeFormat);
+  const openPanel = useUi((s) => s.openPanel);
+  const [now, setNow] = useState(() => new Date()); // se refresca cada minuto y al abrir la campana
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const notifs = useMemo(() => buildNotifs(tasks, events, todayISO(now), fromMin(now.getHours() * 60 + now.getMinutes())), [tasks, events, now]);
+  const toggleNotifs = () => {
+    setNow(new Date());
+    setNotifOpen((o) => !o);
+  };
+  useEffect(() => {
+    if (!notifOpen) return;
+    const away = (e: MouseEvent) => {
+      if (!bell.current?.contains(e.target as Node)) setNotifOpen(false);
+    };
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && setNotifOpen(false);
+    document.addEventListener("mousedown", away);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("mousedown", away);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [notifOpen]);
   const initial = (name.trim()[0] ?? "R").toUpperCase();
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 22, padding: "26px 26px 6px", flex: "none" }}>
+    <div style={{ position: "relative", zIndex: 30, display: "flex", alignItems: "center", gap: 22, padding: "26px 26px 6px", flex: "none" }}>
       <div
         role="button"
+        data-tour="logo"
         tabIndex={0}
         title={t("Switch light / dark")}
         onMouseEnter={() => setLogoHover(true)}
@@ -100,6 +132,7 @@ export function Topbar({ onSettings }: { onSettings: () => void }) {
 
       <div style={{ flex: 1, display: "flex" }}>
         <label
+          data-tour="search"
           className="rb-hover-bg"
           style={{
             display: "flex",
@@ -134,45 +167,64 @@ export function Topbar({ onSettings }: { onSettings: () => void }) {
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div
-          role="button"
-          aria-label={t("Notifications")}
-          tabIndex={0}
-          title={t("Notifications")}
-          className="rb-hover-scale"
-          onClick={() => setNotifOpen((o) => !o)}
-          style={{
-            position: "relative",
-            width: 42,
-            height: 42,
-            borderRadius: "50%",
-            display: "grid",
-            placeItems: "center",
-            cursor: "pointer",
-            ...glassPill,
-            transition: "transform .15s ease-out",
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="#2b3a34" strokeWidth="1.5" strokeLinejoin="round">
-            <path d="M4.5 7.2a4.5 4.5 0 0 1 9 0c0 3.3 1.2 4.3 1.2 4.3H3.3s1.2-1 1.2-4.3Z" />
-            <path d="M7.4 14a1.7 1.7 0 0 0 3.2 0" />
-          </svg>
-          {NOTIFS.length > 0 && (
-            <div style={{ position: "absolute", top: 10, right: 11, width: 6, height: 6, borderRadius: "50%", background: "#17b866", boxShadow: "0 0 0 2px #fff" }} />
-          )}
+        <UpdateButton />
+        <div ref={bell} data-tour="bell" style={{ position: "relative" }}>
+          <div
+            role="button"
+            aria-label={t("Notifications")}
+            aria-expanded={notifOpen}
+            tabIndex={0}
+            title={t("Notifications")}
+            className="rb-hover-scale"
+            onClick={toggleNotifs}
+            onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && toggleNotifs()}
+            style={{
+              position: "relative",
+              width: 42,
+              height: 42,
+              borderRadius: "50%",
+              display: "grid",
+              placeItems: "center",
+              cursor: "pointer",
+              ...glassPill,
+              transition: "transform .15s ease-out",
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="#2b3a34" strokeWidth="1.5" strokeLinejoin="round">
+              <path d="M4.5 7.2a4.5 4.5 0 0 1 9 0c0 3.3 1.2 4.3 1.2 4.3H3.3s1.2-1 1.2-4.3Z" />
+              <path d="M7.4 14a1.7 1.7 0 0 0 3.2 0" />
+            </svg>
+            {notifs.length > 0 && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 10,
+                  right: 11,
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: notifs.some((n) => n.overdue) ? "#a8443a" : "#17b866",
+                  boxShadow: "0 0 0 2px #fff",
+                }}
+              />
+            )}
+          </div>
           {notifOpen && (
             <div
-              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-label={t("Notifications")}
               style={{
                 position: "absolute",
-                right: -6,
+                right: 0,
                 top: 52,
                 zIndex: 50,
-                width: 320,
+                width: 330,
+                maxHeight: 420,
+                display: "flex",
+                flexDirection: "column",
                 padding: 10,
                 borderRadius: 24,
-                cursor: "default",
-                background: "linear-gradient(150deg,rgba(255,255,255,.92),rgba(245,250,247,.8))",
+                background: "linear-gradient(150deg,rgba(255,255,255,.97),rgba(245,250,247,.95))",
                 backdropFilter: "blur(30px) saturate(170%)",
                 border: "1px solid rgba(255,255,255,.9)",
                 boxShadow: "inset 0 1px 1px #fff,0 30px 60px -24px rgba(12,40,26,.45)",
@@ -181,13 +233,50 @@ export function Topbar({ onSettings }: { onSettings: () => void }) {
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px 10px" }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Notifications")}</div>
+                {notifs.length > 0 && <div style={silk(9, { letterSpacing: ".1em", color: "#6b7a73" })}>{notifs.length}</div>}
               </div>
-              {NOTIFS.length === 0 && <div style={{ padding: "6px 10px 10px", fontSize: 12.5, color: "#5d6f67" }}>{t("You are all caught up.")}</div>}
+              {notifs.length === 0 && <div style={{ padding: "6px 10px 10px", fontSize: 12.5, color: "#5d6f67" }}>{t("You are all caught up.")}</div>}
+              <div className="rb-thin-scroll" style={{ minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: 2 }}>
+                {notifs.slice(0, NOTIF_MAX).map((n) => (
+                  <button
+                    key={n.key}
+                    type="button"
+                    className="rb-hover-bg"
+                    onClick={() => {
+                      setNotifOpen(false);
+                      openPanel(n.kind, n.id);
+                    }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 11,
+                      width: "100%",
+                      padding: "9px 10px",
+                      border: 0,
+                      borderRadius: 14,
+                      background: "transparent",
+                      textAlign: "left",
+                      fontFamily: "inherit",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <div style={{ width: 3, height: 28, flex: "none", borderRadius: 3, background: n.overdue ? "#a8443a" : n.kind === "event" ? "#4b7fd6" : "#8a6fd6" }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#121a16", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {n.title || t("Untitled")}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: n.overdue ? "#a8443a" : "#5d6f67", marginTop: 2 }}>{subOf(n, tf)}</div>
+                    </div>
+                  </button>
+                ))}
+                {notifs.length > NOTIF_MAX && <div style={{ padding: "6px 10px 4px", fontSize: 11.5, color: "#6b7a73" }}>{t("+{n} more", { n: notifs.length - NOTIF_MAX })}</div>}
+              </div>
             </div>
           )}
         </div>
         <div
           role="button"
+          data-tour="settings"
           aria-label={t("Settings")}
           tabIndex={0}
           title={t("Settings")}
