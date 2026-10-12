@@ -30,13 +30,14 @@ is not finished. Windows is the platform I build and test on.
 - **Routine** — recurring blocks tied to the real calendar, with clash detection
 - **Quick Notes** — tags, pinning, and a 30-day trash you can restore from
 - A shared detail panel for events, notes and tasks (autosave, cancel/undo)
-- **Settings** — theme, language, glass effect, JSON export/import, sample data
-- Native reminders, light and dark themes, English and Spanish
-- A discreet glass effect (custom title bar + acrylic on Windows), with a switch
+- **Savings** — goals as glass jars with moving coins, a weekly streak, a plan that RaBit recalculates after every deposit or withdrawal, and a "what can I save?" calculator
+- **Settings** — theme, language, text size, JSON export/import, sample data
+- A bell with what is pending today, a first-run guided tutorial, light and dark themes, English and Spanish
 
 **Not done yet**
 
-- **Savings** — the dock entry exists, the screen is a "coming soon" placeholder
+- Reminders and sound — the switches are in Settings but disabled ("in development")
+- **Routine** is still in beta
 - Real dark theme — the preference is saved, the palette is still being worked on
 - Sync, accounts and an auto-updater are deliberately out of scope for now.
   The `SyncProvider` interface exists so a backend can be dropped in later
@@ -90,15 +91,21 @@ build, use **Settings → Try RaBit**.
 
 Step-by-step manual checks live in [`docs/TESTING.md`](docs/TESTING.md).
 
+## Updates
+
+Installed copies update themselves: the app checks quietly and, when there is a new version, shows a download icon next to the bell. One click
+downloads it in the background, and **Restart to update** installs it with your data intact (a backup of the database is made first). How releases
+are signed and published: [`docs/UPDATES.md`](docs/UPDATES.md).
+
 ## Where your data lives
 
 A single SQLite file, `rabit.db`, in the per-platform app data directory:
 
-| Platform | Path |
-| --- | --- |
-| Windows | `%APPDATA%\app.rabit.desktop\rabit.db` |
-| macOS | `~/Library/Application Support/app.rabit.desktop/rabit.db` |
-| Linux | `~/.local/share/app.rabit.desktop/rabit.db` |
+| Platform | Path                                                       |
+| -------- | ---------------------------------------------------------- |
+| Windows  | `%APPDATA%\app.rabit.desktop\rabit.db`                     |
+| macOS    | `~/Library/Application Support/app.rabit.desktop/rabit.db` |
+| Linux    | `~/.local/share/app.rabit.desktop/rabit.db`                |
 
 In the browser (development and tests only) the same SQL schema is kept in
 `localStorage`. To move your data, use **Settings → Data → Export / Import**
@@ -121,6 +128,14 @@ src/store       Zustand (data + UI state)               src/features    home, ca
 src/services    boot, reminders, backup, sample data    src/app         shell, dock, FitPage
 src/i18n        t() plus Spanish dictionaries           src-tauri       Tauri 2 shell (Rust)
 tests/          Vitest and Playwright                   docs/           architecture, testing, QA
+```
+
+Mobile clients live beside the desktop app and share no code with it, only the
+contract in [`shared/`](shared) (SQLite schema, backup format, design tokens):
+
+```
+ios/            RaBitIOS — SwiftUI (not started)        android/        RaBitAndroid — Kotlin + Compose (not started)
+shared/         schema, backup format, tokens, fixtures
 ```
 
 The reasoning behind the layering — and how to extend the app without breaking
