@@ -8,7 +8,8 @@ import { t } from "../i18n";
 import { DEFAULT_SETTINGS, loadAll, normalizeSettings, repo } from "../db/repo";
 import { autoDeleteEvents, purgeTrash, removeTag, renameTag } from "../domain/logic";
 import { fromMin, todayISO, toMin } from "../domain/dates";
-import { TITLE_MAX, type CalEvent, type Note, type RoutineBlock, type Settings, type Tag, type Task, type User } from "../domain/types";
+import type { SavingsGoal, SavingsMove } from "../domain/savings";
+import { routineColor, TITLE_MAX, type CalEvent, type Note, type RoutineBlock, type Settings, type Tag, type Task, type User } from "../domain/types";
 
 /** Títulos: solo-espacios → vacío (así se muestra "Untitled…") y máximo TITLE_MAX caracteres. */
 const clipTitle = <T extends { title?: string }>(o: T): T => {
@@ -33,6 +34,8 @@ export interface BackupFile {
   events: CalEvent[];
   notes: Note[];
   routine: RoutineBlock[];
+  /** opcional: los respaldos anteriores a Savings no lo traen */
+  savings?: { goals: SavingsGoal[]; moves: SavingsMove[] };
 }
 
 interface DataState {
@@ -45,6 +48,8 @@ interface DataState {
   events: CalEvent[];
   notes: Note[];
   routine: RoutineBlock[];
+  goals: SavingsGoal[];
+  moves: SavingsMove[];
 
   init: (db: SqlAdapter, now?: Date) => Promise<void>;
   runMaintenance: (now?: Date) => Promise<void>;
@@ -79,6 +84,14 @@ interface DataState {
   updateRoutine: (id: string, patch: Partial<RoutineBlock>) => Promise<void>;
   deleteRoutine: (id: string) => Promise<void>;
 
+  addGoal: (g: Omit<SavingsGoal, "id" | "saved">) => Promise<SavingsGoal>;
+  updateGoal: (id: string, patch: Partial<Omit<SavingsGoal, "id" | "saved">>) => Promise<void>;
+  deleteGoal: (id: string) => Promise<void>;
+  /** Deshacer un borrado: vuelve a guardar la meta y sus movimientos tal como estaban. */
+  restoreGoal: (g: SavingsGoal, moves: SavingsMove[]) => Promise<void>;
+  /** Depósito (amt > 0) o retiro (amt < 0): registra el movimiento y ajusta lo ahorrado en la meta. */
+  addMove: (goalId: string, amt: number, at?: number) => Promise<SavingsMove | null>;
+
   exportAll: () => BackupFile;
   importAll: (b: BackupFile) => Promise<void>;
 }
@@ -103,6 +116,8 @@ export const useData = create<DataState>((set, get) => ({
   events: [],
   notes: [],
   routine: [],
+  goals: [],
+  moves: [],
 
   async init(db, now = new Date()) {
     const snap = await loadAll(db);
@@ -110,7 +125,8 @@ export const useData = create<DataState>((set, get) => ({
       for (const tg of DEFAULT_TAGS) await repo.saveTag(db, { id: uid(), name: t(tg.name), color: tg.color });
       snap.tags = (await loadAll(db)).tags;
     }
-    set({ db, ready: true, ...snap });
+    const { savings, ...rest } = snap;
+    set({ db, ready: true, ...rest, goals: savings.goals, moves: savings.moves });
     await get().runMaintenance(now);
   },
 
@@ -265,6 +281,7 @@ export const useData = create<DataState>((set, get) => ({
 
   async addRoutine(r) {
     const b: RoutineBlock = { id: uid(), start: "09:00", end: "10:00", color: "#17b866", everyWeeks: 1, ...clipTitle(r) };
+    b.color = routineColor(b.color);
     await repo.saveRoutine(need(get().db), b);
     set((s) => ({ routine: [...s.routine, b] }));
     return b;
@@ -273,8 +290,45 @@ export const useData = create<DataState>((set, get) => ({
     const cur = get().routine.find((x) => x.id === id);
     if (!cur) return;
     const next = { ...cur, ...clipTitle(patch) };
+    next.color = routineColor(next.color);
     await repo.saveRoutine(need(get().db), next);
     set((s) => ({ routine: s.routine.map((x) => (x.id === id ? next : x)) }));
+  },
+  async addGoal(g) {
+    const goal: SavingsGoal = { ...g, id: uid(), saved: 0, name: g.name.trim().slice(0, TITLE_MAX) };
+    await repo.saveGoal(need(get().db), goal);
+    set((s) => ({ goals: [...s.goals, goal] }));
+    return goal;
+  },
+  async updateGoal(id, patch) {
+    const cur = get().goals.find((x) => x.id === id);
+    if (!cur) return;
+    const next = { ...cur, ...patch };
+    next.name = next.name.trim().slice(0, TITLE_MAX);
+    await repo.saveGoal(need(get().db), next);
+    set((s) => ({ goals: s.goals.map((x) => (x.id === id ? next : x)) }));
+  },
+  async deleteGoal(id) {
+    await repo.deleteGoal(need(get().db), id);
+    set((s) => ({ goals: s.goals.filter((x) => x.id !== id), moves: s.moves.filter((m) => m.goalId !== id) }));
+  },
+  async restoreGoal(g, moves) {
+    const db = need(get().db);
+    await repo.saveGoal(db, g);
+    for (const m of moves) await repo.saveMove(db, m);
+    set((s) => ({ goals: [...s.goals.filter((x) => x.id !== g.id), g], moves: [...moves, ...s.moves.filter((m) => m.goalId !== g.id)].sort((a, b) => b.at - a.at) }));
+  },
+  async addMove(goalId, amt, at = Date.now()) {
+    const cur = get().goals.find((x) => x.id === goalId);
+    if (!cur || !Number.isFinite(amt) || amt === 0) return null;
+    const db = need(get().db);
+    const applied = amt < 0 ? Math.max(amt, -cur.saved) : amt; // nunca se retira más de lo que hay
+    const move: SavingsMove = { id: uid(), goalId, amt: applied, at };
+    const next = { ...cur, saved: cur.saved + applied };
+    await repo.saveMove(db, move);
+    await repo.saveGoal(db, next);
+    set((s) => ({ goals: s.goals.map((x) => (x.id === goalId ? next : x)), moves: [move, ...s.moves] }));
+    return move;
   },
   async deleteRoutine(id) {
     await repo.deleteRoutine(need(get().db), id);
@@ -294,12 +348,13 @@ export const useData = create<DataState>((set, get) => ({
       events: s.events,
       notes: s.notes,
       routine: s.routine,
+      savings: { goals: s.goals, moves: s.moves },
     };
   },
   async importAll(b) {
     if (b.app !== "rabit") throw new Error("Not a RaBit backup");
     const db = need(get().db);
-    for (const t of ["notes", "tasks", "events", "routine_blocks", "tags", "kv"]) await db.execute(`DELETE FROM ${t}`);
+    for (const t of ["notes", "tasks", "events", "routine_blocks", "savings_moves", "savings_goals", "tags", "kv"]) await db.execute(`DELETE FROM ${t}`);
     if (b.user) await repo.saveUser(db, b.user);
     await repo.saveSettings(db, normalizeSettings(b.settings));
     for (const t of b.tags) await repo.saveTag(db, t);
@@ -307,6 +362,10 @@ export const useData = create<DataState>((set, get) => ({
     for (const e of b.events) await repo.saveEvent(db, e);
     for (const n of b.notes) await repo.saveNote(db, n);
     for (const r of b.routine) await repo.saveRoutine(db, r);
-    set({ user: b.user, settings: normalizeSettings(b.settings), tags: b.tags, tasks: b.tasks, events: b.events, notes: b.notes, routine: b.routine });
+    const goals = b.savings?.goals ?? [];
+    const moves = b.savings?.moves ?? [];
+    for (const g of goals) await repo.saveGoal(db, g);
+    for (const m of moves) await repo.saveMove(db, m);
+    set({ user: b.user, settings: normalizeSettings(b.settings), tags: b.tags, tasks: b.tasks, events: b.events, notes: b.notes, routine: b.routine, goals, moves });
   },
 }));

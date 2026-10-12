@@ -11,7 +11,7 @@ const wasm = createRequire(import.meta.url).resolve("sql.js/dist/sql-wasm.wasm")
 async function fresh() {
   const db = await openSqlJs({ wasm });
   await migrate(db);
-  useData.setState({ ready: false, tasks: [], events: [], notes: [], tags: [], routine: [], user: null });
+  useData.setState({ ready: false, tasks: [], events: [], notes: [], tags: [], routine: [], goals: [], moves: [], user: null });
   await useData.getState().init(db, new Date(2026, 9, 4));
   return db;
 }
@@ -26,7 +26,7 @@ describe("persistence", () => {
     await migrate(db);
     await migrate(db);
     const v = await db.select<{ user_version: number }>("PRAGMA user_version");
-    expect(v[0].user_version).toBeGreaterThanOrEqual(1);
+    expect(v[0].user_version).toBeGreaterThanOrEqual(3);
   });
 
   it("tasks round-trip through SQLite and sort with done last", async () => {
@@ -98,5 +98,70 @@ describe("input normalisation in the store", () => {
     await useData.getState().updateEvent(e.id, { start: "23:30", end: "00:30" });
     const u = useData.getState().events.find((x) => x.id === e.id)!;
     expect(u.end >= u.start).toBe(true);
+  });
+});
+
+describe("savings persistence", () => {
+  beforeEach(async () => {
+    await fresh();
+  });
+
+  it("deposits and withdrawals move the saved amount, are stored, and survive export/import", async () => {
+    const d = useData.getState();
+    const g = await d.addGoal({ name: "Laptop", target: 1000, color: "#17b866", freq: "none", n: 0, start: 0, important: false, deadline: null, eventId: null });
+    await useData.getState().addMove(g.id, 300, 1_000);
+    await useData.getState().addMove(g.id, -100, 2_000);
+    expect(useData.getState().goals[0].saved).toBe(200);
+    expect(useData.getState().moves.map((m) => m.amt)).toEqual([-100, 300]);
+
+    const backup = useData.getState().exportAll();
+    expect(backup.savings?.goals).toHaveLength(1);
+    await useData.getState().importAll({ ...backup, savings: { goals: [], moves: [] } });
+    expect(useData.getState().goals).toEqual([]);
+    await useData.getState().importAll(backup);
+    expect(useData.getState().goals[0].saved).toBe(200);
+    expect(useData.getState().moves).toHaveLength(2);
+  });
+
+  it("goals and moves are loaded back when the app starts again", async () => {
+    const db = await fresh();
+    const g = await useData.getState().addGoal({ name: "Camera", target: 800, color: "#c98a1e", freq: "week", n: 8, start: 3, important: false, deadline: null, eventId: null });
+    await useData.getState().addMove(g.id, 120, 5_000);
+    useData.setState({ goals: [], moves: [] });
+    await useData.getState().init(db, new Date(2026, 9, 4));
+    expect(useData.getState().goals.map((x) => [x.name, x.saved])).toEqual([["Camera", 120]]);
+    expect(useData.getState().moves).toHaveLength(1);
+  });
+
+  it("restoreGoal brings a deleted goal back with its moves and deadline", async () => {
+    const d = useData.getState();
+    const g = await d.addGoal({ name: "Moto", target: 5200, color: "#8a6fd6", freq: "week", n: 12, start: 3, important: false, deadline: "2027-01-02", eventId: "ev1" });
+    await useData.getState().addMove(g.id, 400, 9_000);
+    const goal = useData.getState().goals[0];
+    const moves = useData.getState().moves;
+    await useData.getState().deleteGoal(g.id);
+    expect(useData.getState().goals).toEqual([]);
+    await useData.getState().restoreGoal(goal, moves);
+    expect(useData.getState().goals[0]).toMatchObject({ name: "Moto", saved: 400, deadline: "2027-01-02", eventId: "ev1" });
+    expect(useData.getState().moves).toHaveLength(1);
+  });
+
+  it("never withdraws more than what is in the jar, and deleting a goal removes its moves", async () => {
+    const d = useData.getState();
+    const g = await d.addGoal({ name: "Trip", target: 500, color: "#4b7fd6", freq: "month", n: 5, start: 0, important: true, deadline: null, eventId: null });
+    await useData.getState().addMove(g.id, 50, 1);
+    await useData.getState().addMove(g.id, -999, 2);
+    expect(useData.getState().goals[0].saved).toBe(0);
+    await useData.getState().deleteGoal(g.id);
+    expect(useData.getState().goals).toEqual([]);
+    expect(useData.getState().moves).toEqual([]);
+  });
+
+  it("old backups without a savings section import cleanly", async () => {
+    const backup = useData.getState().exportAll();
+    const old = { ...backup };
+    delete old.savings;
+    await useData.getState().importAll(old);
+    expect(useData.getState().goals).toEqual([]);
   });
 });

@@ -16,6 +16,8 @@ export interface Modules {
   savings: boolean;
 }
 
+export type FontSize = "small" | "medium" | "large";
+
 export interface Settings {
   modules: Modules;
   theme: "light" | "dark";
@@ -24,7 +26,9 @@ export interface Settings {
   reminders: boolean;
   sound: boolean;
   language: Lang;
-  /** efecto de cristal (transparencia muy leve de la ventana) */
+  /** tamaño del texto de las páginas */
+  fontSize: FontSize;
+  /** efecto de cristal: retirado de Ajustes, siempre false (se conserva por compatibilidad con respaldos) */
   glass: boolean;
 }
 
@@ -90,6 +94,11 @@ export interface RoutineBlock {
 }
 
 export const EVENT_COLORS = ["#17b866", "#4b7fd6", "#8a6fd6", "#2aa6a0", "#c98a1e", "#a8443a"] as const;
+/** Rutina: sin azul ni morado, para no confundirse con eventos (azul) y tareas (morado). */
+export const ROUTINE_COLORS: readonly string[] = EVENT_COLORS.filter((c) => c !== "#4b7fd6" && c !== "#8a6fd6");
+/** Color válido para una rutina (los guardados con azul/morado se muestran en el primer color permitido). */
+export const routineColor = (c: string): string => (ROUTINE_COLORS.includes(c) ? c : ROUTINE_COLORS[0]);
+
 export const TAG_COLORS = ["#17b866", "#2aa6a0", "#4b7fd6", "#8a6fd6", "#d0579a", "#c98a1e", "#a8443a", "#5d6f67"] as const;
 
 export const TRASH_DAYS = 30;
