@@ -1,9 +1,10 @@
 /** Burbuja oscura estilo terminal ("rabit@página"): la voz de RaBit en cada página. */
-export function Terminal({ name, greeting, line }: { name: string; greeting: string; line: string }): JSX.Element {
+export function Terminal({ name, greeting, line, fill = false }: { name: string; greeting: string; line: string; fill?: boolean }): JSX.Element {
   return (
     <div
       style={{
         position: "relative",
+        ...(fill ? { flex: 1, minWidth: 0, boxSizing: "border-box" as const } : null),
         animation: "rb-rise .45s ease-out .1s both",
         borderRadius: 28,
         background: "linear-gradient(150deg,rgba(12,24,18,.9),rgba(16,40,29,.82))",

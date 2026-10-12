@@ -16,6 +16,7 @@ import { eventsOn, overlapMin, routineOccursOn, sortTasks } from "../../domain/l
 import type { CalEvent, ISODate, Note, Task } from "../../domain/types";
 import { silk } from "../../components/ui/glass";
 import { t, tn } from "../../i18n";
+import { useUpdatedNotice } from "../../app/useUpdatedNotice";
 
 const ROUTINE_ANCHOR: ISODate = "2024-01-01";
 const EASE = "cubic-bezier(.22,1,.36,1)";
@@ -379,6 +380,7 @@ export function HomePage() {
 
   /* ---------- greeting ---------- */
   const hour = now.getHours();
+  const notice = useUpdatedNotice();
   const greet = hour < 12 ? t("Good morning") : hour < 18 ? t("Good afternoon") : t("Good evening");
   const name = user?.name?.trim() || t("there");
   const dayLabel = `${WEEKDAYS[now.getDay()]} · ${MONTHS[now.getMonth()]} ${now.getDate()}`.toUpperCase();
@@ -397,7 +399,7 @@ export function HomePage() {
       {/* LEFT / MAIN */}
       <div ref={leftRef} style={{ position: "relative", flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 20 }}>
         <PageHeader eyebrow={dayLabel}>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div data-tour="create" style={{ display: "flex", gap: 8 }}>
             {calOn && (
               <Hv
                 onClick={() => openPanel("event", null)}
@@ -523,7 +525,9 @@ export function HomePage() {
                 <div style={{ marginLeft: 6, ...silk(9, { letterSpacing: ".12em", color: "rgba(110,230,164,.75)" }) }}>rabit@home ~ reminder</div>
               </div>
               <div style={{ position: "relative", padding: "8px 24px 12px" }}>
-                <div style={{ ...silk(12, { color: "#6ee6a4", letterSpacing: ".08em" }), marginBottom: 8 }}>&gt; {`${greet}, ${name}`.toUpperCase()}!</div>
+                <div style={{ ...silk(12, { color: "#6ee6a4", letterSpacing: ".08em" }), marginBottom: 8 }}>
+                  &gt; {notice ? notice.greeting : `${greet}, ${name}`.toUpperCase() + "!"}
+                </div>
                 <div
                   style={{
                     fontFamily: "Doto,monospace",
@@ -535,7 +539,9 @@ export function HomePage() {
                     textShadow: "0 0 14px rgba(61,220,132,.55)",
                   }}
                 >
-                  {nextOcc && deadlineLine ? (
+                  {notice ? (
+                    <>{notice.line}</>
+                  ) : nextOcc && deadlineLine ? (
                     <>
                       {t("NEXT EVENT: {title}", { title: clip(nextOcc.ev.title || t("Untitled event"), 14).toUpperCase() })}
                       <br />
@@ -557,8 +563,10 @@ export function HomePage() {
                     }}
                   />
                 </div>
-                <div style={{ marginTop: 12, fontSize: 13.5, color: "#a9c6b8", fontFamily: "ui-monospace,SFMono-Regular,Menlo,monospace" }}>
-                  {`${calOn ? (eventsThisWeek === 1 ? t("1 event this week") : t("{n} events this week", { n: eventsThisWeek })) + " · " : ""}${openCount === 1 ? t("1 task open") : t("{n} tasks open", { n: openCount })}`}
+                <div style={{ marginTop: 12, minHeight: 19, fontSize: 13.5, color: "#a9c6b8", fontFamily: "ui-monospace,SFMono-Regular,Menlo,monospace" }}>
+                  {notice
+                    ? ""
+                    : `${calOn ? (eventsThisWeek === 1 ? t("1 event this week") : t("{n} events this week", { n: eventsThisWeek })) + " · " : ""}${openCount === 1 ? t("1 task open") : t("{n} tasks open", { n: openCount })}`}
                 </div>
               </div>
             </div>
