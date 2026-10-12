@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+// The first-run tutorial overlays the app; these tests are not about it.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("rabit.tutorial.seen", "off"));
+});
+
 test("calendar: hold an event and swipe left to delete it (undo brings it back)", async ({ page }) => {
   await page.goto("/");
   await page.getByPlaceholder("How should RaBit call you?").fill("Tester");
@@ -7,6 +12,7 @@ test("calendar: hold an event and swipe left to delete it (undo brings it back)"
   await page.getByRole("button", { name: "Let's go" }).click({ timeout: 15_000 });
   await page.getByLabel("Settings").click();
   await page.getByRole("button", { name: "Load" }).click();
+  await expect(page.getByText("Demo data loaded")).toBeVisible({ timeout: 15_000 }); // seeding takes a moment
   await page.getByRole("dialog", { name: "Settings" }).getByRole("button", { name: "Done", exact: true }).click();
   await page.getByRole("button", { name: "Calendar", exact: true }).click();
 
@@ -23,11 +29,16 @@ test("calendar: hold an event and swipe left to delete it (undo brings it back)"
   await expect(page.getByRole("button", { name: "Edit", exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
 
-  // mantener + deslizar a la izquierda = eliminar
-  await page.mouse.move(x, y);
+  // mantener + deslizar a la izquierda = eliminar (espera a que el panel termine de cerrarse y vuelve a medir el chip)
+  await expect(page.getByRole("button", { name: "Edit", exact: true })).toBeHidden();
+  await page.waitForTimeout(700);
+  const b2 = (await chip.boundingBox())!;
+  const x2 = b2.x + b2.width / 2,
+    y2 = b2.y + b2.height / 2;
+  await page.mouse.move(x2, y2);
   await page.mouse.down();
   await page.waitForTimeout(450);
-  for (let i = 1; i <= 10; i++) await page.mouse.move(x - i * 22, y);
+  for (let i = 1; i <= 10; i++) await page.mouse.move(x2 - i * 22, y2);
   await page.mouse.up();
   await expect(page.getByText("Deleted “Dentist”")).toBeVisible();
   await expect(page.locator(".rbc-chip", { hasText: "Dentist" })).toHaveCount(0);
@@ -43,6 +54,7 @@ test("home: hold + swipe left shows 'DELETE' behind the row, then deletes tasks 
   await page.getByRole("button", { name: "Let's go" }).click({ timeout: 15_000 });
   await page.getByLabel("Settings").click();
   await page.getByRole("button", { name: "Load" }).click();
+  await expect(page.getByText("Demo data loaded")).toBeVisible({ timeout: 15_000 }); // seeding takes a moment
   await page.getByRole("dialog", { name: "Settings" }).getByRole("button", { name: "Done", exact: true }).click();
 
   const swipe = async (loc: ReturnType<typeof page.locator>, check = false) => {
