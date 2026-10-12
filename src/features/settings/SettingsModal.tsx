@@ -1,5 +1,5 @@
 /**
- * Ajustes: perfil, módulos, hora y fecha, recordatorios (en desarrollo), apariencia (tema, idioma, tamaño del texto), datos
+ * Ajustes: perfil, módulos, hora y fecha, recordatorios, apariencia (tema, idioma, cristal), datos
  * (exportar/importar) y herramientas de prueba (datos de ejemplo / borrar todo).
  */
 import { useRef, useState, type CSSProperties, type ReactNode } from "react";
@@ -8,16 +8,15 @@ import { useUi } from "../../store/ui";
 import { NAV } from "../../app/nav";
 import { downloadBackup, readBackupFile } from "../../services/backup";
 import { clearAllData, seedDemoData } from "../../services/seed";
-import type { FontSize, Modules, Settings } from "../../domain/types";
+import type { Modules, Settings } from "../../domain/types";
 import { silk } from "../../components/ui/glass";
 import { LANGS, t, type Lang } from "../../i18n";
-import { resetTours } from "../../components/tourState";
 
-const MODS: { id: keyof Modules; desc: string; soon?: boolean; beta?: boolean }[] = [
+const MODS: { id: keyof Modules; desc: string; soon?: boolean }[] = [
   { id: "calendar", desc: "Events, tasks and RaBit reminders." },
-  { id: "routine", desc: "Your recurring week, wake-up and bedtime.", beta: true },
+  { id: "routine", desc: "Your recurring week, wake-up and bedtime." },
   { id: "notes", desc: "Fast notes you can turn into tasks." },
-  { id: "savings", desc: "Set goals and track what you save." },
+  { id: "savings", desc: "Set goals and track what you save.", soon: true },
 ];
 const navOf = (id: string) => NAV.find((n) => n.id === id) ?? NAV[0];
 
@@ -32,25 +31,22 @@ const row: CSSProperties = {
 };
 const label = (text: string, mt = 18): ReactNode => <div style={{ ...silk(9.5, { letterSpacing: ".16em", color: "#6b7a73" }), margin: `${mt}px 0 8px` }}>{t(text)}</div>;
 
-function Switch({ on, onClick, label: aria, disabled = false }: { on: boolean; onClick: () => void; label: string; disabled?: boolean }) {
+function Switch({ on, onClick, label: aria }: { on: boolean; onClick: () => void; label: string }) {
   return (
     <button
       role="switch"
       aria-checked={on}
       aria-label={aria}
-      aria-disabled={disabled}
-      disabled={disabled}
       onClick={(e) => {
         e.stopPropagation();
-        if (!disabled) onClick();
+        onClick();
       }}
       style={{
         width: 42,
         height: 24,
         flex: "none",
         border: 0,
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.55 : 1,
+        cursor: "pointer",
         borderRadius: 12,
         padding: 3,
         background: on ? "#17b866" : "#c7d0cc",
@@ -107,7 +103,6 @@ function Seg<T extends string | number>({ value, opts, onPick }: { value: T; opt
 export function SettingsModal() {
   const open = useUi((s) => s.settingsOpen);
   const openSettings = useUi((s) => s.openSettings);
-  const openTour = useUi((s) => s.openTour);
   const showToast = useUi((s) => s.showToast);
   const { user, settings, updateSettings, setName, exportAll, importAll } = useData();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -274,11 +269,6 @@ export function SettingsModal() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, color: "#121a16" }}>
                       {t(nv.label)}
-                      {m.beta && (
-                        <span style={{ ...silk(8, { letterSpacing: ".1em", color: "#9a6a14" }), padding: "3px 7px", borderRadius: 6, background: "rgba(201,138,30,.14)" }}>
-                          {t("STILL IN BETA")}
-                        </span>
-                      )}
                       {m.soon && (
                         <span style={{ ...silk(8, { letterSpacing: ".1em", color: "#9a6a14" }), padding: "3px 7px", borderRadius: 6, background: "rgba(201,138,30,.14)" }}>
                           {t("SOON")}
@@ -324,29 +314,19 @@ export function SettingsModal() {
 
           {label("RABIT")}
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <div style={{ ...row, opacity: 0.8 }}>
+            <div style={{ ...row, cursor: "pointer" }} onClick={() => pick("reminders", !settings.reminders)}>
               <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, color: "#121a16" }}>
-                  {t("Reminders")}
-                  <span style={{ ...silk(8, { letterSpacing: ".1em", color: "#9a6a14" }), padding: "3px 7px", borderRadius: 6, background: "rgba(201,138,30,.14)" }}>
-                    {t("IN DEVELOPMENT")}
-                  </span>
-                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Reminders")}</div>
                 <div style={{ fontSize: 12, color: "#5d6f67", marginTop: 3, lineHeight: 1.45 }}>{t("RaBit pops up before your events and deadlines.")}</div>
               </div>
-              <Switch on={false} disabled label={t("Reminders")} onClick={() => undefined} />
+              <Switch on={settings.reminders} label={t("Reminders")} onClick={() => pick("reminders", !settings.reminders)} />
             </div>
-            <div style={{ ...row, opacity: 0.8 }}>
+            <div style={{ ...row, cursor: "pointer" }} onClick={() => pick("sound", !settings.sound)}>
               <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, color: "#121a16" }}>
-                  {t("Sound")}
-                  <span style={{ ...silk(8, { letterSpacing: ".1em", color: "#9a6a14" }), padding: "3px 7px", borderRadius: 6, background: "rgba(201,138,30,.14)" }}>
-                    {t("IN DEVELOPMENT")}
-                  </span>
-                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Sound")}</div>
                 <div style={{ fontSize: 12, color: "#5d6f67", marginTop: 3, lineHeight: 1.45 }}>{t("Play a soft 8-bit chime with reminders.")}</div>
               </div>
-              <Switch on={false} disabled label={t("Sound")} onClick={() => undefined} />
+              <Switch on={settings.sound} label={t("Sound")} onClick={() => pick("sound", !settings.sound)} />
             </div>
           </div>
 
@@ -366,17 +346,14 @@ export function SettingsModal() {
             <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Language")}</div>
             <Seg<Lang> value={settings.language} opts={LANGS} onPick={(v) => pick("language", v)} />
           </div>
-          <div style={{ ...row, justifyContent: "space-between", padding: "10px 10px 10px 16px", marginTop: 8 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Text size")}</div>
-            <Seg<FontSize>
-              value={settings.fontSize}
-              opts={[
-                { id: "small", label: "Small" },
-                { id: "medium", label: "Medium" },
-                { id: "large", label: "Large" },
-              ]}
-              onPick={(v) => pick("fontSize", v)}
-            />
+          <div style={{ ...row, cursor: "pointer", marginTop: 8 }} onClick={() => pick("glass", !settings.glass)}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Glass effect")}</div>
+              <div style={{ fontSize: 12, color: "#5d6f67", marginTop: 3, lineHeight: 1.45 }}>
+                {t("A very subtle transparency so you can faintly see what is behind the window.")}
+              </div>
+            </div>
+            <Switch on={settings.glass} label={t("Glass effect")} onClick={() => pick("glass", !settings.glass)} />
           </div>
 
           {label("DATA")}
@@ -424,33 +401,6 @@ export function SettingsModal() {
                 <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => void onImport(e.target.files?.[0])} />
               </div>
             </div>
-            <div style={{ ...row, justifyContent: "space-between" }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Tutorial")}</div>
-                <div style={{ fontSize: 12, color: "#5d6f67", marginTop: 3, lineHeight: 1.45 }}>{t("A quick tour of the gestures and tools.")}</div>
-              </div>
-              <button
-                onClick={() => {
-                  close();
-                  resetTours();
-                  openTour("main");
-                }}
-                style={{
-                  padding: "8px 14px",
-                  border: 0,
-                  borderRadius: 999,
-                  background: "#fff",
-                  boxShadow: "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)",
-                  fontFamily: "inherit",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: "#0b7a45",
-                  cursor: "pointer",
-                }}
-              >
-                {t("Show")}
-              </button>
-            </div>
             <div style={{ ...row, justifyContent: "space-between", opacity: 0.8 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Cloud sync")}</div>
               <span style={{ ...silk(9, { letterSpacing: ".1em", color: "#9a6a14" }), padding: "4px 8px", borderRadius: 6, background: "rgba(201,138,30,.14)" }}>
@@ -465,7 +415,7 @@ export function SettingsModal() {
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Demo data")}</div>
                 <div style={{ fontSize: 12, color: "#5d6f67", marginTop: 3, lineHeight: 1.45 }}>
-                  {t("Fills every module with sample tasks, events, notes, routine and stocks.")}
+                  {t("Fills every module with sample tasks, events, notes, routine and stocks — including a reminder that rings in about 3 minutes.")}
                 </div>
               </div>
               <button
@@ -489,7 +439,7 @@ export function SettingsModal() {
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Clear all data")}</div>
                 <div style={{ fontSize: 12, color: "#5d6f67", marginTop: 3, lineHeight: 1.45 }}>
-                  {t("Removes tasks, events, notes, routine and savings. Your name and settings stay.")}
+                  {t("Removes tasks, events, notes, routine and portfolio. Your name and settings stay.")}
                 </div>
               </div>
               <button

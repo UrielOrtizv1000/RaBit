@@ -41,18 +41,6 @@
     ],
     "android": {
       "debugApplicationIdSuffix": ".debug"
-    },
-    "createUpdaterArtifacts": true
-  },
-  "plugins": {
-    "updater": {
-      "endpoints": [
-        "https://github.com/<OWNER>/<REPO>/releases/latest/download/latest.json"
-      ],
-      "pubkey": "<PUBLIC_KEY_HERE>",
-      "windows": {
-        "installMode": "passive"
-      }
     }
   }
 }

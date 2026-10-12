@@ -154,7 +154,7 @@ export function CalendarPage(): JSX.Element {
     <div style={{ display: "flex", flexDirection: "column", gap: 20, minHeight: "100%" }}>
       <style>{SHARED_CSS}</style>
       <PageHeader eyebrow={eyebrow} title={t("Calendar")} subtitle={subtitle}>
-        <div data-tour="cal-nav" style={PILL_GROUP}>
+        <div style={PILL_GROUP}>
           <div className="rbc-btn" onClick={() => step(-1)} style={navBtn}>
             ‹
           </div>
@@ -182,7 +182,7 @@ export function CalendarPage(): JSX.Element {
             ›
           </div>
         </div>
-        <div data-tour="cal-views" style={PILL_GROUP}>
+        <div style={PILL_GROUP}>
           {VIEWS.map((v) => (
             <div
               key={v}
@@ -206,13 +206,13 @@ export function CalendarPage(): JSX.Element {
             </div>
           ))}
         </div>
-        <div data-tour="cal-new" className="rbc-primary" onClick={() => create(selected)} style={PRIMARY_BTN}>
+        <div className="rbc-primary" onClick={() => create(selected)} style={PRIMARY_BTN}>
           <PlusIcon />
           {t("NEW EVENT")}
         </div>
       </PageHeader>
 
-      <div data-tour="cal-grid" style={{ flex: 1, display: "flex", gap: 26, alignItems: "stretch", minWidth: 0 }}>
+      <div style={{ flex: 1, display: "flex", gap: 26, alignItems: "stretch", minWidth: 0 }}>
         <div style={{ flex: 1, minWidth: 0, minHeight: 706, display: "flex", flexDirection: "column" }}>
           {view === "MONTH" && (
             <MonthView

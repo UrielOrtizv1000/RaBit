@@ -39,6 +39,3 @@ design/*.xlsx
 .idea/
 Thumbs.db
 desktop.ini
-
-# (keep the update simulation env file)
-!.env.update-sim

@@ -1,10 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-// The first-run tutorial overlays the app; these tests are not about it.
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem("rabit.tutorial.seen", "off"));
-});
-
 test("onboarding, create a task, complete it and it sinks to the end", async ({ page }) => {
   await page.goto("/");
   await page.getByPlaceholder("How should RaBit call you?").fill("Tester");

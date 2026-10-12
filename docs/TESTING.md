@@ -28,12 +28,10 @@ Settings (⚙) → **TRY RABIT** → **Load** loads tasks, events, notes, routin
    Rename a tag: it updates on all notes. Hide-list button = full-screen note.
 6. **Calendar**: Month / Week / Day / Year, navigate real months, click a slot to create.
 7. **Routine**: add a block that clashes with an event → it is flagged "! Clash".
-8. **Savings**: create a jar (with and without a plan), add and withdraw money (the plan recalculates), fill a jar → RaBit celebrates; drag the carousel and the coins react.
-9. **Tutorials**: the main tour on first run, then a short one the first time you open each page or window; Settings → Data → Tutorial → Show replays them all.
-10. **Shortcuts**: `Ctrl+N` create, `Esc` close, `Ctrl+K` search.
-11. **Backup**: Settings → Data → Export, then Clear and Import.
-12. **Updates**: `npm run dev:update-sim` (or open the app with `?update-sim`): the download icon appears next to the bell → Update → progress → Restart to update → the Home terminal types "UPDATED TO …".
-13. **Notifications**: the bell lists overdue tasks and what is pending today. Reminders/sound are disabled ("in development").
+8. **Savings**: icon with an amber dot and the "Coming soon" label (placeholder page).
+9. **Shortcuts**: `Ctrl+N` create, `Esc` close, `Ctrl+K` search.
+10. **Backup**: Settings → Data → Export, then Clear and Import.
+11. **Reminder**: with the sample data, leave the app open ~3 min: system notification.
 
 ## Automated tests
 

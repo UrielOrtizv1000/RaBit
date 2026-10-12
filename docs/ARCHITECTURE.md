@@ -3,13 +3,6 @@
 Desktop application (Tauri 2) with a React + TypeScript interface. **100% local**: there is no server, accounts or network.
 This document explains _why_ the code is organized this way and how to extend it without breaking anything.
 
-## Multi-platform layout
-
-This repository holds the desktop app (root, `src/`, `src-tauri/`) and the folders for the native mobile clients,
-`ios/` (RaBitIOS, SwiftUI) and `android/` (RaBitAndroid, Kotlin + Compose). The clients share no code: they share the
-contract in `shared/` (schema, backup `.json` format, design tokens). The desktop app is the reference implementation;
-change the contract in the same PR as the code it describes.
-
 ## Layers and dependency direction
 
 ```
@@ -20,18 +13,18 @@ app ──► features ──► components ──► store ──► db ──�
 
 A layer may only import from the ones to its right. Never the other way around.
 
-| Folder           | Responsibility                                                                              | Must not contain                |
-| ---------------- | ------------------------------------------------------------------------------------------- | ------------------------------- |
-| `src/domain`     | **Pure** types and business rules (dates, task ordering, repetitions, column distribution). | React, database, `window`.      |
-| `src/db`         | SQL interface (`SqlAdapter`), versioned migrations and row ⇄ domain repository.             | Business logic, UI.             |
-| `src/store`      | State (Zustand). `data.ts` writes to SQLite; `ui.ts` is UI state only.                      | JSX, styles.                    |
-| `src/services`   | Effects with the outside world: startup, reminders, backup, glass, sample data.             | React components.               |
-| `src/lib`        | UI utilities without domain (`swipe`, `zoom`, `log`).                                       | Business rules.                 |
-| `src/components` | Reusable components: `ui/` (header, terminal, styles) and `ItemPanel/` (shared panel).      | Knowing about a specific page.  |
-| `src/features/*` | One folder per page/module (home, calendar, routine, notes, savings, settings, onboarding). | Importing from another feature. |
-| `src/app`        | Shell: window, top bar, dock, page fitting (`FitPage`), app startup.                        | Business rules.                 |
-| `src/i18n`       | `t()` and per-area dictionaries in `es/*.ts`.                                               | Untranslated UI text.           |
-| `src-tauri`      | Minimal Rust backend: window, plugins (sql, notifications, dialog, fs) and glass effect.    | Application logic.              |
+| Folder           | Responsibility                                                                                     | Must not contain                  |
+| ---------------- | ------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `src/domain`     | **Pure** types and business rules (dates, task ordering, repetitions, column distribution).       | React, database, `window`.        |
+| `src/db`         | SQL interface (`SqlAdapter`), versioned migrations and row ⇄ domain repository.                   | Business logic, UI.               |
+| `src/store`      | State (Zustand). `data.ts` writes to SQLite; `ui.ts` is UI state only.                            | JSX, styles.                      |
+| `src/services`   | Effects with the outside world: startup, reminders, backup, glass, sample data.                   | React components.                 |
+| `src/lib`        | UI utilities without domain (`swipe`, `zoom`, `log`).                                             | Business rules.                   |
+| `src/components` | Reusable components: `ui/` (header, terminal, styles) and `ItemPanel/` (shared panel).            | Knowing about a specific page.    |
+| `src/features/*` | One folder per page/module (home, calendar, routine, notes, savings, settings, onboarding).       | Importing from another feature.   |
+| `src/app`        | Shell: window, top bar, dock, page fitting (`FitPage`), app startup.                              | Business rules.                   |
+| `src/i18n`       | `t()` and per-area dictionaries in `es/*.ts`.                                                     | Untranslated UI text.             |
+| `src-tauri`      | Minimal Rust backend: window, plugins (sql, notifications, dialog, fs) and glass effect.          | Application logic.                |
 
 ## Important decisions (and why)
 
@@ -80,13 +73,13 @@ dark surface, its color must match the selectors in `global.css` (section "Dark 
 
 ## Quality
 
-| Command                | What it does                                                        |
-| ---------------------- | ------------------------------------------------------------------- |
-| `npm run typecheck`    | Strict TypeScript (no `any`, no unused variables).                  |
-| `npm run lint`         | oxlint: correctness, `no-explicit-any`, hooks rules.                |
-| `npm run format:check` | Prettier with a fixed configuration (`.prettierrc.json`).           |
-| `npm test`             | Vitest: pure rules, persistence, complete i18n.                     |
-| `npm run test:e2e`     | Playwright: onboarding, tasks, theme, language, gestures, stress.   |
+| Command                | What it does                                                   |
+| ---------------------- | -------------------------------------------------------------- |
+| `npm run typecheck`    | Strict TypeScript (no `any`, no unused variables).             |
+| `npm run lint`         | oxlint: correctness, `no-explicit-any`, hooks rules.           |
+| `npm run format:check` | Prettier with a fixed configuration (`.prettierrc.json`).      |
+| `npm test`             | Vitest: pure rules, persistence, complete i18n.                |
+| `npm run test:e2e`     | Playwright: onboarding, tasks, theme, language, gestures, stress. |
 | `npm run package:beta` | Builds and leaves `installers/RaBit_beta.exe` and `RaBit_beta.msi`. |
 
 Error logging: no exception is silently swallowed; `lib/log.ts → logWarn(scope, error)` is used (without personal data).

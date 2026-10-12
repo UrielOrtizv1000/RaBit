@@ -3,7 +3,6 @@
  */
 import { create } from "zustand";
 import type { ISODate } from "../domain/types";
-import type { TourId } from "../components/tours";
 
 export type PageId = "home" | "calendar" | "routine" | "notes" | "savings";
 export type PanelKind = "event" | "note" | "task";
@@ -26,8 +25,6 @@ interface UiState {
   page: PageId;
   panel: PanelState | null;
   settingsOpen: boolean;
-  /** tutorial guiado abierto (uno a la vez) */
-  tour: TourId | null;
   search: string;
   toast: Toast | null;
   setPage: (p: PageId) => void;
@@ -35,7 +32,6 @@ interface UiState {
   closePanel: () => void;
   setPanelKind: (kind: PanelKind) => void;
   openSettings: (o: boolean) => void;
-  openTour: (id: TourId | null) => void;
   setSearch: (q: string) => void;
   showToast: (text: string, undo?: () => void) => void;
   clearToast: () => void;
@@ -48,7 +44,6 @@ export const useUi = create<UiState>((set) => ({
   page: "home",
   panel: null,
   settingsOpen: false,
-  tour: null,
   search: "",
   toast: null,
   setPage: (page) => set({ page }),
@@ -56,7 +51,6 @@ export const useUi = create<UiState>((set) => ({
   closePanel: () => set({ panel: null }),
   setPanelKind: (kind) => set((s) => (s.panel ? { panel: { kind, id: null } } : s)),
   openSettings: (settingsOpen) => set({ settingsOpen }),
-  openTour: (tour) => set({ tour }),
   setSearch: (search) => set({ search }),
   showToast: (text, undo) => {
     clearTimeout(toastTimer);
