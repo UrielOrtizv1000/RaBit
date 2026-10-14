@@ -65,12 +65,28 @@ function TourView({ id }: { id: TourId }) {
     };
     measure();
     const raf = requestAnimationFrame(() => requestAnimationFrame(() => setArmed(true)));
-    const id = setInterval(measure, 250);
-    window.addEventListener("resize", measure);
+    // Se re-mide cuando cambia el tamaño de la capa, de la tarjeta o del objetivo (sin sondeo constante)…
+    let frame = 0;
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    };
+    const ro = new ResizeObserver(schedule);
+    if (wrap.current) ro.observe(wrap.current);
+    if (card.current) ro.observe(card.current);
+    const el = key ? document.querySelector<HTMLElement>(`[data-tour="${key}"]`) : null;
+    if (el) ro.observe(el);
+    // …y durante el primer segundo, mientras la página y sus animaciones de entrada se asientan.
+    const settle = setInterval(measure, 100);
+    const stop = setTimeout(() => clearInterval(settle), 1000);
+    window.addEventListener("resize", schedule);
     return () => {
       cancelAnimationFrame(raf);
-      clearInterval(id);
-      window.removeEventListener("resize", measure);
+      cancelAnimationFrame(frame);
+      clearInterval(settle);
+      clearTimeout(stop);
+      ro.disconnect();
+      window.removeEventListener("resize", schedule);
     };
   }, [key, i]);
 
