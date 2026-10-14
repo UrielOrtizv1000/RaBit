@@ -78,9 +78,9 @@ export function Topbar({ onSettings }: { onSettings: () => void }) {
           ...darkPill,
         }}
       >
-        <div style={silk(13, { fontWeight: 700, color: "#3ddc84", textShadow: "0 0 9px rgba(61,220,132,.7)" })}>&gt;</div>
-        <div style={silk(14, { fontWeight: 700, letterSpacing: ".06em", color: "#3ddc84", textShadow: "0 0 10px rgba(61,220,132,.55)" })}>RABIT</div>
-        <div style={{ width: 6, height: 13, background: "#3ddc84", boxShadow: "0 0 8px rgba(61,220,132,.8)", animation: "rb-cursor 1.1s steps(1) infinite" }} />
+        <div style={silk(13, { fontWeight: 700, color: "var(--rb-neon)", textShadow: "0 0 9px rgba(61,220,132,.7)" })}>&gt;</div>
+        <div style={silk(14, { fontWeight: 700, letterSpacing: ".06em", color: "var(--rb-neon)", textShadow: "0 0 10px rgba(61,220,132,.55)" })}>RABIT</div>
+        <div style={{ width: 6, height: 13, background: "var(--rb-neon)", boxShadow: "0 0 8px rgba(61,220,132,.8)", animation: "rb-cursor 1.1s steps(1) infinite" }} />
         <div
           style={{
             display: "flex",
@@ -124,7 +124,7 @@ export function Topbar({ onSettings }: { onSettings: () => void }) {
               <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
             </svg>
           )}
-          <div style={silk(10, { letterSpacing: ".1em", color: "#3ddc84", textShadow: "0 0 8px rgba(61,220,132,.5)" })}>
+          <div style={silk(10, { letterSpacing: ".1em", color: "var(--rb-neon)", textShadow: "0 0 8px rgba(61,220,132,.5)" })}>
             {(theme === "dark" ? t("Dark") : t("Light")).toUpperCase()}
           </div>
         </div>
@@ -145,7 +145,7 @@ export function Topbar({ onSettings }: { onSettings: () => void }) {
             backdropFilter: "blur(20px) saturate(170%)",
             border: "1px solid rgba(255,255,255,.8)",
             boxShadow: "inset 0 1px 1px rgba(255,255,255,.95),0 10px 24px -18px rgba(20,48,34,.4)",
-            color: "#6b7a73",
+            color: "var(--rb-faint)",
             fontSize: 13,
           }}
         >
@@ -161,7 +161,7 @@ export function Topbar({ onSettings }: { onSettings: () => void }) {
               setSearch(e.currentTarget.value);
               if (e.key === "Enter" && e.currentTarget.value.trim()) setPage("notes");
             }}
-            style={{ flex: 1, minWidth: 0, border: 0, outline: 0, background: "transparent", fontFamily: "inherit", fontSize: 13, color: "#121a16" }}
+            style={{ flex: 1, minWidth: 0, border: 0, outline: 0, background: "transparent", fontFamily: "inherit", fontSize: 13, color: "var(--rb-ink)" }}
           />
         </label>
       </div>
@@ -203,7 +203,7 @@ export function Topbar({ onSettings }: { onSettings: () => void }) {
                   width: 6,
                   height: 6,
                   borderRadius: "50%",
-                  background: notifs.some((n) => n.overdue) ? "#a8443a" : "#17b866",
+                  background: notifs.some((n) => n.overdue) ? "var(--rb-danger)" : "var(--rb-green)",
                   boxShadow: "0 0 0 2px #fff",
                 }}
               />
@@ -232,8 +232,8 @@ export function Topbar({ onSettings }: { onSettings: () => void }) {
               }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px 10px" }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Notifications")}</div>
-                {notifs.length > 0 && <div style={silk(9, { letterSpacing: ".1em", color: "#6b7a73" })}>{notifs.length}</div>}
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Notifications")}</div>
+                {notifs.length > 0 && <div style={silk(9, { letterSpacing: ".1em", color: "var(--rb-faint)" })}>{notifs.length}</div>}
               </div>
               {notifs.length === 0 && <div style={{ padding: "6px 10px 10px", fontSize: 12.5, color: "#5d6f67" }}>{t("You are all caught up.")}</div>}
               <div className="rb-thin-scroll" style={{ minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: 2 }}>
@@ -262,14 +262,16 @@ export function Topbar({ onSettings }: { onSettings: () => void }) {
                   >
                     <div style={{ width: 3, height: 28, flex: "none", borderRadius: 3, background: n.overdue ? "#a8443a" : n.kind === "event" ? "#4b7fd6" : "#8a6fd6" }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: "#121a16", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--rb-ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {n.title || t("Untitled")}
                       </div>
-                      <div style={{ fontSize: 11.5, color: n.overdue ? "#a8443a" : "#5d6f67", marginTop: 2 }}>{subOf(n, tf)}</div>
+                      <div style={{ fontSize: 11.5, color: n.overdue ? "var(--rb-danger)" : "var(--rb-muted)", marginTop: 2 }}>{subOf(n, tf)}</div>
                     </div>
                   </button>
                 ))}
-                {notifs.length > NOTIF_MAX && <div style={{ padding: "6px 10px 4px", fontSize: 11.5, color: "#6b7a73" }}>{t("+{n} more", { n: notifs.length - NOTIF_MAX })}</div>}
+                {notifs.length > NOTIF_MAX && (
+                  <div style={{ padding: "6px 10px 4px", fontSize: 11.5, color: "var(--rb-faint)" }}>{t("+{n} more", { n: notifs.length - NOTIF_MAX })}</div>
+                )}
               </div>
             </div>
           )}

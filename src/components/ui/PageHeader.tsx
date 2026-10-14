@@ -9,9 +9,9 @@ export function PageHeader({ eyebrow, title, subtitle, children }: { eyebrow: st
   return (
     <div data-rise="0" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, height: 44, flex: "none" }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 16, minWidth: 0, whiteSpace: "nowrap" }}>
-        {title ? <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-.01em", color: "#121a16" }}>{title}</div> : null}
+        {title ? <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-.01em", color: "var(--rb-ink)" }}>{title}</div> : null}
         <div style={{ ...SILK_LABEL, letterSpacing: ".16em" }}>{eyebrow}</div>
-        {subtitle ? <div style={{ fontSize: 12.5, color: "#5d6f67", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis" }}>{subtitle}</div> : null}
+        {subtitle ? <div style={{ fontSize: 12.5, color: "var(--rb-muted)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis" }}>{subtitle}</div> : null}
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>{children}</div>
     </div>

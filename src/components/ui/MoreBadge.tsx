@@ -15,7 +15,7 @@ export function MoreBadge({ n }: { n: number }): JSX.Element {
         borderRadius: 999,
         display: "grid",
         placeItems: "center",
-        background: "#121a16",
+        background: "var(--rb-ink)",
         color: "#fff",
         fontSize: 9.5,
         fontWeight: 700,

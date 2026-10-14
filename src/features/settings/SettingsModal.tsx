@@ -10,8 +10,10 @@ import { downloadBackup, readBackupFile } from "../../services/backup";
 import { clearAllData, seedDemoData } from "../../services/seed";
 import type { FontSize, Modules, Settings } from "../../domain/types";
 import { silk } from "../../components/ui/glass";
+import { pillButton } from "../../components/ui/buttons";
 import { LANGS, t, type Lang } from "../../i18n";
 import { resetTours } from "../../components/tourState";
+import { useUpdater } from "../../services/updater";
 
 const MODS: { id: keyof Modules; desc: string; soon?: boolean; beta?: boolean }[] = [
   { id: "calendar", desc: "Events, tasks and RaBit reminders." },
@@ -53,7 +55,7 @@ function Switch({ on, onClick, label: aria, disabled = false }: { on: boolean; o
         opacity: disabled ? 0.55 : 1,
         borderRadius: 12,
         padding: 3,
-        background: on ? "#17b866" : "#c7d0cc",
+        background: on ? "var(--rb-green)" : "#c7d0cc",
         transition: "background .2s ease-out",
       }}
     >
@@ -90,7 +92,7 @@ function Seg<T extends string | number>({ value, opts, onPick }: { value: T; opt
               fontSize: 12,
               fontWeight: 600,
               cursor: "pointer",
-              color: a ? "#121a16" : "#5d6f67",
+              color: a ? "var(--rb-ink)" : "var(--rb-muted)",
               background: a ? "#fff" : "transparent",
               boxShadow: a ? "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)" : "none",
               transition: "background .2s ease-out",
@@ -112,7 +114,15 @@ export function SettingsModal() {
   const { user, settings, updateSettings, setName, exportAll, importAll } = useData();
   const fileRef = useRef<HTMLInputElement>(null);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [checking, setChecking] = useState(false);
   if (!open) return null;
+
+  const checkUpdates = async () => {
+    setChecking(true);
+    await useUpdater.api.check();
+    setChecking(false);
+    showToast(useUpdater.getState().next ? t("Update available — use the download icon") : t("You're up to date"));
+  };
 
   const close = () => openSettings(false);
   const setMods = (modules: Modules) => void updateSettings({ modules });
@@ -166,12 +176,12 @@ export function SettingsModal() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 24px 6px" }}>
-          <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-.01em", color: "#121a16" }}>{t("Settings")}</div>
+          <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-.01em", color: "var(--rb-ink)" }}>{t("Settings")}</div>
           <button
             aria-label={t("Close")}
             onClick={close}
             className="rb-hover-bg"
-            style={{ width: 30, height: 30, border: 0, background: "transparent", borderRadius: "50%", cursor: "pointer", color: "#5d6f67", fontSize: 16 }}
+            style={{ width: 30, height: 30, border: 0, background: "transparent", borderRadius: "50%", cursor: "pointer", color: "var(--rb-muted)", fontSize: 16 }}
           >
             ×
           </button>
@@ -194,19 +204,19 @@ export function SettingsModal() {
               {initial}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 11.5, fontWeight: 600, color: "#5d6f67", marginBottom: 3 }}>{t("Your name · used in greetings")}</div>
+              <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--rb-muted)", marginBottom: 3 }}>{t("Your name · used in greetings")}</div>
               <input
                 aria-label={t("Your name")}
                 value={user?.name ?? ""}
                 onChange={(e) => void setName(e.target.value)}
                 placeholder={t("Your name")}
-                style={{ width: "100%", border: 0, outline: 0, background: "transparent", fontFamily: "inherit", fontSize: 15, fontWeight: 700, color: "#121a16" }}
+                style={{ width: "100%", border: 0, outline: 0, background: "transparent", fontFamily: "inherit", fontSize: 15, fontWeight: 700, color: "var(--rb-ink)" }}
               />
             </div>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "18px 0 8px" }}>
-            <div style={silk(9.5, { letterSpacing: ".16em", color: "#6b7a73" })}>{t("MODULES · {on}/4 ON", { on })}</div>
+            <div style={silk(9.5, { letterSpacing: ".16em", color: "var(--rb-faint)" })}>{t("MODULES · {on}/4 ON", { on })}</div>
             <div style={{ display: "flex", gap: 2, padding: 3, borderRadius: 999, background: "rgba(18,38,30,.05)" }}>
               <button
                 onClick={() => setMods({ calendar: true, routine: true, notes: true, savings: true })}
@@ -219,7 +229,7 @@ export function SettingsModal() {
                   fontSize: 11.5,
                   fontWeight: 600,
                   cursor: "pointer",
-                  color: "#0b7a45",
+                  color: "var(--rb-green-deep)",
                 }}
               >
                 {t("All on")}
@@ -235,7 +245,7 @@ export function SettingsModal() {
                   fontSize: 11.5,
                   fontWeight: 600,
                   cursor: "pointer",
-                  color: "#5d6f67",
+                  color: "var(--rb-muted)",
                 }}
               >
                 {t("All off")}
@@ -272,7 +282,7 @@ export function SettingsModal() {
                     </svg>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, color: "#121a16" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>
                       {t(nv.label)}
                       {m.beta && (
                         <span style={{ ...silk(8, { letterSpacing: ".1em", color: "#9a6a14" }), padding: "3px 7px", borderRadius: 6, background: "rgba(201,138,30,.14)" }}>
@@ -285,13 +295,13 @@ export function SettingsModal() {
                         </span>
                       )}
                     </div>
-                    <div style={{ fontSize: 12, color: "#5d6f67", marginTop: 3, lineHeight: 1.45 }}>{t(m.desc)}</div>
+                    <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>{t(m.desc)}</div>
                   </div>
                   <Switch on={a} label={t(nv.label)} onClick={() => setMods({ ...settings.modules, [m.id]: !a })} />
                 </div>
               );
             })}
-            <div style={{ padding: "4px 4px 0", fontSize: 11.5, lineHeight: 1.5, color: "#6b7a73" }}>
+            <div style={{ padding: "4px 4px 0", fontSize: 11.5, lineHeight: 1.5, color: "var(--rb-faint)" }}>
               {t("Home always stays on. Turned-off modules disappear from the sidebar and Home — your data is kept.")}
             </div>
           </div>
@@ -299,7 +309,7 @@ export function SettingsModal() {
           {label("TIME & DATE")}
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div style={{ ...row, justifyContent: "space-between", padding: "10px 10px 10px 16px" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Time format")}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Time format")}</div>
               <Seg
                 value={settings.timeFormat}
                 opts={[
@@ -310,7 +320,7 @@ export function SettingsModal() {
               />
             </div>
             <div style={{ ...row, justifyContent: "space-between", padding: "10px 10px 10px 16px" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Week starts on")}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Week starts on")}</div>
               <Seg
                 value={settings.weekStart}
                 opts={[
@@ -326,25 +336,25 @@ export function SettingsModal() {
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div style={{ ...row, opacity: 0.8 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, color: "#121a16" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>
                   {t("Reminders")}
                   <span style={{ ...silk(8, { letterSpacing: ".1em", color: "#9a6a14" }), padding: "3px 7px", borderRadius: 6, background: "rgba(201,138,30,.14)" }}>
                     {t("IN DEVELOPMENT")}
                   </span>
                 </div>
-                <div style={{ fontSize: 12, color: "#5d6f67", marginTop: 3, lineHeight: 1.45 }}>{t("RaBit pops up before your events and deadlines.")}</div>
+                <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>{t("RaBit pops up before your events and deadlines.")}</div>
               </div>
               <Switch on={false} disabled label={t("Reminders")} onClick={() => undefined} />
             </div>
             <div style={{ ...row, opacity: 0.8 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, color: "#121a16" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>
                   {t("Sound")}
                   <span style={{ ...silk(8, { letterSpacing: ".1em", color: "#9a6a14" }), padding: "3px 7px", borderRadius: 6, background: "rgba(201,138,30,.14)" }}>
                     {t("IN DEVELOPMENT")}
                   </span>
                 </div>
-                <div style={{ fontSize: 12, color: "#5d6f67", marginTop: 3, lineHeight: 1.45 }}>{t("Play a soft 8-bit chime with reminders.")}</div>
+                <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>{t("Play a soft 8-bit chime with reminders.")}</div>
               </div>
               <Switch on={false} disabled label={t("Sound")} onClick={() => undefined} />
             </div>
@@ -352,7 +362,7 @@ export function SettingsModal() {
 
           {label("APPEARANCE")}
           <div style={{ ...row, justifyContent: "space-between", padding: "10px 10px 10px 16px" }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Theme")}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Theme")}</div>
             <Seg
               value={settings.theme}
               opts={[
@@ -363,11 +373,11 @@ export function SettingsModal() {
             />
           </div>
           <div style={{ ...row, justifyContent: "space-between", padding: "10px 10px 10px 16px", marginTop: 8 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Language")}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Language")}</div>
             <Seg<Lang> value={settings.language} opts={LANGS} onPick={(v) => pick("language", v)} />
           </div>
           <div style={{ ...row, justifyContent: "space-between", padding: "10px 10px 10px 16px", marginTop: 8 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Text size")}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Text size")}</div>
             <Seg<FontSize>
               value={settings.fontSize}
               opts={[
@@ -383,42 +393,14 @@ export function SettingsModal() {
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div style={{ ...row, justifyContent: "space-between" }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Backup")}</div>
-                <div style={{ fontSize: 12, color: "#5d6f67", marginTop: 3, lineHeight: 1.45 }}>{t("Everything lives on this device. Export a .json to keep a copy.")}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Backup")}</div>
+                <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>{t("Everything lives on this device. Export a .json to keep a copy.")}</div>
               </div>
               <div style={{ display: "flex", gap: 6 }}>
-                <button
-                  onClick={() => void downloadBackup(exportAll()).then((ok) => ok && showToast(t("Backup exported")))}
-                  style={{
-                    padding: "8px 14px",
-                    border: 0,
-                    borderRadius: 999,
-                    background: "#fff",
-                    boxShadow: "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)",
-                    fontFamily: "inherit",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "#0b7a45",
-                    cursor: "pointer",
-                  }}
-                >
+                <button onClick={() => void downloadBackup(exportAll()).then((ok) => ok && showToast(t("Backup exported")))} style={pillButton}>
                   {t("Export")}
                 </button>
-                <button
-                  onClick={() => fileRef.current?.click()}
-                  style={{
-                    padding: "8px 14px",
-                    border: 0,
-                    borderRadius: 999,
-                    background: "#fff",
-                    boxShadow: "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)",
-                    fontFamily: "inherit",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "#0b7a45",
-                    cursor: "pointer",
-                  }}
-                >
+                <button onClick={() => fileRef.current?.click()} style={pillButton}>
                   {t("Import")}
                 </button>
                 <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => void onImport(e.target.files?.[0])} />
@@ -426,8 +408,8 @@ export function SettingsModal() {
             </div>
             <div style={{ ...row, justifyContent: "space-between" }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Tutorial")}</div>
-                <div style={{ fontSize: 12, color: "#5d6f67", marginTop: 3, lineHeight: 1.45 }}>{t("A quick tour of the gestures and tools.")}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Tutorial")}</div>
+                <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>{t("A quick tour of the gestures and tools.")}</div>
               </div>
               <button
                 onClick={() => {
@@ -435,6 +417,19 @@ export function SettingsModal() {
                   resetTours();
                   openTour("main");
                 }}
+                style={pillButton}
+              >
+                {t("Show")}
+              </button>
+            </div>
+            <div style={{ ...row, justifyContent: "space-between" }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Updates")}</div>
+                <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>{t("RaBit checks quietly at start. Nothing else is sent.")}</div>
+              </div>
+              <button
+                onClick={() => void checkUpdates()}
+                disabled={checking}
                 style={{
                   padding: "8px 14px",
                   border: 0,
@@ -444,15 +439,16 @@ export function SettingsModal() {
                   fontFamily: "inherit",
                   fontSize: 12,
                   fontWeight: 700,
-                  color: "#0b7a45",
-                  cursor: "pointer",
+                  color: "var(--rb-green-deep)",
+                  cursor: checking ? "default" : "pointer",
+                  opacity: checking ? 0.6 : 1,
                 }}
               >
-                {t("Show")}
+                {checking ? t("Checking…") : t("Check for updates")}
               </button>
             </div>
             <div style={{ ...row, justifyContent: "space-between", opacity: 0.8 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Cloud sync")}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Cloud sync")}</div>
               <span style={{ ...silk(9, { letterSpacing: ".1em", color: "#9a6a14" }), padding: "4px 8px", borderRadius: 6, background: "rgba(201,138,30,.14)" }}>
                 {t("COMING SOON")}
               </span>
@@ -463,8 +459,8 @@ export function SettingsModal() {
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div style={{ ...row, justifyContent: "space-between" }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Demo data")}</div>
-                <div style={{ fontSize: 12, color: "#5d6f67", marginTop: 3, lineHeight: 1.45 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Demo data")}</div>
+                <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>
                   {t("Fills every module with sample tasks, events, notes, routine and stocks.")}
                 </div>
               </div>
@@ -474,7 +470,7 @@ export function SettingsModal() {
                   padding: "8px 14px",
                   border: 0,
                   borderRadius: 999,
-                  background: "linear-gradient(150deg,#1fc172,#0f9a56)",
+                  background: "var(--rb-green-grad)",
                   fontFamily: "inherit",
                   fontSize: 12,
                   fontWeight: 700,
@@ -487,8 +483,8 @@ export function SettingsModal() {
             </div>
             <div style={{ ...row, justifyContent: "space-between" }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Clear all data")}</div>
-                <div style={{ fontSize: 12, color: "#5d6f67", marginTop: 3, lineHeight: 1.45 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Clear all data")}</div>
+                <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>
                   {t("Removes tasks, events, notes, routine and savings. Your name and settings stay.")}
                 </div>
               </div>
@@ -506,12 +502,12 @@ export function SettingsModal() {
                   padding: "8px 14px",
                   border: 0,
                   borderRadius: 999,
-                  background: confirmClear ? "#a8443a" : "#fff",
+                  background: confirmClear ? "var(--rb-danger)" : "#fff",
                   boxShadow: "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)",
                   fontFamily: "inherit",
                   fontSize: 12,
                   fontWeight: 700,
-                  color: confirmClear ? "#fff" : "#a8443a",
+                  color: confirmClear ? "#fff" : "var(--rb-danger)",
                   cursor: "pointer",
                 }}
               >
@@ -528,7 +524,7 @@ export function SettingsModal() {
               padding: 12,
               border: 0,
               borderRadius: 999,
-              background: "linear-gradient(150deg,#1fc172,#0f9a56)",
+              background: "var(--rb-green-grad)",
               color: "#fff",
               fontFamily: "inherit",
               fontSize: 13,

@@ -20,6 +20,17 @@ body,
 }
 :root {
   --glass-a: 1;
+  /* Colores de marca (alineados con shared/design-tokens.md). No tocar los valores oscuros (#1c2a23, rgba(12,24,18…)):
+     el modo oscuro los busca por texto en el atributo style (ver más abajo). */
+  --rb-ink: #121a16;
+  --rb-body: #41504a;
+  --rb-muted: #5d6f67;
+  --rb-faint: #6b7a73;
+  --rb-green: #17b866;
+  --rb-green-deep: #0b7a45;
+  --rb-neon: #3ddc84;
+  --rb-danger: #a8443a;
+  --rb-green-grad: linear-gradient(150deg, #1fc172, #0f9a56);
 }
 html,
 body {

@@ -44,7 +44,7 @@ export function Toaster() {
             flex: "none",
             border: 0,
             background: "transparent",
-            color: "#3ddc84",
+            color: "var(--rb-neon)",
             fontWeight: 700,
             cursor: "pointer",
             fontFamily: "Silkscreen,monospace",
