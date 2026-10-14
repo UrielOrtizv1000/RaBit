@@ -2,6 +2,17 @@
   "name": "rabit",
   "private": true,
   "version": "0.1.0",
+  "description": "Local-first desktop organizer for tasks, events, notes and routine",
+  "author": "Uriel Ortiz",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UrielOrtizv1000/RaBit.git"
+  },
+  "homepage": "https://github.com/UrielOrtizv1000/RaBit#readme",
+  "engines": {
+    "node": ">=20"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,15 +22,19 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "demo": "node scripts/demo.mjs",
+    "screenshots": "playwright test -c scripts/screenshots/playwright.config.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "oxlint src tests",
+    "lint": "oxlint --deny-warnings src tests",
     "lint:fix": "oxlint --fix src tests",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "package:beta": "node scripts/package-beta.mjs",
     "release:check": "node scripts/release-check.mjs",
-    "dev:update-sim": "vite --mode update-sim",
-    "tauri:update-sim": "node scripts/update-sim.mjs"
+    "release:set-pubkey": "node scripts/set-pubkey.mjs",
+    "qa:permissions": "node scripts/qa/permissions-check.mjs",
+    "package": "node scripts/package.mjs",
+    "update-sim": "node scripts/update-sim.mjs",
+    "update-sim:web": "node scripts/update-sim.mjs --web",
+    "clean": "node scripts/clean.mjs"
   },
   "dependencies": {
     "@fontsource/doto": "^5.3.0",

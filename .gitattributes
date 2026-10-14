@@ -11,3 +11,4 @@
 *.exe binary
 *.msi binary
 *.woff2 binary
+*.bmp binary

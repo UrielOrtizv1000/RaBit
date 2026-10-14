@@ -28,17 +28,11 @@ CLAUDE.md
 .cursor/
 .cursorrules
 
-# Internal working note (Obsidian frontmatter + links to a private vault)
-RaBit.md
-
-# Private source data (personal finance export used only as a design reference)
-design/*.xlsx
+# Private source data (personal finance export; keep it outside the repo)
+**/App_GBM_*.xlsx
 
 # Editor and OS noise
 .vscode/
 .idea/
 Thumbs.db
 desktop.ini
-
-# (keep the update simulation env file)
-!.env.update-sim
