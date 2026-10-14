@@ -43,6 +43,13 @@ one of them is a bug:
   queries.
 - Errors are logged through `src/lib/log.ts` without dumping personal data.
 
+## Known advisories
+
+- **`glib` < 0.20 (Dependabot #1, medium, unsoundness in `VariantStrIter`)**: it comes from `gtk 0.18`, which Tauri 2 uses
+  only for its Linux window (`tao`, `muda`, `tauri`). The Windows and macOS builds that RaBit releases do not compile it, and
+  RaBit never calls that API. The fix needs `glib` 0.20+, which Tauri will only adopt with its gtk4 move (3.0, currently alpha);
+  it cannot be patched here without forking Tauri. Re-check on every Tauri upgrade.
+
 ## Supported versions
 
 RaBit is in beta. Only the latest release on `main` is maintained — fixes land

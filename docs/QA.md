@@ -37,7 +37,11 @@ view switching ×48, used tags deleted/renamed, corrupt/partial import, repeated
 - The glass (acrylic) effect can only be verified in the installed Windows app.
 - Default labels created before switching language are not re-translated.
 
-## Packaging regression (fixed)
+## Packaging regressions (fixed)
+
+- **Exporting a backup failed in the installed app** ("not allowed by ACL"): the window used `fs:default`, which has no write permission, and
+  the browser build never goes through Tauri's permissions, so nobody saw it. The window now lists exactly the 21 permissions the code uses
+  (`src-tauri/capabilities/default.json`), `tests/capabilities.test.ts` keeps the list honest and `npm run qa:permissions` checks the real app.
 
 - A CSP that included `script-src`, `base-uri`, `form-action` and `frame-ancestors` made **the installed app close as soon as it started** (in the browser it went unnoticed).
   A simpler policy was kept instead (`default-src 'self'`, inline styles, `data:` fonts and images, `connect-src` limited to the Tauri IPC, `object-src 'none'`).

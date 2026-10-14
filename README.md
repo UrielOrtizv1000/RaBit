@@ -34,8 +34,8 @@ your computer.
 
 ## Status: beta, in active development
 
-This is version **0.1.0-beta**. It is functional and it is what I use, but it
-is not finished. Windows is the platform I build and test on.
+This is version **0.1.0**, heading for **0.2.0** (automatic updates and a new installer). It is functional and it is
+what I use, but it is not finished. Windows is the platform I build and test on.
 
 **Working today**
 
@@ -47,13 +47,14 @@ is not finished. Windows is the platform I build and test on.
 - A shared detail panel for events, notes and tasks (autosave, cancel/undo)
 - **Savings** — goals as glass jars with moving coins, a weekly streak, a plan that RaBit recalculates after every deposit or withdrawal, and a "what can I save?" calculator
 - **Settings** — theme, language, text size, JSON export/import, sample data
-- A bell with what is pending today, a first-run guided tutorial, light and dark themes, English and Spanish
+- A bell with what is pending today, a short first-run tutorial (plus a one-time hint per page), light and dark themes, English and Spanish
+- **Automatic updates** — signed releases from GitHub, installed with one click (see [Updates](#updates))
 
 **Not done yet**
 
 - Reminders and sound — the switches are in Settings but disabled ("in development")
 - **Routine** is still in beta
-- Real dark theme — the preference is saved, the palette is still being worked on
+- Code signing — the installer is not signed yet, so Windows SmartScreen may warn the first time
 - Sync and accounts are deliberately out of scope for now.
   The `SyncProvider` interface exists so a backend can be dropped in later
   without touching the rest of the app.

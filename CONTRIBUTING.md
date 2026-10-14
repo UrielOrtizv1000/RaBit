@@ -15,9 +15,10 @@ terms as the project: the GNU General Public License v3.0.
 - **For anything non-trivial, open an issue first.** A short issue describing
   the problem and your intended approach saves a lot of rework. Small fixes and
   typo corrections can go straight to a pull request.
-- **Keep it local-first.** No telemetry, no analytics, no network calls, no
-  accounts, and no new runtime dependency that phones home. That is a project
-  requirement, not a preference.
+- **Keep it local-first.** No telemetry, no analytics, no accounts, no new
+  network calls (the only one is the update check against GitHub releases) and
+  no new runtime dependency that phones home. That is a project requirement,
+  not a preference.
 
 ## Setting up
 
