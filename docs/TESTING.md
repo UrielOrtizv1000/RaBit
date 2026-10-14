@@ -2,12 +2,12 @@
 
 ## Option A — double-click (the easiest)
 
-Run **`Probar RaBit.bat`** (in the project root). It opens the installable app if you already built it;
+Run **`scripts/windows/probar-rabit.bat`**. It opens the installable app if you already built it;
 if not, it launches it in development mode (`npm run tauri dev`).
 
 ## Option B — installer
 
-`npm run tauri build` and run the `.msi` or the `-setup.exe` from `src-tauri\target\release\bundle\`.
+`npm run package` and run `installers\RaBit-Setup.exe`.
 
 ## Option C — browser only (fast, no Rust)
 
@@ -32,8 +32,28 @@ Settings (⚙) → **TRY RABIT** → **Load** loads tasks, events, notes, routin
 9. **Tutorials**: the main tour on first run, then a short one the first time you open each page or window; Settings → Data → Tutorial → Show replays them all.
 10. **Shortcuts**: `Ctrl+N` create, `Esc` close, `Ctrl+K` search.
 11. **Backup**: Settings → Data → Export, then Clear and Import.
-12. **Updates**: `npm run dev:update-sim` (or open the app with `?update-sim`): the download icon appears next to the bell → Update → progress → Restart to update → the Home terminal types "UPDATED TO …".
+12. **Updates**: `npm run update-sim:web` (or open the app with `?update-sim`): the download icon appears next to the bell → Update → progress → Restart to update → the Home terminal types "UPDATED TO …".
 13. **Notifications**: the bell lists overdue tasks and what is pending today. Reminders/sound are disabled ("in development").
+
+## Tauri permissions (installed app only)
+
+The browser cannot exercise Tauri's permissions, so two checks cover them:
+
+- `npm test` includes `tests/capabilities.test.ts`: `src-tauri/capabilities/default.json` must grant exactly what the code imports.
+- `npm run qa:permissions` (Windows) builds a test copy of the app with another identifier, drives it over the WebView2 debugging
+  port and checks the real ACL: what the app uses works, everything else is denied, the title bar buttons and Close work.
+  Run it after touching `capabilities/` or `tauri.conf.json`. It leaves `target/release/rabit.exe` as the test build
+  (use `RABIT_TARGET_DIR` to avoid that, or run `npm run package` afterwards).
+
+Manual check in the **installed** app (the native dialog is not automated): Settings → Data → **Export**, choose a
+file, and confirm the `.json` is created and can be imported back.
+
+## README screenshots
+
+`npm run screenshots` starts the dev server if needed, loads the sample data with a fixed date and rewrites the WebP images
+in `docs/assets/screenshots/` (Home, Calendar, Routine, Quick Notes and Savings, light and dark). Run it after a visual change,
+look at the result, and commit the images with the change. The script lives in `scripts/screenshots/` and is not part of
+`npm run test:e2e`.
 
 ## Automated tests
 
