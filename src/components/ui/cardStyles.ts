@@ -42,7 +42,7 @@ export const PRIMARY_BTN: CSSProperties = {
   gap: 9,
   padding: "10px 16px",
   borderRadius: 999,
-  background: "linear-gradient(150deg,#1fc172,#0f9a56)",
+  background: "var(--rb-green-grad)",
   color: "#fff",
   fontFamily: "Silkscreen,monospace",
   fontSize: 10,
@@ -57,5 +57,5 @@ export const SILK_LABEL: CSSProperties = {
   fontFamily: "Silkscreen,monospace",
   fontSize: 10,
   letterSpacing: ".16em",
-  color: "#6b7a73",
+  color: "var(--rb-faint)",
 };

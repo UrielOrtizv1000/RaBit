@@ -13,4 +13,10 @@ export const es: Record<string, string> = {
   Retry: "Reintentar",
   "UPDATED TO v{version}": "ACTUALIZADO A v{version}",
   "ENJOY THE NEW VERSION.": "DISFRUTA LA NUEVA VERSIÓN.",
+  Updates: "Actualizaciones",
+  "RaBit checks quietly at start. Nothing else is sent.": "RaBit revisa en silencio al iniciar. No se envía nada más.",
+  "Check for updates": "Buscar actualizaciones",
+  "Checking…": "Buscando…",
+  "You're up to date": "Estás al día",
+  "Update available — use the download icon": "Hay una actualización: usa el ícono de descarga",
 };

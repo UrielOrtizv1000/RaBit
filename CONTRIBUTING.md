@@ -10,7 +10,7 @@ terms as the project: the GNU General Public License v3.0.
 ## Before you start
 
 - **Read the architecture doc.** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-  explains the layer rules and *why* the code is arranged the way it is. Most
+  explains the layer rules and _why_ the code is arranged the way it is. Most
   review comments are about those rules.
 - **For anything non-trivial, open an issue first.** A short issue describing
   the problem and your intended approach saves a lot of rework. Small fixes and
@@ -56,7 +56,7 @@ Run these before opening a pull request — CI runs the same commands:
 npm run typecheck     # tsc --noEmit
 npm run lint          # oxlint
 npm run format:check  # prettier --check
-npm test              # vitest (logic, persistence, i18n coverage)
+npm test              # vitest (logic, persistence, i18n, Tauri permissions)
 npm run test:e2e      # playwright
 ```
 
@@ -64,6 +64,8 @@ Notes:
 
 - `npm test` fails if a UI string has no Spanish translation. Add the
   translation in `src/i18n/es/` for any new text.
+- Touching `src-tauri/capabilities/` or `tauri.conf.json`? `npm test` checks the permission list against the code, and on
+  Windows `npm run qa:permissions` drives the real app to check the ACL (a browser test cannot see permissions).
 - If you change behaviour, add or update a test. Logic in `src/domain` is pure
   and easy to test — that is deliberate.
 - Keep the layering intact: a layer may only import from the ones to its right

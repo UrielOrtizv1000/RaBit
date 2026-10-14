@@ -112,7 +112,7 @@ export function App() {
     >
       <TitleBar />
       {err && (
-        <div role="alert" style={{ padding: 12, color: "#a8443a" }}>
+        <div role="alert" style={{ padding: 12, color: "var(--rb-danger)" }}>
           {t("Could not open the database: {err}", { err })}
         </div>
       )}

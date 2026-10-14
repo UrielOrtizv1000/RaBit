@@ -114,7 +114,7 @@ export function TaskPane({ id, seed, onStatus, onCreated, onDelete }: PaneProps 
             fontFamily: "inherit",
             fontSize: 12.5,
             fontWeight: 600,
-            color: "#41504a",
+            color: "var(--rb-body)",
             boxSizing: "border-box",
             padding: "8px 12px",
           }}

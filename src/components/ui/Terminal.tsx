@@ -15,7 +15,7 @@ export function Terminal({ name, greeting, line, fill = false }: { name: string;
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "14px 20px 0" }}>
-        <div style={{ width: 7, height: 7, background: "#3ddc84" }} />
+        <div style={{ width: 7, height: 7, background: "var(--rb-neon)" }} />
         <div style={{ width: 7, height: 7, background: "rgba(61,220,132,.45)" }} />
         <div style={{ width: 7, height: 7, background: "rgba(61,220,132,.2)" }} />
         <div style={{ marginLeft: 6, fontFamily: "Silkscreen,monospace", fontSize: 9, letterSpacing: ".1em", color: "#6ee6a4" }}>{name}</div>
@@ -25,7 +25,7 @@ export function Terminal({ name, greeting, line, fill = false }: { name: string;
           {"> "}
           {greeting}
         </div>
-        <div style={{ fontFamily: "Doto,monospace", fontWeight: 900, fontSize: 20, lineHeight: 1.25, color: "#3ddc84", textShadow: "0 0 12px rgba(61,220,132,.5)" }}>
+        <div style={{ fontFamily: "Doto,monospace", fontWeight: 900, fontSize: 20, lineHeight: 1.25, color: "var(--rb-neon)", textShadow: "0 0 12px rgba(61,220,132,.5)" }}>
           {line}
           <span
             style={{
@@ -34,7 +34,7 @@ export function Terminal({ name, greeting, line, fill = false }: { name: string;
               height: 18,
               marginLeft: 8,
               verticalAlign: -3,
-              background: "#3ddc84",
+              background: "var(--rb-neon)",
               boxShadow: "0 0 9px rgba(61,220,132,.8)",
               animation: "rb-cursor 1.1s steps(1) infinite",
             }}

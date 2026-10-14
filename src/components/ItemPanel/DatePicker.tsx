@@ -27,11 +27,16 @@ export function DateField({ value, onChange, busy, variant, disabled }: Props) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const today = todayISO();
 
+  // Al abrir (o si cambia el valor con el selector abierto) la vista vuelve al valor: se ajusta en el render, no en un efecto.
+  const [viewFor, setViewFor] = useState<ISODate | null>(null);
+  const viewKey = open ? value : null;
+  if (viewKey !== viewFor) {
+    setViewFor(viewKey);
+    if (viewKey !== null) setView(viewKey);
+  }
+
   useEffect(() => {
-    if (open) {
-      setView(value);
-      window.setTimeout(() => popRef.current?.querySelector<HTMLButtonElement>("button[data-sel='1']")?.focus(), 30);
-    }
+    if (open) window.setTimeout(() => popRef.current?.querySelector<HTMLButtonElement>("button[data-sel='1']")?.focus(), 30);
   }, [open, value]);
 
   const cells = useMemo(() => {
@@ -67,7 +72,7 @@ export function DateField({ value, onChange, busy, variant, disabled }: Props) {
           boxShadow: open ? "inset 0 0 0 1.5px rgba(23,184,102,.55)" : "none",
           fontSize: 12.5,
           fontWeight: 600,
-          color: "#41504a",
+          color: "var(--rb-body)",
         } as const)
       : ({
           display: "flex",
@@ -82,7 +87,7 @@ export function DateField({ value, onChange, busy, variant, disabled }: Props) {
           color: INK,
         } as const);
 
-  const navBtn = { ...reset, width: 26, height: 26, borderRadius: 8, display: "grid", placeItems: "center", color: "#5d6f67", fontSize: 15 } as const;
+  const navBtn = { ...reset, width: 26, height: 26, borderRadius: 8, display: "grid", placeItems: "center", color: "var(--rb-muted)", fontSize: 15 } as const;
 
   return (
     <div
@@ -184,7 +189,14 @@ export function DateField({ value, onChange, busy, variant, disabled }: Props) {
                     {d.getDate()}
                     <span
                       aria-hidden="true"
-                      style={{ position: "absolute", bottom: 4, width: 4, height: 4, borderRadius: "50%", background: busy?.has(c) ? (sel ? "#fff" : "#17b866") : "transparent" }}
+                      style={{
+                        position: "absolute",
+                        bottom: 4,
+                        width: 4,
+                        height: 4,
+                        borderRadius: "50%",
+                        background: busy?.has(c) ? (sel ? "#fff" : "var(--rb-green)") : "transparent",
+                      }}
                     />
                   </button>
                 );
@@ -222,7 +234,7 @@ export function DateField({ value, onChange, busy, variant, disabled }: Props) {
                   borderRadius: 999,
                   fontSize: 12,
                   fontWeight: 600,
-                  color: "#41504a",
+                  color: "var(--rb-body)",
                   background: "rgba(18,38,30,.05)",
                   transition: "background .25s ease",
                 }}

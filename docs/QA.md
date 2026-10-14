@@ -41,4 +41,4 @@ view switching ×48, used tags deleted/renamed, corrupt/partial import, repeated
 
 - A CSP that included `script-src`, `base-uri`, `form-action` and `frame-ancestors` made **the installed app close as soon as it started** (in the browser it went unnoticed).
   A simpler policy was kept instead (`default-src 'self'`, inline styles, `data:` fonts and images, `connect-src` limited to the Tauri IPC, `object-src 'none'`).
-  Rule: after touching `tauri.conf.json`, **open the built executable**, not just the browser (`tools/qa/csp-check.mjs` only validates the interface).
+  Rule: after touching `tauri.conf.json` or `src-tauri/capabilities/`, **open the built executable**, not just the browser (`scripts/qa/csp-check.mjs` only validates the interface; `npm run qa:permissions` drives the real app and checks the permissions).

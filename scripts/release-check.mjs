@@ -25,4 +25,12 @@ if (versions.size !== 1 || versions.has(undefined)) {
   console.error("\nLas versiones no coinciden. Súbelas juntas (package.json, tauri.conf.json y Cargo.toml) antes de publicar.");
   process.exit(1);
 }
+// El actualizador no debe publicarse con los valores de ejemplo (la app no podría actualizarse y no avisaría).
+const conf = read("src-tauri/tauri.conf.json");
+const placeholders = ["<OWNER>", "<REPO>", "<PUBLIC_KEY_HERE>"].filter((p) => conf.includes(p));
+if (placeholders.length > 0) {
+  console.error(`\ntauri.conf.json aún tiene valores de ejemplo del actualizador: ${placeholders.join(", ")}. Ver docs/UPDATES.md.`);
+  process.exit(1);
+}
+
 console.log(`\nTodo en la versión ${[...versions][0]}.`);

@@ -1,8 +1,23 @@
 <div align="center">
-  <img src="assets/app-icon.png" alt="RaBit — a neon-green pixel rabbit head on a black background" width="190">
+  <img src="assets/brand/app-icon.png" alt="RaBit — a neon-green pixel rabbit head on a black background" width="190">
   <h1>RaBit</h1>
   <p><b>A local-first desktop organizer for tasks, events, notes and routine.</b><br>
   No account. No cloud. No ads. No paywall.</p>
+  <p><a href="https://github.com/UrielOrtizv1000/RaBit/releases/latest/download/RaBit-Setup.exe"><b>Download for Windows</b></a>
+  · <a href="https://github.com/UrielOrtizv1000/RaBit/releases/latest">All releases</a></p>
+  <p>
+    <a href="https://github.com/UrielOrtizv1000/RaBit/actions/workflows/ci.yml"><img src="https://github.com/UrielOrtizv1000/RaBit/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+    <a href="https://github.com/UrielOrtizv1000/RaBit/releases"><img src="https://img.shields.io/github/v/release/UrielOrtizv1000/RaBit?include_prereleases&amp;label=release" alt="Latest release"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/UrielOrtizv1000/RaBit" alt="License: GPL-3.0"></a>
+    <img src="https://img.shields.io/badge/platform-Windows-0b7a45" alt="Platform: Windows">
+    <img src="https://img.shields.io/badge/data-100%25%20local-17b866" alt="Data: 100% local">
+  </p>
+  <p>
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/home-dark.webp">
+      <img src="docs/assets/screenshots/home-light.webp" alt="RaBit's Home: next event in a pixel terminal, upcoming events, pending tasks, quick notes and today's calendar" width="900">
+    </picture>
+  </p>
 </div>
 
 ---
@@ -39,9 +54,49 @@ is not finished. Windows is the platform I build and test on.
 - Reminders and sound — the switches are in Settings but disabled ("in development")
 - **Routine** is still in beta
 - Real dark theme — the preference is saved, the palette is still being worked on
-- Sync, accounts and an auto-updater are deliberately out of scope for now.
+- Sync and accounts are deliberately out of scope for now.
   The `SyncProvider` interface exists so a backend can be dropped in later
   without touching the rest of the app.
+
+## A look inside
+
+Everything below is the real app with its built-in sample data (Settings → Try RaBit), in the light and dark themes — your
+browser picks the one that matches GitHub's theme.
+
+<table>
+  <tr>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/calendar-dark.webp">
+        <img src="docs/assets/screenshots/calendar-light.webp" alt="Calendar in month view with a day agenda on the side">
+      </picture>
+      <p align="center"><b>Calendar</b> — month, week, day and year</p>
+    </td>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/routine-dark.webp">
+        <img src="docs/assets/screenshots/routine-light.webp" alt="Weekly routine grid with wake-up and bedtime lines">
+      </picture>
+      <p align="center"><b>Routine</b> — weekly blocks; the calendar always wins a clash</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/savings-dark.webp">
+        <img src="docs/assets/screenshots/savings-light.webp" alt="Savings goals as glass jars with coins, a weekly streak and a what-can-I-save calculator">
+      </picture>
+      <p align="center"><b>Savings</b> — goals as jars, a weekly streak and a plan</p>
+    </td>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/notes-dark.webp">
+        <img src="docs/assets/screenshots/notes-light.webp" alt="Quick Notes with tags, a pinned note and the shared detail panel">
+      </picture>
+      <p align="center"><b>Quick Notes</b> — tags, pinning and a 30-day trash</p>
+    </td>
+  </tr>
+</table>
 
 ## How this was built
 
@@ -49,7 +104,7 @@ RaBit is an AI-assisted project and I would rather say so than have you guess
 from the commit history.
 
 - **Claude** produced the original UI/UX mockups (the `.dc.html` files in
-  `design/`) and a substantial part of the implementation.
+  `docs/design/`) and a substantial part of the implementation.
 - **Hermes** has acted as the coding agent — repository setup, refactors,
   documentation, and the QA pass that produced `docs/QA.md`.
 - I direct the project, review every change, decide what ships, and test it
@@ -77,13 +132,14 @@ npm install
 npm run tauri dev      # the desktop app, in development mode
 npm run dev            # frontend only, in a browser (sql.js + localStorage)
 npm run demo           # browser with sample data (?seed)
+npm run screenshots    # regenerates docs/assets/screenshots/ (README images)
 
 npm run typecheck      # strict TypeScript
 npm run lint           # oxlint
 npm run format:check   # Prettier
 npm test               # Vitest
 npm run test:e2e       # Playwright
-npm run package:beta   # builds installers/RaBit_beta.exe and .msi
+npm run package        # builds installers/RaBit-Setup.exe
 ```
 
 `http://localhost:1420/?seed` loads sample data in development. In an installed
@@ -113,8 +169,10 @@ In the browser (development and tests only) the same SQL schema is kept in
 
 ## Privacy and security
 
-RaBit makes no network requests and collects nothing. There is no telemetry, no
-analytics and no crash reporting — the app has nothing to phone home with. The
+RaBit collects nothing. There is no telemetry, no analytics and no crash
+reporting. The only network request is the update check: it asks GitHub for the
+`latest.json` of the newest release (a version number and a signature, nothing
+about you) and downloads a signed installer only when you click **Update**. The
 Tauri window ships a restrictive CSP, every SQL query is parameterised, and
 errors are logged through `src/lib/log.ts` without personal data. See
 [`SECURITY.md`](SECURITY.md).
@@ -127,7 +185,8 @@ src/db          SQL, migrations, repository             src/components  ui/ and 
 src/store       Zustand (data + UI state)               src/features    home, calendar, routine, notes, savings, settings, onboarding
 src/services    boot, reminders, backup, sample data    src/app         shell, dock, FitPage
 src/i18n        t() plus Spanish dictionaries           src-tauri       Tauri 2 shell (Rust)
-tests/          Vitest and Playwright                   docs/           architecture, testing, QA
+tests/          Vitest and Playwright                   docs/           architecture, testing, QA, design mockups
+scripts/        demo, packaging, release checks, QA
 ```
 
 Mobile clients live beside the desktop app and share no code with it, only the

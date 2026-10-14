@@ -1,6 +1,6 @@
 @echo off
-cd /d "%~dp0"
-set EXE=src-tauri	argeteleaseabit.exe
+cd /d "%~dp0..\.."
+set "EXE=src-tauri\target\release\rabit.exe"
 if exist "%EXE%" (
   start "" "%EXE%"
 ) else (

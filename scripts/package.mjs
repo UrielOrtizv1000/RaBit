@@ -1,11 +1,10 @@
 /**
- * Genera los instaladores de la versión beta con nombre fijo:
- *   installers/RaBit_beta.exe  (NSIS, el recomendado: instala por usuario, sin permisos de administrador)
- *   installers/RaBit_beta.msi  (MSI, para despliegues administrados)
+ * Genera el instalador de Windows con nombre fijo:
+ *   installers/RaBit-Setup.exe  (NSIS: instala por usuario, sin permisos de administrador)
  *
- * Uso: npm run package:beta        (compila con `tauri build` y copia los resultados)
- *      npm run package:beta -- --skip-build   (solo copia lo ya compilado)
- *      RABIT_TARGET_DIR=C:/ruta npm run package:beta   (compila en otra carpeta: útil si rabit.exe está abierta)
+ * Uso: npm run package                 (compila con `tauri build` y copia el resultado)
+ *      npm run package -- --skip-build (solo copia lo ya compilado)
+ *      RABIT_TARGET_DIR=C:/ruta npm run package   (compila en otra carpeta: útil si rabit.exe está abierta)
  *
  * Por qué se renombra después de compilar y no con `productName`: el nombre del producto es el que ve el usuario
  * en la ventana, el menú Inicio y «Aplicaciones»; el nombre del archivo es solo del instalador.
@@ -48,10 +47,7 @@ function find(dir, ext) {
 
 mkdirSync(out, { recursive: true });
 let copied = 0;
-for (const [dir, ext, name] of [
-  ["nsis", ".exe", "RaBit_beta.exe"],
-  ["msi", ".msi", "RaBit_beta.msi"],
-]) {
+for (const [dir, ext, name] of [["nsis", ".exe", "RaBit-Setup.exe"]]) {
   const src = find(dir, ext);
   if (!src) {
     console.warn(`No se encontró el instalador ${ext} en ${join(bundle, dir)}`);

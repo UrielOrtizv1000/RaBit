@@ -32,6 +32,10 @@ pub fn run() {
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_fs::init())
     .setup(|app| {
+      // Registro local (sin red): en desarrollo informa de todo; en la versión instalada solo avisos y errores,
+      // para poder diagnosticar un fallo del actualizador, que de otro modo sería silencioso.
+      let level = if cfg!(debug_assertions) { log::LevelFilter::Info } else { log::LevelFilter::Warn };
+      app.handle().plugin(tauri_plugin_log::Builder::default().level(level).build())?;
       // Antes de que el frontend abra la base y migre: respalda `rabit.db` si esta versión es distinta de la anterior.
       // Un fallo aquí nunca debe impedir que la app arranque.
       if let Ok(dir) = app.path().app_config_dir() {
@@ -45,13 +49,6 @@ pub fn run() {
       #[cfg(desktop)]
       if let Err(e) = app.handle().plugin(tauri_plugin_updater::Builder::new().build()) {
         log::warn!("updater unavailable: {e}");
-      }
-      if cfg!(debug_assertions) {
-        app.handle().plugin(
-          tauri_plugin_log::Builder::default()
-            .level(log::LevelFilter::Info)
-            .build(),
-        )?;
       }
       Ok(())
     })

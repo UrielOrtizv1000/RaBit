@@ -30,7 +30,8 @@ import { GLASS_CARD } from "../../components/ui/cardStyles";
 import { silk } from "../../components/ui/glass";
 import { Calculator } from "./Calculator";
 import { JarCarousel, type JarCard } from "./JarCarousel";
-import { GoalModal, MoveModal, type GoalDraft, type MoveForm } from "./modals";
+import { GoalModal, type GoalDraft } from "./GoalModal";
+import { MoveModal, type MoveForm } from "./MoveModal";
 
 const reducedMotion = (): boolean => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
@@ -87,25 +88,24 @@ export function SavingsPage() {
   // Mensaje de orgullo: se «escribe» letra por letra, parpadea un rato y desaparece
   useEffect(() => {
     if (!proud) return;
-    setTyped(reduced ? proud.length : 0);
+    let count = reduced ? proud.length : 0; // con movimiento reducido el texto ya está completo
     let blink: ReturnType<typeof setInterval> | undefined;
     let end: ReturnType<typeof setTimeout> | undefined;
     const type = setInterval(() => {
-      setTyped((n) => {
-        const next = n + 1;
-        if (next >= proud.length) {
-          clearInterval(type);
-          blink = setInterval(() => setBlinkOff((b) => !b), 480);
-          end = setTimeout(() => {
-            if (blink) clearInterval(blink);
-            setProud(null);
-            setBlinkOff(false);
-          }, 10_000);
-        }
-        return next;
-      });
+      count += 1;
+      setTyped(count);
+      if (count >= proud.length) {
+        clearInterval(type);
+        blink = setInterval(() => setBlinkOff((b) => !b), 480);
+        end = setTimeout(() => {
+          if (blink) clearInterval(blink);
+          setProud(null);
+          setBlinkOff(false);
+        }, 10_000);
+      }
     }, 55);
     return () => {
+      setTyped(0);
       clearInterval(type);
       if (blink) clearInterval(blink);
       if (end) clearTimeout(end);
@@ -332,7 +332,7 @@ export function SavingsPage() {
             fontFamily: "inherit",
             fontSize: 13.5,
             fontWeight: 600,
-            color: "#0b7a45",
+            color: "var(--rb-green-deep)",
           }}
         >
           {t("Create new")}
@@ -343,7 +343,7 @@ export function SavingsPage() {
               borderRadius: 13,
               display: "grid",
               placeItems: "center",
-              background: "linear-gradient(150deg,#1fc172,#0f9a56)",
+              background: "var(--rb-green-grad)",
               boxShadow: "inset 0 1px 0 rgba(255,255,255,.35),0 12px 22px -12px rgba(23,184,102,.9)",
             }}
           >
@@ -390,10 +390,10 @@ export function SavingsPage() {
               </div>
               <div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                  <div style={{ fontFamily: "Doto,monospace", fontWeight: 900, fontSize: 40, lineHeight: 1, color: "#121a16" }}>{streak.current}</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: "#121a16" }}>{t("week streak")}</div>
+                  <div style={{ fontFamily: "Doto,monospace", fontWeight: 900, fontSize: 40, lineHeight: 1, color: "var(--rb-ink)" }}>{streak.current}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "var(--rb-ink)" }}>{t("week streak")}</div>
                 </div>
-                <div style={{ fontSize: 12, color: "#6b7a73", marginTop: 5 }}>
+                <div style={{ fontSize: 12, color: "var(--rb-faint)", marginTop: 5 }}>
                   {t("Best {best} · {done} completed", { best: tn(streak.best, "week", "weeks"), done: tn(doneCount, "goal", "goals") })}
                 </div>
               </div>
@@ -415,13 +415,15 @@ export function SavingsPage() {
                       transition: "background .5s ease",
                     }}
                   />
-                  <div style={silk(8, { letterSpacing: ".06em", color: w.current ? "#0b7a45" : "#9aa8a1" })}>{w.current ? t("NOW") : weekLabel(w.w).split(" ")[1]}</div>
+                  <div style={silk(8, { letterSpacing: ".06em", color: w.current ? "var(--rb-green-deep)" : "#9aa8a1" })}>
+                    {w.current ? t("NOW") : weekLabel(w.w).split(" ")[1]}
+                  </div>
                 </div>
               ))}
             </div>
             <div style={{ textAlign: "right", minWidth: 170 }}>
-              <div style={{ fontSize: 12, color: "#6b7a73", marginBottom: 5 }}>{t("This week")}</div>
-              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-.02em", color: "#121a16" }}>
+              <div style={{ fontSize: 12, color: "var(--rb-faint)", marginBottom: 5 }}>{t("This week")}</div>
+              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-.02em", color: "var(--rb-ink)" }}>
                 {money(weekIn)}
                 <span style={{ fontSize: 14, fontWeight: 600, color: "#9aa8a1" }}> / {money(weekPlan)}</span>
               </div>
@@ -433,11 +435,11 @@ export function SavingsPage() {
                   gap: 7,
                   fontSize: 12,
                   fontWeight: 600,
-                  color: weekOk ? "#0b7a45" : "#9a6a14",
+                  color: weekOk ? "var(--rb-green-deep)" : "#9a6a14",
                   marginTop: 6,
                 }}
               >
-                <div style={{ width: 6, height: 6, borderRadius: "50%", background: weekOk ? "#17b866" : "#e0902a" }} />
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: weekOk ? "var(--rb-green)" : "#e0902a" }} />
                 {weekOk ? t("Week covered") : t("{amt} to go", { amt: money(weekPlan - weekIn) })}
               </div>
             </div>
