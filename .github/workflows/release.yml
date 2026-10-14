@@ -1,3 +1,4 @@
+# Las acciones de terceros están fijadas por SHA (no por etiqueta): este workflow tiene acceso a la clave de firma.
 # Publica una versión de RaBit cuando se crea un tag `v*` (p. ej. v1.3.0).
 #
 # Compila para Windows y macOS, FIRMA los artefactos del actualizador y sube al release los instaladores y el
@@ -5,7 +6,7 @@
 #
 # Secretos del repositorio necesarios:
 #   TAURI_SIGNING_PRIVATE_KEY            contenido de la clave privada (npx tauri signer generate)
-#   TAURI_SIGNING_PRIVATE_KEY_PASSWORD   su contraseña (vacía si no se puso)
+#   TAURI_SIGNING_PRIVATE_KEY_PASSWORD   su contraseña (GitHub no admite secretos vacíos: si la clave no tiene contraseña, no lo crees)
 name: Release
 
 on:
@@ -22,8 +23,8 @@ jobs:
     outputs:
       notes: ${{ steps.notes.outputs.notes }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
           cache: npm
@@ -58,19 +59,19 @@ jobs:
             rust_targets: "aarch64-apple-darwin,x86_64-apple-darwin"
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
           cache: npm
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
         with:
           targets: ${{ matrix.rust_targets }}
-      - uses: swatinem/rust-cache@v2
+      - uses: swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           workspaces: "src-tauri -> target"
       - run: npm ci
-      - uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -84,3 +85,24 @@ jobs:
           # genera y sube latest.json (versión, notas, URLs y firmas por plataforma)
           includeUpdaterJson: true
           args: ${{ matrix.args }}
+      # Copia con nombre fijo (RaBit-Setup.exe) para que el botón de descarga del README no cambie entre versiones
+      - if: matrix.label == 'Windows'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          f=$(ls src-tauri/target/release/bundle/nsis/*-setup.exe | head -n 1)
+          cp "$f" RaBit-Setup.exe
+          gh release upload "${{ github.ref_name }}" RaBit-Setup.exe --clobber
+
+  verify:
+    name: Verify updater manifest
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      # Si latest.json falta, no es de esta versión o no trae firma de Windows, las apps instaladas no podrían actualizarse
+      - name: Check latest.json
+        run: |
+          curl -fsSL "https://github.com/${{ github.repository }}/releases/latest/download/latest.json" -o latest.json
+          jq -e --arg v "${GITHUB_REF_NAME#v}" '.version == $v and ((.platforms["windows-x86_64"].signature // "") | length > 0)' latest.json
+          curl -fsSIL -o /dev/null "$(jq -r '.platforms["windows-x86_64"].url' latest.json)"

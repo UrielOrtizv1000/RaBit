@@ -7,35 +7,12 @@ import { useEffect, useRef, useState } from "react";
 import { useUpdater } from "../services/updater";
 import { t } from "../i18n";
 import { glassPill, silk } from "../components/ui/glass";
+import { primaryButton as primary, secondaryButton as secondary } from "../components/ui/buttons";
 
 const EASE = "cubic-bezier(.22,1,.36,1)";
 const RING_R = 19;
 const RING_C = 2 * Math.PI * RING_R;
 const MAX_NOTES = 5;
-
-const primary = {
-  padding: "11px 20px",
-  border: 0,
-  borderRadius: 999,
-  cursor: "pointer",
-  fontFamily: "inherit",
-  fontSize: 13,
-  fontWeight: 600,
-  color: "#fff",
-  background: "linear-gradient(150deg,#1fc172,#0f9a56)",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,.35),0 14px 26px -14px rgba(23,184,102,1)",
-} as const;
-const secondary = {
-  padding: "11px 18px",
-  border: 0,
-  borderRadius: 999,
-  cursor: "pointer",
-  fontFamily: "inherit",
-  fontSize: 13,
-  fontWeight: 600,
-  color: "#5d6f67",
-  background: "transparent",
-} as const;
 
 export function UpdateButton() {
   const { status, progress, current, next, error } = useUpdater();
@@ -132,18 +109,18 @@ export function UpdateButton() {
           }}
         >
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#121a16" }}>{t("Update available")}</div>
-            <div style={silk(9, { letterSpacing: ".1em", color: "#0b7a45" })}>v{next.version}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Update available")}</div>
+            <div style={silk(9, { letterSpacing: ".1em", color: "var(--rb-green-deep)" })}>v{next.version}</div>
           </div>
-          <div style={{ fontSize: 12, color: "#6b7a73", marginTop: 3 }}>{t("You have v{current}", { current })}</div>
+          <div style={{ fontSize: 12, color: "var(--rb-faint)", marginTop: 3 }}>{t("You have v{current}", { current })}</div>
 
           {next.notes.length > 0 && status !== "error" && (
             <div style={{ marginTop: 12 }}>
-              <div style={silk(9, { letterSpacing: ".14em", color: "#6b7a73", marginBottom: 7 })}>{t("WHAT'S NEW")}</div>
+              <div style={silk(9, { letterSpacing: ".14em", color: "var(--rb-faint)", marginBottom: 7 })}>{t("WHAT'S NEW")}</div>
               <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 6 }}>
                 {next.notes.slice(0, MAX_NOTES).map((n, i) => (
-                  <li key={i} style={{ display: "flex", gap: 9, fontSize: 12.5, lineHeight: 1.45, color: "#41504a" }}>
-                    <span aria-hidden="true" style={{ width: 5, height: 5, flex: "none", marginTop: 6, borderRadius: 2, background: "#17b866" }} />
+                  <li key={i} style={{ display: "flex", gap: 9, fontSize: 12.5, lineHeight: 1.45, color: "var(--rb-body)" }}>
+                    <span aria-hidden="true" style={{ width: 5, height: 5, flex: "none", marginTop: 6, borderRadius: 2, background: "var(--rb-green)" }} />
                     {n}
                   </li>
                 ))}
@@ -153,9 +130,9 @@ export function UpdateButton() {
 
           {busy && (
             <div style={{ marginTop: 14 }} aria-live="polite">
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#5d6f67", marginBottom: 7 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--rb-muted)", marginBottom: 7 }}>
                 <span>{t("Downloading update…")}</span>
-                <span style={{ fontWeight: 700, color: "#121a16" }}>{pct}%</span>
+                <span style={{ fontWeight: 700, color: "var(--rb-ink)" }}>{pct}%</span>
               </div>
               <div
                 role="progressbar"
@@ -170,7 +147,7 @@ export function UpdateButton() {
           )}
 
           {status === "error" && (
-            <div role="alert" style={{ marginTop: 12, fontSize: 12.5, fontWeight: 600, color: "#a8443a" }}>
+            <div role="alert" style={{ marginTop: 12, fontSize: 12.5, fontWeight: 600, color: "var(--rb-danger)" }}>
               {t("Couldn't update — try again")}
             </div>
           )}

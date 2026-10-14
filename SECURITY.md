@@ -22,18 +22,23 @@ real concern here:
   write beyond what the app should.
 
 - **Out of scope by design:** there is no server, no account system, no
-  authentication, no remote API and no telemetry to attack. The app makes no
-  network requests, so reports about the network surface do not apply.
+  authentication, no remote API and no telemetry to attack. The only network request is the update check against this repository's GitHub releases (a signed `latest.json`); there is nothing else to attack on the network side. Reports about the updater's signature check are in scope.
 
 ## Design commitments
 
 These are guarantees the code is expected to keep. A pull request that breaks
 one of them is a bug:
 
-- No outbound network requests of any kind.
+- No outbound network requests other than the update check against GitHub releases.
 - No collection or transmission of user data, ever.
+- Future account credentials (e.g. Gmail) are kept in the operating system's credential store, never in `rabit.db`, the
+  JSON export, the upgrade backups or the logs, and are never sent to the update server.
+- Updates are accepted only if signed with the project's key and downloaded over HTTPS; the private key never enters the
+  repository (see `docs/UPDATES.md`).
 - The Tauri CSP stays restrictive; window capabilities stay to the minimum the
   app needs.
+  This is enforced, not just promised: `src-tauri/capabilities/default.json` lists only the permissions the code uses
+  (`tests/capabilities.test.ts`), and `npm run qa:permissions` checks the real app (see `docs/ARCHITECTURE.md`).
 - Every SQL statement goes through the parameterised adapter — no string-built
   queries.
 - Errors are logged through `src/lib/log.ts` without dumping personal data.

@@ -42,10 +42,11 @@ describe("persistence", () => {
   it("maintenance purges old trash and auto-deletes past events at startup", async () => {
     const d = useData.getState();
     const n = await d.addNote({ title: "gone" });
-    await d.updateNote(n.id, { deletedAt: Date.now() - 40 * DAY_MS });
+    const today = new Date(2026, 9, 4); // la misma fecha que recibe runMaintenance (no depende del reloj real)
+    await d.updateNote(n.id, { deletedAt: today.getTime() - 40 * DAY_MS });
     await d.addEvent({ title: "past", date: "2026-10-01", autoDeleteAfter: true });
     await d.addEvent({ title: "kept", date: "2026-10-01" });
-    await useData.getState().runMaintenance(new Date(2026, 9, 4));
+    await useData.getState().runMaintenance(today);
     const s = useData.getState();
     expect(s.notes.find((x) => x.id === n.id)).toBeUndefined();
     expect(s.events.map((e) => e.title)).toEqual(["kept"]);

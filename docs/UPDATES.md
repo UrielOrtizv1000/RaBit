@@ -18,6 +18,49 @@ How it is built: `tauri-plugin-updater` (check, download, signature check, insta
 both desktop-only. The logic lives in `src/services/updater.ts` (a small state machine: `idle | checking | available |
 downloading | ready | error`), the UI in `src/app/UpdateButton.tsx` and `src/app/useUpdatedNotice.ts`.
 
+## How the app knows there is an update, and why it can be trusted
+
+```
+RaBit (installed)                                   GitHub (public repo)
+  ├─ endpoint, hard-coded in the app ────────────►  releases/latest/download/latest.json
+  │    https://github.com/UrielOrtizv1000/RaBit/…      { version, notes, url, signature }
+  ├─ is `version` newer than mine? (semver; never an older one)
+  ├─ download `url` over HTTPS (only https is accepted in installed builds)
+  ├─ verify `signature` with the PUBLIC key embedded in the app
+  └─ valid → install · invalid → rejected, nothing is installed
+```
+
+- **Where the information comes from:** only from the endpoint written in `src-tauri/tauri.conf.json`, which is compiled into
+  the app. A manifest hosted anywhere else is never consulted. The request has no template variables, so GitHub does not
+  even learn the installed version; it only sees the usual IP address and User-Agent of any HTTPS request.
+- **The public key is not a secret.** It only _verifies_ signatures; with it nobody can create one. Anyone can read it
+  from the app or this repository.
+- **The private key is the only thing that can authorize an update.** Without it, a tampered installer, a fake
+  `latest.json` or even full control of the GitHub release is rejected by every installed app.
+- **What an attacker would need to push a malicious update:** the private key _and_ a way to publish to this repository's
+  releases (or to break TLS to github.com). Protect both.
+
+### Protecting the private key and the release
+
+1. Keep `rabit.key` out of the repository, with a **password**, and keep one offline backup. Never paste it in chats or issues.
+2. The only place it lives online is the GitHub Actions secrets `TAURI_SIGNING_PRIVATE_KEY` and
+   `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, used by `release.yml` and nothing else.
+3. Enable two-factor authentication on the GitHub account that owns the repository.
+4. In GitHub → Settings → Rules, protect tags `v*` so only the owner can create them, and keep `main` protected.
+5. Third-party actions in `release.yml` are pinned by commit SHA, because that workflow can read the signing key.
+6. If the key is ever exposed: generate a new pair, run `npm run release:set-pubkey`, publish a release signed with the
+   **old** key that ships the new public key, and revoke the old secret. Installed apps can only be rotated to a new key
+   through an update signed by the old one, which is why leaks must be handled quickly.
+
+### Rules for when accounts (e.g. Gmail) arrive
+
+Updating must never be able to expose them:
+
+- Account tokens go in the operating system's credential store (Windows Credential Manager, macOS Keychain), **never**
+  in `rabit.db`, in the `.json` export, in `rabit.backup-*.db` files or in logs.
+- The update request carries no user data, no account identifiers and no tokens; keep it that way.
+- Any code that handles accounts must be reviewed against `SECURITY.md` before it ships.
+
 ## 1. Signing keys (one time, done by a person)
 
 Updates are verified with a signature, so a tampered download is rejected. Generate a key pair:
@@ -26,13 +69,13 @@ Updates are verified with a signature, so a tampered download is rejected. Gener
 npx tauri signer generate -w ~/.tauri/rabit.key
 ```
 
-It asks for a password (you may leave it empty) and creates two files:
+Set a **password** when it asks (an empty one works but leaves the key unprotected if the file leaks). It creates two files:
 
-| File                 | What it is      | Where it goes                                                                                                                          |
-| -------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `rabit.key.pub`      | **public** key  | `src-tauri/tauri.conf.json` → `plugins.updater.pubkey` (replace `<PUBLIC_KEY_HERE>` with the file's whole content)                     |
-| `rabit.key`          | **private** key | GitHub → Settings → Secrets and variables → Actions → **`TAURI_SIGNING_PRIVATE_KEY`** (paste the file's content). **Never commit it.** |
-| the password you set | password        | Secret **`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`** (create it empty if there is no password)                                              |
+| File                 | What it is      | Where it goes                                                                                                                           |
+| -------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `rabit.key.pub`      | **public** key  | `src-tauri/tauri.conf.json` → `plugins.updater.pubkey` (run `npm run release:set-pubkey` to copy it, or paste the file's whole content) |
+| `rabit.key`          | **private** key | GitHub → Settings → Secrets and variables → Actions → **`TAURI_SIGNING_PRIVATE_KEY`** (paste the file's content). **Never commit it.**  |
+| the password you set | password        | Secret **`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`** (GitHub does not accept empty secrets: if the key has no password, do not create it)    |
 
 Also set the repository in the same file: `plugins.updater.endpoints` →
 `https://github.com/<OWNER>/<REPO>/releases/latest/download/latest.json` (replace `<OWNER>/<REPO>`).
@@ -53,7 +96,7 @@ Also set the repository in the same file: `plugins.updater.endpoints` →
 
 Installed apps pick the new version up on their next check (at start, or within 6 hours if open).
 
-Local builds (`npm run package:beta`) do not need the private key: the script turns the updater artifacts off for that
+Local builds (`npm run package`) do not need the private key: the script turns the updater artifacts off for that
 run, because `bundle.createUpdaterArtifacts` requires signing. The official build is the one from the workflow.
 
 ## 3. Testing the flow locally (no release needed)
@@ -61,8 +104,8 @@ run, because `bundle.createUpdaterArtifacts` requires signing. The official buil
 In development the real check is **disabled**; there is a simulation that walks the whole flow with the same UI:
 
 ```bash
-npm run tauri:update-sim       # the desktop app (tauri dev) with the simulation on
-npm run dev:update-sim         # the same UI in a browser (http://localhost:1420)
+npm run update-sim            # the desktop app (tauri dev) with the simulation on
+npm run update-sim:web        # the same UI in a browser (http://localhost:1420)
 # or open any dev URL with  ?update-sim  at the end
 ```
 
@@ -94,9 +137,13 @@ Rust tests for the database backup: `cd src-tauri && cargo test`.
 
 ## Manual steps that still need a person
 
-1. Generate the signing keys (section 1).
-2. Put the **public key** and the real `<OWNER>/<REPO>` in `src-tauri/tauri.conf.json`.
-3. Add the secrets `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` to the GitHub repository.
-4. Publish a first release (`v0.1.0` or later) so there is a `latest.json`; apps built **before** this feature existed
-   cannot update themselves, so that first build has to be installed once by hand.
+1. Generate the signing keys (section 1) and keep a copy of the private key outside the repository.
+2. Put the **public key** in `src-tauri/tauri.conf.json` (`plugins.updater.pubkey`). The endpoint already points to
+   `UrielOrtizv1000/RaBit`. `npm run release:check` fails while any `<…>` placeholder is left.
+3. Add the secret `TAURI_SIGNING_PRIVATE_KEY` to the GitHub repository, and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` if the key has a password.
+4. Publish a first release with a `v*` tag as a **normal release, not a pre-release** (`releases/latest` ignores
+   pre-releases). Apps built **before** this feature existed (the `0.1.0-beta` installer) cannot update themselves, so
+   that first build has to be installed once by hand. The workflow's last job (`Verify updater manifest`) fails if
+   `latest.json` is missing, is not for this version or has no Windows signature.
 5. Optional: macOS builds are not notarized by the workflow; add Apple signing secrets if you distribute on macOS.
+   Windows installers are not code-signed either, so SmartScreen may warn on first run.

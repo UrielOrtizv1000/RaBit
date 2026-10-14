@@ -225,6 +225,14 @@ describe("helpers and simulation", () => {
     expect(parseNotes(undefined)).toEqual([]);
   });
 
+  it("parseNotes caps the number and the length of lines (the manifest is untrusted network text)", () => {
+    const many = Array.from({ length: 50 }, (_, i) => `- note ${i}`).join("\n");
+    expect(parseNotes(many)).toHaveLength(20);
+    const long = parseNotes(`- ${"x".repeat(500)}`)[0];
+    expect(long.length).toBe(160);
+    expect(long.endsWith("…")).toBe(true);
+  });
+
   it("nextMinor bumps the minor version", () => {
     expect(nextMinor("0.1.0")).toBe("0.2.0");
     expect(nextMinor("1.9.4")).toBe("1.10.0");
