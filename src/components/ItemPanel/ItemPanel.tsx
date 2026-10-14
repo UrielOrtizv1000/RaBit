@@ -5,7 +5,7 @@
  * Se abre con `useUi().openPanel(kind, id?, seed?)`.
  */
 import { swipeProps } from "../../lib/swipe";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { todayISO } from "../../domain/dates";
 import { t, tn } from "../../i18n";
 import { useData } from "../../store/data";
@@ -54,26 +54,25 @@ export function ItemPanel({ inline = false }: { inline?: boolean }) {
   const [status, setStatus] = useState<SaveStatus>("idle");
   const [leaving, setLeaving] = useState<ReadonlySet<string>>(new Set());
   const [tall, setTall] = useState(false);
-  const applied = useRef(panel);
+  const [applied, setApplied] = useState(panel); // último panel externo ya aplicado
 
-  // Follow external openPanel()/setPanelKind() calls (overlay mode only).
-  useEffect(() => {
-    if (inline || panel === applied.current) return;
-    applied.current = panel;
-    if (!panel) return;
-    setKind(panel.kind);
-    setSel(fromPanel(panel));
-    setFilter("all");
-    setLocalQ("");
-    setListHidden(false);
-  }, [panel, inline]);
+  // Follow external openPanel()/setPanelKind() calls (overlay mode only). Se ajusta en el render, no en un efecto.
+  if (!inline && panel !== applied) {
+    setApplied(panel);
+    if (panel) {
+      setKind(panel.kind);
+      setSel(fromPanel(panel));
+      setFilter("all");
+      setLocalQ("");
+      setListHidden(false);
+    }
+  }
 
   // si el ítem abierto se elimina (p. ej. deslizando su fila), cierra su edición
-  useEffect(() => {
-    if (!sel || sel.id === null) return;
+  if (sel && sel.id !== null) {
     const list = kind === "task" ? tasks : kind === "event" ? events : notes;
     if (!list.some((x) => x.id === sel.id)) setSel(null);
-  }, [tasks, events, notes, kind, sel]);
+  }
 
   const today = todayISO();
   const groupsFor = useCallback(
@@ -125,7 +124,7 @@ export function ItemPanel({ inline = false }: { inline?: boolean }) {
     setSel(first ? { id: first, key: first } : null);
     if (!inline) {
       useUi.getState().setPanelKind(k);
-      applied.current = useUi.getState().panel;
+      setApplied(useUi.getState().panel);
     }
   };
   const close = () => closePanel();
