@@ -48,6 +48,9 @@ export function App() {
     void applyGlass(glass);
   }, [glass]);
   setLang(language); // síncrono: los hijos ya renderizan en el idioma elegido
+  useEffect(() => {
+    document.documentElement.lang = language; // accesibilidad: lectores de pantalla y corrector siguen el idioma elegido
+  }, [language]);
   const ready = useData((s) => s.ready);
   const user = useData((s) => s.user);
   const modules = useData((s) => s.settings.modules);
