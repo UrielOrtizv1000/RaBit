@@ -10,6 +10,8 @@
 - Updater hardening: a time limit on the check (20 s) and the download (10 min), release notes from the network capped to 20 lines of 160
   characters, third-party GitHub Actions pinned by commit SHA, `release:check` refuses placeholder values and `npm run release:set-pubkey`
   copies the public key into the config. The key and the release rules are documented in `docs/UPDATES.md`.
+- The tutorial re-measures with `ResizeObserver` instead of a constant timer, and `<html lang>` follows the chosen language.
+- Docs brought up to date (README status, updater and testing guides, known advisories in `SECURITY.md`).
 - Internal: no lint warnings (`oxlint --deny-warnings`); the seven largest files were split into one component per card, window or dialog
   (every file is now under ~400 lines, except four still listed in the architecture guide); brand colors are CSS variables (`--rb-*`) and
   shared button styles live in `components/ui/buttons.ts`. No visual change.
