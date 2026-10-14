@@ -78,8 +78,8 @@ Aim for **under ~400 lines per file**. A page (`features/<x>/<X>Page.tsx`) owns 
 and dialogs live in sibling files that receive props, pure rules go in `model.ts`, and gesture/animation logic in a
 `use<Name>.ts` hook. Move code, don't rewrite it, and compare screenshots before and after when you split a screen.
 
-Still over that size and good candidates for the next split: `features/settings/SettingsModal.tsx`,
-`components/ItemPanel/ItemPanel.tsx`, `features/savings/SavingsPage.tsx` and `components/ItemPanel/NotePane.tsx`.
+No file in `src/` is over that size any more (the largest are ~400 lines). When you split a screen, compare screenshots before and after
+(light and dark, every state you can open): the result should be pixel-identical.
 
 ### Tauri permissions (capabilities)
 
