@@ -4,7 +4,7 @@ import { coverGoals, monthIndex, monthLabel, money, parseAmount, weekIndex, week
 import { t, tn } from "../../i18n";
 import { silk } from "../../components/ui/glass";
 import { SIDE_CARD } from "../../components/ui/cardStyles";
-import { Seg } from "./modals";
+import { Seg } from "./modalParts";
 
 export interface CalcResult {
   total: number;
@@ -30,10 +30,10 @@ export function Calculator({ pending, now, onJar }: { pending: { name: string; c
       data-tour="calculator"
       style={{ ...SIDE_CARD, gridColumn: 2, gridRow: 2, boxSizing: "border-box", display: "flex", flexDirection: "column", padding: 22, borderRadius: 28 }}
     >
-      <div style={silk(10, { letterSpacing: ".16em", color: "#6b7a73", marginBottom: 6 })}>{t("WHAT CAN I SAVE?")}</div>
-      <div style={{ fontSize: 13, color: "#5d6f67", marginBottom: 16 }}>{t("Tell RaBit what you can put away.")}</div>
+      <div style={silk(10, { letterSpacing: ".16em", color: "var(--rb-faint)", marginBottom: 6 })}>{t("WHAT CAN I SAVE?")}</div>
+      <div style={{ fontSize: 13, color: "var(--rb-muted)", marginBottom: 16 }}>{t("Tell RaBit what you can put away.")}</div>
       <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 16px", borderRadius: 18, background: "rgba(18,38,30,.05)" }}>
-        <div style={{ fontSize: 22, fontWeight: 700, color: "#6b7a73" }}>$</div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: "var(--rb-faint)" }}>$</div>
         <input
           aria-label={t("Amount per period")}
           value={per}
@@ -49,7 +49,7 @@ export function Calculator({ pending, now, onJar }: { pending: { name: string; c
             fontSize: 24,
             fontWeight: 700,
             letterSpacing: "-.02em",
-            color: "#121a16",
+            color: "var(--rb-ink)",
             padding: "10px 0",
           }}
         />
@@ -69,7 +69,7 @@ export function Calculator({ pending, now, onJar }: { pending: { name: string; c
         />
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", margin: "18px 0 8px" }}>
-        <div style={{ fontSize: 12, color: "#6b7a73" }}>{t("For")}</div>
+        <div style={{ fontSize: 12, color: "var(--rb-faint)" }}>{t("For")}</div>
         <div style={{ fontSize: 13, fontWeight: 700, color: "#121a16" }}>{freq === "week" ? tn(n, "week", "weeks") : tn(n, "month", "months")}</div>
       </div>
       <input
@@ -84,7 +84,7 @@ export function Calculator({ pending, now, onJar }: { pending: { name: string; c
       />
       <style>{`.rb-range{-webkit-appearance:none;appearance:none;width:100%;height:22px;margin:0;background:transparent;cursor:pointer}.rb-range:focus{outline:none}.rb-range::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,#17b866 var(--pct),rgba(18,38,30,.12) var(--pct))}.rb-range::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-7px;border-radius:50%;background:#fff;border:2px solid #17b866;box-shadow:0 3px 8px -2px rgba(20,48,34,.45);transition:transform .2s ease}.rb-range:hover::-webkit-slider-thumb,.rb-range:focus-visible::-webkit-slider-thumb{transform:scale(1.12)}.rb-range:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(23,184,102,.25),0 3px 8px -2px rgba(20,48,34,.45)}`}</style>
       <div style={{ marginTop: 16, padding: "16px 18px", borderRadius: 20, background: "linear-gradient(150deg,rgba(23,184,102,.14),rgba(23,184,102,.06))" }}>
-        <div style={{ fontSize: 12, color: "#0b7a45" }}>{t("By {date} you'd have", { date: end })}</div>
+        <div style={{ fontSize: 12, color: "var(--rb-green-deep)" }}>{t("By {date} you'd have", { date: end })}</div>
         <div style={{ fontFamily: "Doto,monospace", fontWeight: 900, fontSize: 34, lineHeight: 1.1, color: "#0b5e37", marginTop: 4 }}>{money(total)}</div>
       </div>
       {covers.length > 0 && (
@@ -92,7 +92,7 @@ export function Calculator({ pending, now, onJar }: { pending: { name: string; c
           {covers.map((c, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12.5 }}>
               <div style={{ width: 8, height: 8, borderRadius: 3, background: c.color }} />
-              <div style={{ flex: 1, minWidth: 0, color: "#41504a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</div>
+              <div style={{ flex: 1, minWidth: 0, color: "var(--rb-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</div>
               <div style={{ fontWeight: 700, color: c.pct >= 100 ? "#0b7a45" : "#41504a" }}>{c.pct >= 100 ? t("Covered") : `${Math.round(c.pct)}%`}</div>
             </div>
           ))}
@@ -114,7 +114,7 @@ export function Calculator({ pending, now, onJar }: { pending: { name: string; c
           fontFamily: "inherit",
           fontSize: 13,
           fontWeight: 600,
-          color: "#0b7a45",
+          color: "var(--rb-green-deep)",
           background: "rgba(23,184,102,.1)",
         }}
       >
