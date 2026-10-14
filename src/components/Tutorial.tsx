@@ -10,6 +10,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { useUi } from "../store/ui";
 import { silk } from "./ui/glass";
+import { GREEN_GRAD, tourButton } from "./ui/buttons";
 import { t } from "../i18n";
 import { markTourSeen } from "./tourState";
 import { TOURS, type TourId } from "./tours";
@@ -34,7 +35,6 @@ function TourView({ id }: { id: TourId }) {
   const STEPS = TOURS[id];
   const openTour = useUi((s) => s.openTour);
   const setPage = useUi((s) => s.setPage);
-  const open = true;
   const [i, setI] = useState(0);
   const [target, setTarget] = useState<Rect | null>(null);
   const [area, setArea] = useState({ w: 0, h: 0 });
@@ -51,7 +51,6 @@ function TourView({ id }: { id: TourId }) {
 
   // Mide el objetivo respecto a la capa del tutorial; se re-mide por si la interfaz se reescala o se mueve.
   useLayoutEffect(() => {
-    if (!open) return;
     const measure = () => {
       const w = wrap.current;
       if (!w) return;
@@ -73,7 +72,7 @@ function TourView({ id }: { id: TourId }) {
       clearInterval(id);
       window.removeEventListener("resize", measure);
     };
-  }, [open, key, i]);
+  }, [key, i]);
 
   const last = i === STEPS.length - 1;
   const close = () => {
@@ -111,18 +110,7 @@ function TourView({ id }: { id: TourId }) {
   const radius = target ? Math.min(ring.h / 2, 22) : 0;
   const ease = "cubic-bezier(.2,.8,.2,1)";
   const glide = `left .55s ${ease},top .55s ${ease}`;
-  const btn = {
-    border: 0,
-    borderRadius: 999,
-    fontFamily: "inherit",
-    fontSize: 12,
-    fontWeight: 700,
-    cursor: "pointer",
-    padding: "8px 14px",
-    flex: "none",
-    whiteSpace: "nowrap",
-  } as const;
-
+  const btn = tourButton;
   return (
     <div ref={wrap} style={{ position: "absolute", inset: 0, zIndex: 70, pointerEvents: "none" }}>
       <div
@@ -160,13 +148,13 @@ function TourView({ id }: { id: TourId }) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-          <div style={silk(9, { letterSpacing: ".14em", color: "#0b7a45" })}>{t("TUTORIAL")}</div>
-          <div style={silk(9, { letterSpacing: ".1em", color: "#6b7a73" })}>
+          <div style={silk(9, { letterSpacing: ".14em", color: "var(--rb-green-deep)" })}>{t("TUTORIAL")}</div>
+          <div style={silk(9, { letterSpacing: ".1em", color: "var(--rb-faint)" })}>
             {i + 1}/{STEPS.length}
           </div>
         </div>
-        <div style={{ fontSize: 16, fontWeight: 700, color: "#121a16", marginBottom: 6 }}>{t(s.title)}</div>
-        <div style={{ fontSize: 13, lineHeight: 1.5, color: "#41504a" }}>{t(s.body)}</div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: "var(--rb-ink)", marginBottom: 6 }}>{t(s.title)}</div>
+        <div style={{ fontSize: 13, lineHeight: 1.5, color: "var(--rb-body)" }}>{t(s.body)}</div>
         <div style={{ display: "flex", gap: 4, marginTop: 14 }}>
           {STEPS.map((_, n) => (
             <div
@@ -177,16 +165,16 @@ function TourView({ id }: { id: TourId }) {
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6, marginTop: 12 }}>
           {!last && (
-            <button onClick={close} style={{ ...btn, background: "transparent", color: "#5d6f67" }}>
+            <button onClick={close} style={{ ...btn, background: "transparent", color: "var(--rb-muted)" }}>
               {t("Skip")}
             </button>
           )}
           {i > 0 && (
-            <button onClick={() => setI(i - 1)} style={{ ...btn, background: "rgba(18,38,30,.06)", color: "#41504a" }}>
+            <button onClick={() => setI(i - 1)} style={{ ...btn, background: "rgba(18,38,30,.06)", color: "var(--rb-body)" }}>
               {t("Back")}
             </button>
           )}
-          <button onClick={() => (last ? close() : setI(i + 1))} style={{ ...btn, color: "#fff", background: "linear-gradient(150deg,#1fc172,#0f9a56)" }}>
+          <button onClick={() => (last ? close() : setI(i + 1))} style={{ ...btn, color: "#fff", background: GREEN_GRAD }}>
             {last ? t("Got it") : t("Next")}
           </button>
         </div>
