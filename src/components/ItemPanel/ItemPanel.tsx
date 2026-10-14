@@ -4,34 +4,18 @@
  * el tipo activo decide qué panel de detalle se renderiza (EventPane / NotePane / TaskPane).
  * Se abre con `useUi().openPanel(kind, id?, seed?)`.
  */
-import { swipeProps } from "../../lib/swipe";
 import { useCallback, useMemo, useState } from "react";
 import { todayISO } from "../../domain/dates";
 import { t, tn } from "../../i18n";
 import { useData } from "../../store/data";
-import { useUi, type PanelKind, type PanelState } from "../../store/ui";
+import { useUi, type PanelKind } from "../../store/ui";
 import { EventPane } from "./EventPane";
-import { eventRows, FILTERS, isPastEvent, noteRows, taskRows, type Ctx, type Group, type Row } from "./lists";
+import { ListColumn } from "./ListColumn";
+import { eventRows, FILTERS, isPastEvent, noteRows, taskRows, type Ctx, type Group } from "./lists";
 import { NotePane } from "./NotePane";
+import { fromPanel, labelsFor, type Sel } from "./panelModel";
 import { TaskPane } from "./TaskPane";
-import { CheckBox, EASE, FAINT, GREEN, greenGrad, Ico, INK, MUTED, PanelStyles, Pill, RED, reset, Seg, silk, type SaveStatus } from "./ui";
-
-type Sel = { id: string | null; key: string; seed?: PanelState["seed"] } | null;
-
-const kindOptions = () =>
-  [
-    ["event", t("EVENTS")],
-    ["note", t("NOTES")],
-    ["task", t("TASKS")],
-  ] as const;
-const labelsFor = (k: PanelKind): { newLabel: string; search: string; bulk: string } =>
-  k === "task"
-    ? { newLabel: t("New task"), search: t("Search tasks…"), bulk: t("Delete done tasks") }
-    : k === "event"
-      ? { newLabel: t("New event"), search: t("Search events…"), bulk: t("Delete past events") }
-      : { newLabel: t("New note"), search: t("Search notes…"), bulk: t("Empty trash") };
-
-const fromPanel = (p: PanelState | null): Sel => (p ? (p.id ? { id: p.id, key: p.id } : { id: null, key: `new-${Date.now()}`, seed: p.seed }) : null);
+import { EASE, FAINT, GREEN, MUTED, PanelStyles, reset, type SaveStatus } from "./ui";
 
 export function ItemPanel({ inline = false }: { inline?: boolean }) {
   const panel = useUi((s) => s.panel);
@@ -230,116 +214,29 @@ export function ItemPanel({ inline = false }: { inline?: boolean }) {
     >
       <PanelStyles />
 
-      {/* LEFT: list */}
-      <div
-        style={{
-          width: listHidden ? 0 : 380,
-          opacity: listHidden ? 0 : 1,
-          flex: "none",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          borderRight: `1px solid ${listHidden ? "transparent" : "rgba(18,38,30,.07)"}`,
-          background: "rgba(255,255,255,.35)",
-          visibility: listHidden ? "hidden" : "visible",
-          transition: `width .6s ${EASE},opacity .4s ease,border-color .4s ease,visibility 0s linear ${listHidden ? ".6s" : "0s"}`,
-        }}
-      >
-        <div style={{ width: 380, flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "20px 22px 14px" }}>
-            {inline ? (
-              <div style={silk(10, ".16em")}>{t("YOUR NOTES")}</div>
-            ) : (
-              <div data-tour="panel-tabs">
-                <Seg<PanelKind>
-                  role="tablist"
-                  label={t("Item type")}
-                  options={kindOptions()}
-                  value={kind}
-                  onChange={pickKind}
-                  size={9.5}
-                  pad="7px 10px"
-                  font={{ fontFamily: "Silkscreen,monospace", letterSpacing: ".07em", fontWeight: 400 }}
-                  stretch={false}
-                />
-              </div>
-            )}
-            <div data-tour="panel-new" style={{ flex: "none" }}>
-              <Pill
-                onClick={startNew}
-                className="ip-h-scale"
-                style={{
-                  padding: "9px 13px",
-                  whiteSpace: "nowrap",
-                  color: "#fff",
-                  background: greenGrad,
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,.35),0 10px 20px -12px rgba(23,184,102,.95)",
-                  flex: "none",
-                }}
-              >
-                {Ico.plus()}
-                {L.newLabel}
-              </Pill>
-            </div>
-          </div>
-          <div style={{ padding: "0 22px 4px", fontSize: 22, fontWeight: 700, letterSpacing: "-.02em", color: INK }} aria-live="polite">
-            {headline}
-          </div>
-          <div style={{ padding: "10px 22px 12px", display: "flex", flexDirection: "column", gap: 10 }}>
-            <label
-              data-tour="panel-search"
-              className="ip-focus-within"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 9,
-                padding: "10px 14px",
-                borderRadius: 999,
-                background: "rgba(255,255,255,.8)",
-                boxShadow: "inset 0 1px 1px #fff,0 6px 14px -10px rgba(20,48,34,.35)",
-                transition: "box-shadow .25s ease",
-              }}
-            >
-              {Ico.search}
-              <input
-                aria-label={L.search}
-                value={localQ}
-                onChange={(e) => setLocalQ(e.target.value)}
-                placeholder={L.search}
-                style={{ flex: 1, minWidth: 0, border: 0, background: "transparent", fontFamily: "inherit", fontSize: 13, color: INK }}
-              />
-            </label>
-            <Seg label={t("Filter")} options={filterOptions} value={filter} onChange={setFilter} pad="7px 0" />
-          </div>
-
-          <div className="rb-noscroll" style={{ flex: 1, minHeight: 0, padding: "0 14px 16px" }}>
-            {groups.map((g) => (
-              <section key={g.label} aria-label={t(g.label)}>
-                <div style={{ ...silk(9, ".14em", g.color), padding: "12px 10px 6px" }}>{t(g.label)}</div>
-                {g.rows.map((r) => (
-                  <RowView key={r.id} row={r} selected={sel?.id === r.id} leaving={leaving.has(r.id)} onSelect={() => select(r.id)} onToggle={() => void D().toggleTask(r.id)} />
-                ))}
-              </section>
-            ))}
-            {groups.length === 0 && (
-              <div style={{ padding: "40px 20px", textAlign: "center", fontSize: 13, color: FAINT }}>{q.length ? t("No matches.") : t("Nothing here yet.")}</div>
-            )}
-          </div>
-
-          {showBulk && (
-            <div style={{ flex: "none", padding: "12px 22px 18px", borderTop: "1px solid rgba(18,38,30,.07)", animation: `rb-toast .35s ${EASE} both` }}>
-              <Pill
-                onClick={bulk}
-                className="ip-h-red2"
-                style={{ width: "100%", justifyContent: "center", gap: 8, padding: "10px 14px", color: RED, background: "rgba(192,74,66,.06)" }}
-              >
-                {Ico.trash()}
-                {L.bulk} · {bulkCount}
-              </Pill>
-            </div>
-          )}
-        </div>
-      </div>
+      <ListColumn
+        inline={inline}
+        listHidden={listHidden}
+        kind={kind}
+        pickKind={pickKind}
+        startNew={startNew}
+        labels={L}
+        headline={headline}
+        localQ={localQ}
+        setLocalQ={setLocalQ}
+        filter={filter}
+        setFilter={setFilter}
+        filterOptions={filterOptions}
+        groups={groups}
+        hasQuery={q.length > 0}
+        sel={sel}
+        leaving={leaving}
+        select={select}
+        toggleTask={(id) => void D().toggleTask(id)}
+        showBulk={showBulk}
+        bulk={bulk}
+        bulkCount={bulkCount}
+      />
 
       {/* RIGHT: detail */}
       <div data-tour="panel-detail" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
@@ -435,116 +332,6 @@ export function ItemPanel({ inline = false }: { inline?: boolean }) {
       }}
     >
       {win}
-    </div>
-  );
-}
-
-function RowView({ row, selected, leaving, onSelect, onToggle }: { row: Row; selected: boolean; leaving: boolean; onSelect: () => void; onToggle: () => void }) {
-  const isTask = row.kind === "task";
-  return (
-    <div
-      style={{
-        maxHeight: leaving ? 0 : 220,
-        opacity: leaving ? 0 : 1,
-        transform: leaving ? "translateX(-14px)" : "none",
-        overflow: leaving ? "hidden" : "visible",
-        transition: `max-height .26s ${EASE},opacity .2s ease,transform .24s ${EASE}`,
-        animation: `rb-toast .3s ${EASE} both`,
-      }}
-    >
-      <div
-        onClick={onSelect}
-        {...(row.trashed ? {} : swipeProps({ kind: row.kind, id: row.id, title: row.title }))}
-        className={selected ? undefined : "ip-h-white"}
-        style={{
-          display: "flex",
-          gap: 12,
-          padding: 12,
-          borderRadius: 18,
-          cursor: "pointer",
-          background: selected ? "#fff" : "transparent",
-          boxShadow: selected ? "inset 0 1px 1px #fff,0 10px 22px -14px rgba(20,48,34,.45)" : "none",
-          opacity: row.kind === "event" && row.done ? 0.7 : 1,
-          transition: `background .35s ${EASE},box-shadow .35s ease`,
-        }}
-      >
-        {isTask && (
-          <div style={{ marginTop: 1 }}>
-            <CheckBox
-              on={row.done}
-              size={20}
-              radius={7}
-              label={t("{action}: {title}", { action: row.done ? t("Mark not done") : t("Mark done"), title: row.title })}
-              onToggle={onToggle}
-              off="rgba(255,255,255,.8)"
-              border="rgba(18,38,30,.28)"
-            />
-          </div>
-        )}
-        {row.kind === "event" && (
-          <div
-            aria-hidden="true"
-            style={{
-              width: 36,
-              height: 38,
-              flex: "none",
-              borderRadius: 12,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "rgba(255,255,255,.85)",
-              boxShadow: "inset 0 1px 1px #fff,0 4px 10px -6px rgba(20,48,34,.3)",
-            }}
-          >
-            <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: ".06em", color: row.accent }}>{row.mon}</div>
-            <div style={{ fontFamily: "Doto,monospace", fontWeight: 900, fontSize: 15, lineHeight: 1, color: INK }}>{row.day}</div>
-          </div>
-        )}
-        {row.kind === "note" && <div aria-hidden="true" style={{ width: 4, flex: "none", alignSelf: "stretch", borderRadius: 3, background: row.accent }} />}
-        <button
-          type="button"
-          className="ip-select-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect();
-          }}
-          aria-current={selected ? "true" : undefined}
-          style={{ ...reset, flex: 1, minWidth: 0, display: "block" }}
-        >
-          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span
-              style={{
-                flex: 1,
-                minWidth: 0,
-                fontSize: 14,
-                fontWeight: 600,
-                color: isTask && row.done ? "#6d7b75" : INK,
-                textDecoration: isTask && row.done ? "line-through" : "none",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {row.title}
-            </span>
-            {row.important && <span role="img" aria-label={t("Important")} style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: "#c0503f" }} />}
-            {row.pinned && (
-              <span role="img" aria-label={t("Pinned")} style={{ display: "grid" }}>
-                {Ico.pin(GREEN)}
-              </span>
-            )}
-          </span>
-          <span style={{ display: "block", fontSize: 12, color: FAINT, marginTop: 3 }}>{row.due}</span>
-          {row.snippet.trim() && (
-            <span
-              style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", fontSize: 12.5, lineHeight: 1.45, color: MUTED, marginTop: 5 }}
-            >
-              {row.snippet}
-            </span>
-          )}
-        </button>
-      </div>
     </div>
   );
 }
