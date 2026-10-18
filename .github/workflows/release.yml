@@ -1,7 +1,7 @@
 # Las acciones de terceros están fijadas por SHA (no por etiqueta): este workflow tiene acceso a la clave de firma.
 # Publica una versión de RaBit cuando se crea un tag `v*` (p. ej. v1.3.0).
 #
-# Compila para Windows y macOS, FIRMA los artefactos del actualizador y sube al release los instaladores y el
+# Compila para Windows, macOS y Linux (x86_64), FIRMA los artefactos del actualizador y sube al release los instaladores y el
 # `latest.json` que las apps instaladas consultan para actualizarse solas. Pasos y secretos: docs/UPDATES.md.
 #
 # Secretos del repositorio necesarios:
@@ -53,6 +53,10 @@ jobs:
             os: windows-latest
             args: ""
             rust_targets: ""
+          - label: Linux
+            os: ubuntu-22.04 # la distro más antigua soportada: el AppImage enlaza contra su glibc
+            args: ""
+            rust_targets: ""
           - label: macOS (universal)
             os: macos-latest
             args: "--target universal-apple-darwin"
@@ -70,6 +74,11 @@ jobs:
       - uses: swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           workspaces: "src-tauri -> target"
+      # Dependencias de sistema de Tauri 2 (las mismas que el README y el job `linux` de ci.yml)
+      - if: matrix.label == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential curl wget file patchelf libssl-dev libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
       - run: npm ci
       - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0
         env:
@@ -94,15 +103,28 @@ jobs:
           f=$(ls src-tauri/target/release/bundle/nsis/*-setup.exe | head -n 1)
           cp "$f" RaBit-Setup.exe
           gh release upload "${{ github.ref_name }}" RaBit-Setup.exe --clobber
+      # Linux: copias con nombre fijo (el AppImage es el único que se actualiza solo) y sumas SHA-256 de todo
+      - if: matrix.label == 'Linux'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          b=src-tauri/target/release/bundle
+          cp "$(ls $b/appimage/*.AppImage | head -n 1)" RaBit-x86_64.AppImage
+          cp "$(ls $b/deb/*.deb | head -n 1)" RaBit-x86_64.deb
+          cp "$(ls $b/rpm/*.rpm | head -n 1)" RaBit-x86_64.rpm
+          sha256sum RaBit-x86_64.AppImage RaBit-x86_64.deb RaBit-x86_64.rpm > SHA256SUMS-linux.txt
+          gh release upload "${{ github.ref_name }}" RaBit-x86_64.AppImage RaBit-x86_64.deb RaBit-x86_64.rpm SHA256SUMS-linux.txt --clobber
 
   verify:
     name: Verify updater manifest
     needs: publish
     runs-on: ubuntu-latest
     steps:
-      # Si latest.json falta, no es de esta versión o no trae firma de Windows, las apps instaladas no podrían actualizarse
+      # Si latest.json falta, no es de esta versión o no trae firma de Windows o de Linux, las apps instaladas no podrían actualizarse
       - name: Check latest.json
         run: |
           curl -fsSL "https://github.com/${{ github.repository }}/releases/latest/download/latest.json" -o latest.json
-          jq -e --arg v "${GITHUB_REF_NAME#v}" '.version == $v and ((.platforms["windows-x86_64"].signature // "") | length > 0)' latest.json
+          jq -e --arg v "${GITHUB_REF_NAME#v}" '.version == $v and ((.platforms["windows-x86_64"].signature // "") | length > 0) and ((.platforms["linux-x86_64"].signature // "") | length > 0)' latest.json
           curl -fsSIL -o /dev/null "$(jq -r '.platforms["windows-x86_64"].url' latest.json)"
+          curl -fsSIL -o /dev/null "$(jq -r '.platforms["linux-x86_64"].url' latest.json)"

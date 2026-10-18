@@ -3,8 +3,9 @@ mod backup;
 use tauri::Manager;
 
 /// Activa o desactiva el efecto de cristal (acrylic en Windows). Muy sutil: el tinte es casi opaco.
+/// Devuelve si la plataforma lo soporta; si no, el frontend deja las superficies opacas.
 #[tauri::command]
-fn set_glass(window: tauri::WebviewWindow, enabled: bool) {
+fn set_glass(window: tauri::WebviewWindow, enabled: bool) -> bool {
   #[cfg(target_os = "windows")]
   {
     if enabled {
@@ -12,10 +13,26 @@ fn set_glass(window: tauri::WebviewWindow, enabled: bool) {
     } else {
       let _ = window_vibrancy::clear_acrylic(&window);
     }
+    true
   }
   #[cfg(not(target_os = "windows"))]
   {
     let _ = (&window, enabled);
+    false
+  }
+}
+
+/// ¿Puede la app actualizarse sola? En Linux solo el AppImage (el actualizador reemplaza ese archivo; con .deb/.rpm
+/// las versiones nuevas llegan por el gestor de paquetes). Windows y macOS siempre pueden.
+#[tauri::command]
+fn update_supported() -> bool {
+  #[cfg(target_os = "linux")]
+  {
+    std::env::var_os("APPIMAGE").is_some()
+  }
+  #[cfg(not(target_os = "linux"))]
+  {
+    true
   }
 }
 
@@ -26,7 +43,7 @@ pub fn run() {
   #[cfg(desktop)]
   let builder = builder.plugin(tauri_plugin_process::init());
   builder
-    .invoke_handler(tauri::generate_handler![set_glass])
+    .invoke_handler(tauri::generate_handler![set_glass, update_supported])
     .plugin(tauri_plugin_sql::Builder::default().build())
     .plugin(tauri_plugin_notification::init())
     .plugin(tauri_plugin_dialog::init())

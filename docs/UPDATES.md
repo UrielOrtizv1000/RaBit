@@ -18,6 +18,11 @@ How it is built: `tauri-plugin-updater` (check, download, signature check, insta
 both desktop-only. The logic lives in `src/services/updater.ts` (a small state machine: `idle | checking | available |
 downloading | ready | error`), the UI in `src/app/UpdateButton.tsx` and `src/app/useUpdatedNotice.ts`.
 
+**Linux.** Only the AppImage updates itself (the updater replaces that file). The `.deb` and `.rpm` get new versions from the
+package manager, so the backend command `update_supported` (`src-tauri/src/lib.rs`) is true there only when the `APPIMAGE`
+environment variable is set; otherwise the app never contacts the update server, shows no update icon, and
+**Settings → Data → Check for updates** says updates come from the package manager.
+
 ## How the app knows there is an update, and why it can be trusted
 
 ```
@@ -92,7 +97,7 @@ The repository is already set in the same file (`plugins.updater.endpoints` →
    (keep them short and user-facing; one per line).
 3. `npm run release:check` — fails if the versions differ.
 4. Commit, then tag and push: `git tag v0.2.0 && git push origin v0.2.0`.
-5. The workflow `.github/workflows/release.yml` does the rest: type-checks, runs the tests, builds Windows and macOS
+5. The workflow `.github/workflows/release.yml` does the rest: type-checks, runs the tests, builds Windows, macOS and Linux (x86_64)
    (universal), **signs** the updater artifacts, creates the release and uploads the installers plus `latest.json`.
 
 Installed apps pick the new version up on their next check (at start, or within 6 hours if open).
@@ -123,7 +128,7 @@ Rust tests for the database backup: `cd src-tauri && cargo test`.
 ## 4. What happens to the user's data
 
 - Everything lives **outside the app bundle**, in the per-user config directory (`app_config_dir`, e.g.
-  `%APPDATA%\app.rabit.desktop\` on Windows): the SQLite file `rabit.db` holds tasks, events, notes, routine, Savings and
+  `%APPDATA%\app.rabit.desktop\` on Windows, `~/.config/app.rabit.desktop/` on Linux): the SQLite file `rabit.db` holds tasks, events, notes, routine, Savings and
   settings. Installing or replacing the app never touches that folder.
 - **Migrations run automatically** when the new version starts (`PRAGMA user_version`, append-only, see
   `src/db/migrations.ts`). Never edit an existing migration; add a new one.
@@ -145,6 +150,8 @@ Rust tests for the database backup: `cd src-tauri && cargo test`.
 4. Publish a first release with a `v*` tag as a **normal release, not a pre-release** (`releases/latest` ignores
    pre-releases). Apps built **before** this feature existed (the `0.1.0-beta` installer) cannot update themselves, so
    that first build has to be installed once by hand. The workflow's last job (`Verify updater manifest`) fails if
-   `latest.json` is missing, is not for this version or has no Windows signature.
-5. Optional: macOS builds are not notarized by the workflow; add Apple signing secrets if you distribute on macOS.
+   `latest.json` is missing, is not for this version or has no Windows or Linux signature.
+5. Linux: the workflow publishes `RaBit-x86_64.AppImage`, `.deb`, `.rpm` and `SHA256SUMS-linux.txt` next to the Windows installer. Only the
+   AppImage is in `latest.json` (`linux-x86_64`) and updates itself. ARM64 is not built yet (it would need an `ubuntu-24.04-arm` row).
+6. Optional: macOS builds are not notarized by the workflow; add Apple signing secrets if you distribute on macOS.
    Windows installers are not code-signed either, so SmartScreen may warn on first run.

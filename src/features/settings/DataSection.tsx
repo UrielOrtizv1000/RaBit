@@ -23,7 +23,8 @@ export function DataSection({ close }: { close: () => void }) {
     setChecking(true);
     await useUpdater.api.check();
     setChecking(false);
-    showToast(useUpdater.getState().next ? t("Update available — use the download icon") : t("You're up to date"));
+    const { next, supported } = useUpdater.getState();
+    showToast(!supported ? t("Updates come from your package manager") : next ? t("Update available — use the download icon") : t("You're up to date"));
   };
 
   const onImport = async (f: File | undefined) => {

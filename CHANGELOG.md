@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Linux (in progress)**: AppImage, `.deb` and `.rpm` bundles; native window frame (no custom title bar, no transparency), minimum size 1024×680
+  (`src-tauri/tauri.linux.conf.json`); the glass effect stays off where the system cannot do it (`set_glass` now reports support);
+  `window-vibrancy` is only built on Windows; only the AppImage self-updates (`.deb`/`.rpm` skip the check and point to the package manager). `npm run package` builds the Linux installers too, `scripts/linux/probar-rabit.sh`, and CI now runs clippy, `cargo test` and a Linux bundle build.
+  The release workflow builds and publishes Linux x86_64 (AppImage with self-update, `.deb`, `.rpm`, SHA-256 sums); README has Linux download and install notes.
+  Plan: `docs/LINUX-PLAN.md`.
 - **Shorter tutorial**: 17 steps instead of 42 (4 in the main tour, 1–2 per page or window), still shown once per page.
 - **Settings → Updates → Check for updates**, with a message when you are up to date.
 - Windows installer with the RaBit icon, publisher and branded banners; `npm run package` → `installers/RaBit-Setup.exe` (the `.msi` is no longer built).

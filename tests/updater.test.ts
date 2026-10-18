@@ -31,6 +31,22 @@ function fake(over: Partial<UpdateBackend> = {}, version = "1.2.0") {
 }
 
 describe("useUpdater state machine", () => {
+  it("an install that cannot self-update (Linux .deb/.rpm) never checks and flags it", async () => {
+    const { b, calls } = fake({ supported: async () => false });
+    const u = createUpdater(b, memory());
+    await u.api.check();
+    expect(calls).toEqual([]);
+    expect(u.getState()).toMatchObject({ status: "idle", supported: false, next: null, current: "1.2.0" });
+  });
+
+  it("a supported install checks as usual", async () => {
+    const { b, calls } = fake({ supported: async () => true });
+    const u = createUpdater(b, memory());
+    await u.api.check();
+    expect(calls).toEqual(["check"]);
+    expect(u.getState().supported).toBe(true);
+  });
+
   it("starts idle and a check with nothing new stays silent", async () => {
     const { b } = fake({ check: async () => null });
     const u = createUpdater(b, memory());

@@ -37,3 +37,36 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+
+  linux:
+    name: Rust (clippy, tests) and Linux bundles
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
+        with:
+          components: clippy
+      - uses: swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: "src-tauri -> target"
+      # Dependencias de sistema de Tauri 2 (las mismas que lista el README)
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential curl wget file patchelf libssl-dev libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+      - run: npm ci
+      # `tauri::generate_context!` necesita la carpeta dist/ (frontendDist), así que se compila la interfaz primero
+      - run: npm run build
+      - run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
+      - run: cargo test --manifest-path src-tauri/Cargo.toml
+      # Sin firma: el build de PR no tiene la clave del actualizador (el release oficial sí, ver release.yml)
+      - run: npx tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
+        env:
+          NO_STRIP: "true"
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+      - name: Check the three Linux bundles exist
+        run: |
+          ls -l src-tauri/target/release/bundle/appimage/*.AppImage src-tauri/target/release/bundle/deb/*.deb src-tauri/target/release/bundle/rpm/*.rpm

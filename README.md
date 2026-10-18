@@ -4,12 +4,13 @@
   <p><b>A local-first desktop organizer for tasks, events, notes and routine.</b><br>
   No account. No cloud. No ads. No paywall.</p>
   <p><a href="https://github.com/UrielOrtizv1000/RaBit/releases/latest/download/RaBit-Setup.exe"><b>Download for Windows</b></a>
+  · <a href="https://github.com/UrielOrtizv1000/RaBit/releases/latest/download/RaBit-x86_64.AppImage"><b>Download for Linux (AppImage)</b></a>
   · <a href="https://github.com/UrielOrtizv1000/RaBit/releases/latest">All releases</a></p>
   <p>
     <a href="https://github.com/UrielOrtizv1000/RaBit/actions/workflows/ci.yml"><img src="https://github.com/UrielOrtizv1000/RaBit/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
     <a href="https://github.com/UrielOrtizv1000/RaBit/releases"><img src="https://img.shields.io/github/v/release/UrielOrtizv1000/RaBit?include_prereleases&amp;label=release" alt="Latest release"></a>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/UrielOrtizv1000/RaBit" alt="License: GPL-3.0"></a>
-    <img src="https://img.shields.io/badge/platform-Windows-0b7a45" alt="Platform: Windows">
+    <img src="https://img.shields.io/badge/platform-Windows%20%C2%B7%20Linux-0b7a45" alt="Platforms: Windows and Linux">
     <img src="https://img.shields.io/badge/data-100%25%20local-17b866" alt="Data: 100% local">
   </p>
   <p>
@@ -35,7 +36,7 @@ your computer.
 ## Status: beta, in active development
 
 This is version **0.1.0**, heading for **0.2.0** (automatic updates and a new installer). It is functional and it is
-what I use, but it is not finished. Windows is the platform I build and test on.
+what I use, but it is not finished. Windows is the platform I build and test on; Linux (x86_64) builds are new and less tested.
 
 **Working today**
 
@@ -123,11 +124,30 @@ persistence in SQLite through `tauri-plugin-sql` with versioned migrations
 for the animations. Quality gate: Vitest (logic, persistence, i18n coverage),
 Playwright (end-to-end), oxlint, Prettier and `tsc --noEmit`.
 
+## Install on Linux
+
+Each release carries three files for x86_64 (built on Ubuntu 22.04, so it needs a distro at least that recent, with WebKitGTK 4.1):
+
+| File                    | For                          | Updates itself            |
+| ----------------------- | ---------------------------- | ------------------------- |
+| `RaBit-x86_64.AppImage` | any distro (`chmod +x`, run) | yes, from inside the app  |
+| `RaBit-x86_64.deb`      | Debian, Ubuntu, Mint         | no — download the new one |
+| `RaBit-x86_64.rpm`      | Fedora, openSUSE             | no — download the new one |
+
+`SHA256SUMS-linux.txt` in the same release lets you verify the download (`sha256sum -c SHA256SUMS-linux.txt`). Reminder notifications
+need a notification daemon; GNOME and KDE have one. ARM64 builds are not published yet.
+
 ## Getting started
 
 Requirements: Node 20+, npm, a stable Rust toolchain (`rustup`) and the Tauri 2
-system dependencies for your platform — on Windows that means the Microsoft C++
-Build Tools and WebView2. No environment variables, no secrets, no API keys.
+system dependencies for your platform. No environment variables, no secrets, no API keys.
+
+- **Windows:** the Microsoft C++ Build Tools and WebView2.
+- **Linux (Debian/Ubuntu 22.04+):**
+  `sudo apt install build-essential curl wget file patchelf libssl-dev libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev`.
+  Fedora: `sudo dnf install webkit2gtk4.1-devel gtk3-devel libappindicator-gtk3-devel librsvg2-devel openssl-devel patchelf @c-development`.
+  Arch: `sudo pacman -S webkit2gtk-4.1 gtk3 libayatana-appindicator librsvg openssl patchelf base-devel`.
+  Reminders use desktop notifications, so a notification daemon (`libnotify`) should be running; GNOME and KDE already have one.
 
 ```bash
 npm install
@@ -141,7 +161,7 @@ npm run lint           # oxlint
 npm run format:check   # Prettier
 npm test               # Vitest
 npm run test:e2e       # Playwright
-npm run package        # builds installers/RaBit-Setup.exe
+npm run package        # builds installers/ (RaBit-Setup.exe on Windows; AppImage, .deb, .rpm on Linux)
 ```
 
 `http://localhost:1420/?seed` loads sample data in development. In an installed
@@ -163,7 +183,7 @@ A single SQLite file, `rabit.db`, in the per-platform app data directory:
 | -------- | ---------------------------------------------------------- |
 | Windows  | `%APPDATA%\app.rabit.desktop\rabit.db`                     |
 | macOS    | `~/Library/Application Support/app.rabit.desktop/rabit.db` |
-| Linux    | `~/.local/share/app.rabit.desktop/rabit.db`                |
+| Linux    | `~/.config/app.rabit.desktop/rabit.db`                     |
 
 In the browser (development and tests only) the same SQL schema is kept in
 `localStorage`. To move your data, use **Settings → Data → Export / Import**

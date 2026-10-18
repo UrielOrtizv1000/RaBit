@@ -40,7 +40,7 @@ Settings (⚙) → **TRY RABIT** → **Load** loads tasks, events, notes, routin
 The browser cannot exercise Tauri's permissions, so two checks cover them:
 
 - `npm test` includes `tests/capabilities.test.ts`: `src-tauri/capabilities/default.json` must grant exactly what the code imports.
-- `npm run qa:permissions` (Windows) builds a test copy of the app with another identifier, drives it over the WebView2 debugging
+- `npm run qa:permissions` (Windows only: it needs the WebView2 debugging port; on Linux `tests/capabilities.test.ts` and the manual Export check below cover it) builds a test copy of the app with another identifier, drives it over the WebView2 debugging
   port and checks the real ACL: what the app uses works, everything else is denied, the title bar buttons and Close work.
   Run it after touching `capabilities/` or `tauri.conf.json`. It leaves `target/release/rabit.exe` as the test build
   (use `RABIT_TARGET_DIR` to avoid that, or run `npm run package` afterwards).

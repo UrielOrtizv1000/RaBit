@@ -22,11 +22,13 @@ export interface UpdateInfo {
 
 export interface UpdateBackend {
   currentVersion(): Promise<string>;
+  /** ¿Esta instalación puede actualizarse sola? (Linux: solo AppImage.) Si falta, se asume que sí. */
+  supported?(): Promise<boolean>;
   /** Busca una versión nueva; null si no hay. */
   check(): Promise<UpdateInfo | null>;
   /** Descarga la versión encontrada por el último `check()`. */
   download(onProgress: (fraction: number) => void): Promise<void>;
-  /** Instala lo descargado (en Windows el instalador cierra la app). */
+  /** Instala lo descargado (en Windows el instalador cierra la app; en Linux se reemplaza el AppImage). */
   install(): Promise<void>;
   relaunch(): Promise<void>;
 }
@@ -47,6 +49,8 @@ export interface UpdaterState {
   status: UpdaterStatus;
   /** 0–1, solo con sentido en downloading/ready */
   progress: number;
+  /** false si las versiones nuevas llegan por otro medio (gestor de paquetes de Linux) */
+  supported: boolean;
   /** versión instalada ahora */
   current: string;
   /** versión nueva disponible */
@@ -102,7 +106,7 @@ const msg = (e: unknown): string => (e instanceof Error ? e.message : String(e))
 
 /** Crea la tienda del actualizador con un backend y un almacenamiento dados (testeable). */
 export function createUpdater(backend: UpdateBackend, storage: UpdaterStorage): UpdaterStore {
-  const useStore = create<UpdaterState>(() => ({ status: "idle", progress: 0, current: "", next: null, error: null, updated: null }));
+  const useStore = create<UpdaterState>(() => ({ status: "idle", supported: true, progress: 0, current: "", next: null, error: null, updated: null }));
   const set = useStore.setState;
   const get = useStore.getState;
   let failedStep: "download" | "install" | null = null;
@@ -115,6 +119,10 @@ export function createUpdater(backend: UpdateBackend, storage: UpdaterStorage): 
       set({ status: "checking", error: null });
       try {
         const current = await backend.currentVersion();
+        if (backend.supported && !(await backend.supported())) {
+          set({ status: "idle", supported: false, next: null, current });
+          return;
+        }
         const info = await backend.check();
         if (info) set({ status: "available", next: info, current, progress: 0 });
         else set({ status: "idle", next: null, current });
@@ -218,6 +226,10 @@ function tauriBackend(): UpdateBackend {
     async currentVersion() {
       const { getVersion } = await import("@tauri-apps/api/app");
       return getVersion();
+    },
+    async supported() {
+      const { invoke } = await import("@tauri-apps/api/core");
+      return invoke<boolean>("update_supported");
     },
     async check() {
       const { check } = await import("@tauri-apps/plugin-updater");
@@ -348,7 +360,7 @@ export function startUpdater(): () => void {
         if (useUpdater.getState().status !== "ready") return;
         event.preventDefault();
         try {
-          await api.installOnExit(); // en Windows el instalador cierra la app por su cuenta
+          await api.installOnExit(); // en Windows el instalador cierra la app por su cuenta; en Linux basta con reemplazar el AppImage
         } finally {
           await win.destroy();
         }
