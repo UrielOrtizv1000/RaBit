@@ -55,6 +55,7 @@ what I use, but it is not finished. Windows is the platform I build and test on.
 - Reminders and sound — the switches are in Settings but disabled ("in development")
 - **Routine** is still in beta
 - Code signing — the installer is not signed yet, so Windows SmartScreen may warn the first time
+- Real dark theme — the preference is saved, the palette is still being worked on
 - Sync and accounts are deliberately out of scope for now.
   The `SyncProvider` interface exists so a backend can be dropped in later
   without touching the rest of the app.
