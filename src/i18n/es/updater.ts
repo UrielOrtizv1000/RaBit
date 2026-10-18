@@ -18,5 +18,6 @@ export const es: Record<string, string> = {
   "Check for updates": "Buscar actualizaciones",
   "Checking…": "Buscando…",
   "You're up to date": "Estás al día",
+  "Updates come from your package manager": "Las actualizaciones llegan por tu gestor de paquetes",
   "Update available — use the download icon": "Hay una actualización: usa el ícono de descarga",
 };

@@ -1,12 +1,14 @@
 /**
  * Barra de título propia (la ventana de Tauri va sin decoraciones). Zona arrastrable + minimizar/maximizar/cerrar.
- * En el navegador (dev/e2e) los botones no hacen nada.
+ * En el navegador (dev/e2e) los botones no hacen nada. En Linux no se muestra (ventana nativa).
  */
 import type { CSSProperties } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { t } from "../i18n";
 
 const isTauri = "__TAURI_INTERNALS__" in window;
+/** En Linux la ventana usa las decoraciones del sistema (src-tauri/tauri.linux.conf.json): esta barra sobra. */
+const nativeFrame = isTauri && /Linux/.test(navigator.userAgent) && !/Android/.test(navigator.userAgent);
 
 const btn: CSSProperties = {
   width: 40,
@@ -21,6 +23,7 @@ const btn: CSSProperties = {
 
 /** Barra de título propia (la ventana nativa va sin decoraciones). */
 export function TitleBar() {
+  if (nativeFrame) return null;
   const w = isTauri ? getCurrentWindow() : null;
   return (
     <div

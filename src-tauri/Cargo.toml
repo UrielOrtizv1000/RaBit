@@ -27,6 +27,9 @@ tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 tauri-plugin-notification = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
+
+# Efecto de cristal (acrylic): solo Windows. Linux no lo usa y no debe compilarlo.
+[target.'cfg(target_os = "windows")'.dependencies]
 window-vibrancy = "0.5"
 
 # Actualizaciones automáticas y reinicio: solo escritorio (en móvil no existen).

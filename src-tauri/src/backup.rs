@@ -64,7 +64,7 @@ pub fn prune(dir: &Path, keep: usize) -> io::Result<()> {
     })
     .map(|e| (e.metadata().and_then(|m| m.modified()).unwrap_or(SystemTime::UNIX_EPOCH), e.path()))
     .collect();
-  backups.sort_by(|a, b| b.0.cmp(&a.0));
+  backups.sort_by_key(|b| std::cmp::Reverse(b.0));
   for (_, path) in backups.into_iter().skip(keep) {
     let _ = fs::remove_file(sidecar(&path, "-wal"));
     let _ = fs::remove_file(sidecar(&path, "-shm"));
