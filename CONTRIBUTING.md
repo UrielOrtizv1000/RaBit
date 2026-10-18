@@ -28,7 +28,7 @@ npm run tauri dev
 ```
 
 You need Node 20+, npm, a stable Rust toolchain, and the Tauri 2 system
-dependencies for your platform.
+dependencies for your platform (the exact packages per OS are listed in the README, under "Getting started").
 
 ## Branching and commits
 
