@@ -1,13 +1,14 @@
 /**
  * Página Quick Notes: reutiliza el panel compartido en modo `inline`.
  */
+import { useState } from "react";
 import { MONTHS, WEEKDAYS } from "../../domain/dates";
 import { ItemPanel } from "../../components/ItemPanel/ItemPanel";
 import { t } from "../../i18n";
 import { PageHeader } from "../../components/ui/PageHeader";
 
 export function NotesPage() {
-  const now = new Date();
+  const [now] = useState(() => new Date());
   const kicker = `${WEEKDAYS[now.getDay()]} · ${MONTHS[now.getMonth()]} ${now.getDate()}`.toUpperCase();
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column", gap: 20 }}>

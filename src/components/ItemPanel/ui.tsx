@@ -2,7 +2,7 @@
  * Piezas de interfaz reutilizables del panel (segmentos, píldoras, casillas, iconos) y el hook `useAutosave`
  * (guardado con retardo + volcado al desmontar para no perder lo escrito).
  */
-import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
 export const INK = "#121a16";
 export const GREEN = "#0b7a45";
@@ -324,7 +324,9 @@ export function Pill({
 /** Keeps latest value in a ref so timers never see stale closures. */
 export function useLatest<T>(v: T) {
   const r = useRef(v);
-  r.current = v;
+  useLayoutEffect(() => {
+    r.current = v;
+  });
   return r;
 }
 
@@ -337,7 +339,7 @@ export function useAutosave(save: () => Promise<void>, onStatus: (s: SaveStatus)
   const timer = useRef<number | undefined>(undefined);
   const dirty = useRef(false);
   const chain = useRef<Promise<void>>(Promise.resolve());
-  const run = useRef(() => {
+  const run = useCallback(() => {
     dirty.current = false;
     statusRef.current("saving");
     chain.current = chain.current
@@ -346,19 +348,19 @@ export function useAutosave(save: () => Promise<void>, onStatus: (s: SaveStatus)
         () => statusRef.current("saved"),
         () => statusRef.current("idle"),
       );
-  });
-  const schedule = useRef(() => {
+  }, [saveRef, statusRef]);
+  const schedule = useCallback(() => {
     dirty.current = true;
     window.clearTimeout(timer.current);
     statusRef.current("saving");
-    timer.current = window.setTimeout(() => run.current(), ms);
-  });
+    timer.current = window.setTimeout(run, ms);
+  }, [ms, run, statusRef]);
   useEffect(
     () => () => {
       window.clearTimeout(timer.current);
-      if (dirty.current) run.current();
+      if (dirty.current) run();
     },
-    [],
+    [run],
   );
-  return schedule.current;
+  return schedule;
 }

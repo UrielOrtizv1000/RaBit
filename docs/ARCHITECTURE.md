@@ -1,6 +1,6 @@
 # RaBit Architecture
 
-Desktop application (Tauri 2) with a React + TypeScript interface. **100% local**: there is no server, accounts or network.
+Desktop application (Tauri 2) with a React + TypeScript interface. **100% local**: there is no server or accounts; the only network request is the update check against GitHub releases.
 This document explains _why_ the code is organized this way and how to extend it without breaking anything.
 
 ## Multi-platform layout
@@ -72,6 +72,51 @@ Add it to `LANGS` in `src/i18n/index.ts`, create the dictionary for that languag
 
 Add an object at the end of `MIGRATIONS` (next `version`) with SQL statements, update `db/repo.ts` and add a test in `tests/store.test.ts`.
 
+### Keep files small
+
+Aim for **under ~400 lines per file**. A page (`features/<x>/<X>Page.tsx`) owns the state and the actions; its cards, windows
+and dialogs live in sibling files that receive props, pure rules go in `model.ts`, and gesture/animation logic in a
+`use<Name>.ts` hook. Move code, don't rewrite it, and compare screenshots before and after when you split a screen.
+
+Still over that size and good candidates for the next split: `features/settings/SettingsModal.tsx`,
+`components/ItemPanel/ItemPanel.tsx`, `features/savings/SavingsPage.tsx` and `components/ItemPanel/NotePane.tsx`.
+
+### Tauri permissions (capabilities)
+
+The window may only call what the app uses: `src-tauri/capabilities/default.json` lists **21 permissions** and no
+`*:default` set. Anything not listed is rejected by Tauri's ACL ("not allowed by ACL"). Why each one is there:
+
+| Permission(s)                                                                          | Used by                                                                                                                                                                                             |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sql:allow-load`, `sql:allow-select`, `sql:allow-execute`                              | `db/tauriDb.ts` (the SQLite database)                                                                                                                                                               |
+| `core:window:allow-minimize`, `allow-toggle-maximize`, `allow-close`                   | the title bar buttons (`app/TitleBar.tsx`)                                                                                                                                                          |
+| `core:window:allow-start-dragging`, `allow-internal-toggle-maximize`                   | the draggable title bar (`data-tauri-drag-region`: drag and double-click to maximize)                                                                                                               |
+| `core:window:allow-destroy`, `core:event:allow-listen`, `allow-unlisten`               | installing a downloaded update when the window is closed (`services/updater.ts`, `onCloseRequested`)                                                                                                |
+| `core:app:allow-version`                                                               | the version shown and compared by the updater                                                                                                                                                       |
+| `updater:allow-check`, `allow-download`, `allow-install`, `process:allow-restart`      | the update flow (check, download, install, relaunch)                                                                                                                                                |
+| `notification:allow-is-permission-granted`, `allow-request-permission`, `allow-notify` | reminders (`services/reminders.ts`)                                                                                                                                                                 |
+| `dialog:allow-save`, `fs:allow-write-text-file`                                        | **Export backup** (`services/backup.ts`): the user picks a file in the native "Save" dialog; the dialog plugin then adds **that exact path** to the file scope, so nothing else on disk is writable |
+
+Not permissions: `invoke("set_glass")` is the app's own command and needs none; the `log` plugin is only used from Rust.
+
+Rules:
+
+- Adding a Tauri plugin or API means adding its permissions here **and** its row to the table in
+  `tests/capabilities.test.ts`, which fails if the JSON grants more or less than the imported modules need (no `*:default`,
+  no leftovers, no missing ones).
+- **A browser test cannot see permissions.** After touching `capabilities/` or `tauri.conf.json`, run
+  `npm run qa:permissions` (Windows): it builds a test copy of the app with another identifier (your data is not touched),
+  drives it, and checks that everything the app uses is allowed and everything else is denied.
+- History: until this audit the list used `core:default`, `dialog:default` and `fs:default`. `fs:default` has no write
+  permission, so **exporting a backup failed in the installed app** (it worked in the browser).
+
+### Colors and buttons
+
+Brand colors are CSS variables (`--rb-*`, top of `styles/global.css`): write `color: "var(--rb-muted)"`, not the hex. Shared
+button styles are in `components/ui/buttons.ts`. Two exceptions: SVG attributes (`stroke=`, `fill=`) and canvas/framer-motion
+code need literal colors, and the dark surfaces `#1c2a23` / `rgba(12,24,18…)` must stay literal because the dark theme finds
+them by text in the `style` attribute.
+
 ### Change the look
 
 The shared styles are in `components/ui/cardStyles.ts` and `components/ui/glass.ts`; the keyframes in `styles/global.css`.
@@ -80,13 +125,13 @@ dark surface, its color must match the selectors in `global.css` (section "Dark 
 
 ## Quality
 
-| Command                | What it does                                                        |
-| ---------------------- | ------------------------------------------------------------------- |
-| `npm run typecheck`    | Strict TypeScript (no `any`, no unused variables).                  |
-| `npm run lint`         | oxlint: correctness, `no-explicit-any`, hooks rules.                |
-| `npm run format:check` | Prettier with a fixed configuration (`.prettierrc.json`).           |
-| `npm test`             | Vitest: pure rules, persistence, complete i18n.                     |
-| `npm run test:e2e`     | Playwright: onboarding, tasks, theme, language, gestures, stress.   |
-| `npm run package:beta` | Builds and leaves `installers/RaBit_beta.exe` and `RaBit_beta.msi`. |
+| Command                | What it does                                                      |
+| ---------------------- | ----------------------------------------------------------------- |
+| `npm run typecheck`    | Strict TypeScript (no `any`, no unused variables).                |
+| `npm run lint`         | oxlint: correctness, `no-explicit-any`, hooks rules.              |
+| `npm run format:check` | Prettier with a fixed configuration (`.prettierrc.json`).         |
+| `npm test`             | Vitest: pure rules, persistence, complete i18n.                   |
+| `npm run test:e2e`     | Playwright: onboarding, tasks, theme, language, gestures, stress. |
+| `npm run package`      | Builds and leaves `installers/RaBit-Setup.exe`.                   |
 
 Error logging: no exception is silently swallowed; `lib/log.ts → logWarn(scope, error)` is used (without personal data).

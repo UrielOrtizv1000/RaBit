@@ -76,8 +76,13 @@ export type UpdaterStore = UseBoundStore<StoreApi<UpdaterState>> & { api: Update
 const K_LAST_SEEN = "rabit.updater.lastSeenVersion";
 const K_PENDING = "rabit.updater.pending";
 export const CHECK_EVERY_MS = 6 * 60 * 60 * 1000;
+/** Sin tiempo máximo, una red colgada dejaría el estado en «checking» y no se volvería a revisar nunca. */
+const CHECK_TIMEOUT_MS = 20_000;
+const DOWNLOAD_TIMEOUT_MS = 10 * 60_000;
+const MAX_NOTES = 20;
+const MAX_NOTE_CHARS = 160;
 
-/** Notas del manifiesto → líneas limpias (sin «- », «* », «#», negritas). */
+/** Notas del manifiesto → líneas limpias (sin «- », «* », «#», negritas), con tope de líneas y de largo (son texto de red). */
 export function parseNotes(body: string | undefined | null): string[] {
   return (body ?? "")
     .split(/\r?\n/)
@@ -88,7 +93,9 @@ export function parseNotes(body: string | undefined | null): string[] {
         .replace(/\*\*(.+?)\*\*/g, "$1")
         .trim(),
     )
-    .filter(Boolean);
+    .filter(Boolean)
+    .slice(0, MAX_NOTES)
+    .map((l) => (l.length > MAX_NOTE_CHARS ? `${l.slice(0, MAX_NOTE_CHARS - 1)}…` : l));
 }
 
 const msg = (e: unknown): string => (e instanceof Error ? e.message : String(e));
@@ -214,20 +221,23 @@ function tauriBackend(): UpdateBackend {
     },
     async check() {
       const { check } = await import("@tauri-apps/plugin-updater");
-      pending = await check();
+      pending = await check({ timeout: CHECK_TIMEOUT_MS });
       return pending ? { version: pending.version, notes: parseNotes(pending.body) } : null;
     },
     async download(onProgress) {
       if (!pending) throw new Error("No update to download");
       let total = 0;
       let got = 0;
-      await pending.download((e) => {
-        if (e.event === "Started") total = e.data.contentLength ?? 0;
-        else if (e.event === "Progress") {
-          got += e.data.chunkLength;
-          if (total > 0) onProgress(got / total);
-        } else onProgress(1);
-      });
+      await pending.download(
+        (e) => {
+          if (e.event === "Started") total = e.data.contentLength ?? 0;
+          else if (e.event === "Progress") {
+            got += e.data.chunkLength;
+            if (total > 0) onProgress(got / total);
+          } else onProgress(1);
+        },
+        { timeout: DOWNLOAD_TIMEOUT_MS },
+      );
     },
     async install() {
       if (!pending) throw new Error("No update to install");

@@ -16,7 +16,7 @@ const btn: CSSProperties = {
   background: "transparent",
   border: 0,
   cursor: "pointer",
-  color: "#5d6f67",
+  color: "var(--rb-muted)",
 };
 
 /** Barra de título propia (la ventana nativa va sin decoraciones). */
@@ -36,7 +36,7 @@ export function TitleBar() {
         userSelect: "none",
       }}
     >
-      <div data-tauri-drag-region style={{ fontFamily: "Silkscreen,monospace", fontSize: 9, letterSpacing: ".16em", color: "#6b7a73" }}>
+      <div data-tauri-drag-region style={{ fontFamily: "Silkscreen,monospace", fontSize: 9, letterSpacing: ".16em", color: "var(--rb-faint)" }}>
         RABIT
       </div>
       <div style={{ display: "flex" }}>

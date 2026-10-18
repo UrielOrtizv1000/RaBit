@@ -10,7 +10,11 @@ Source: `src/domain/types.ts`.
 | Event colors   | `#17b866` `#4b7fd6` `#8a6fd6` `#2aa6a0` `#c98a1e` `#a8443a`                                |
 | Routine colors | Event colors **minus** blue `#4b7fd6` and purple `#8a6fd6` (reserved for events and tasks) |
 | Tag colors     | `#17b866` `#2aa6a0` `#4b7fd6` `#8a6fd6` `#d0579a` `#c98a1e` `#a8443a` `#5d6f67`            |
-| Brand          | neon-green pixel rabbit on black — see `assets/app-icon.png`                               |
+| Brand          | neon-green pixel rabbit on black — see `assets/brand/app-icon.png`                         |
+
+Desktop UI colors used everywhere live as CSS variables in `src/styles/global.css`: `--rb-ink` `#121a16`,
+`--rb-body` `#41504a`, `--rb-muted` `#5d6f67`, `--rb-faint` `#6b7a73`, `--rb-green` `#17b866`, `--rb-green-deep` `#0b7a45`,
+`--rb-neon` `#3ddc84`, `--rb-danger` `#a8443a` and `--rb-green-grad` (`#1fc172` → `#0f9a56`). Mobile clients use the same values.
 
 Fonts: Plus Jakarta Sans (UI), Doto and Silkscreen (pixel accents).
 
