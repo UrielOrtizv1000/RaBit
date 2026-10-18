@@ -57,4 +57,6 @@ look at the result, and commit the images with the change. The script lives in `
 
 ## Automated tests
 
-`npm test` (logic and database) · `npm run test:e2e` (browser: onboarding, task, theme, demo).
+`npm test` (Vitest: logic, database, i18n coverage, updater, Tauri permissions) · `npm run test:e2e` (Playwright, browser: onboarding
+and tasks, language, Savings, swipe-to-delete, note tags, theme and demo data, stress/layout, the tutorial and the updater).
+CI (`.github/workflows/ci.yml`) runs typecheck, lint, format, Vitest and Playwright on every pull request.

@@ -23,7 +23,7 @@ this is for the "why" and for what you actually verified.
 
 ## Checklist
 
-- [ ] No network calls, telemetry or accounts were added.
+- [ ] No network calls (other than the update check), telemetry or accounts were added.
 - [ ] The layer rules in `docs/ARCHITECTURE.md` are respected.
 - [ ] New UI strings have a Spanish translation in `src/i18n/es/`.
 - [ ] Tests were added or updated for behaviour changes.

@@ -77,8 +77,9 @@ Set a **password** when it asks (an empty one works but leaves the key unprotect
 | `rabit.key`          | **private** key | GitHub → Settings → Secrets and variables → Actions → **`TAURI_SIGNING_PRIVATE_KEY`** (paste the file's content). **Never commit it.**  |
 | the password you set | password        | Secret **`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`** (GitHub does not accept empty secrets: if the key has no password, do not create it)    |
 
-Also set the repository in the same file: `plugins.updater.endpoints` →
-`https://github.com/<OWNER>/<REPO>/releases/latest/download/latest.json` (replace `<OWNER>/<REPO>`).
+The repository is already set in the same file (`plugins.updater.endpoints` →
+`https://github.com/UrielOrtizv1000/RaBit/releases/latest/download/latest.json`). Change it only if you fork the project;
+`npm run release:check` refuses `<OWNER>`, `<REPO>` and `<PUBLIC_KEY_HERE>` placeholders.
 
 > **Back the private key up somewhere safe.** If you lose it, installed apps can no longer verify new updates and
 > everyone would have to reinstall by hand once. Do not change the public key lightly for the same reason.
@@ -87,10 +88,10 @@ Also set the repository in the same file: `plugins.updater.endpoints` →
 
 1. Bump the version in the **three** places (they must match): `package.json`, `src-tauri/tauri.conf.json`,
    `src-tauri/Cargo.toml` (and `src-tauri/Cargo.lock` follows when you build).
-2. Add a `## 1.3.0` section to `CHANGELOG.md`. Its bullets become the release notes and the app's **What's new** list
+2. Add a `## 0.2.0` section to `CHANGELOG.md`. Its bullets become the release notes and the app's **What's new** list
    (keep them short and user-facing; one per line).
 3. `npm run release:check` — fails if the versions differ.
-4. Commit, then tag and push: `git tag v1.3.0 && git push origin v1.3.0`.
+4. Commit, then tag and push: `git tag v0.2.0 && git push origin v0.2.0`.
 5. The workflow `.github/workflows/release.yml` does the rest: type-checks, runs the tests, builds Windows and macOS
    (universal), **signs** the updater artifacts, creates the release and uploads the installers plus `latest.json`.
 

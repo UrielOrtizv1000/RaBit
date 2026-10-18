@@ -20,18 +20,18 @@ app ──► features ──► components ──► store ──► db ──�
 
 A layer may only import from the ones to its right. Never the other way around.
 
-| Folder           | Responsibility                                                                              | Must not contain                |
-| ---------------- | ------------------------------------------------------------------------------------------- | ------------------------------- |
-| `src/domain`     | **Pure** types and business rules (dates, task ordering, repetitions, column distribution). | React, database, `window`.      |
-| `src/db`         | SQL interface (`SqlAdapter`), versioned migrations and row ⇄ domain repository.             | Business logic, UI.             |
-| `src/store`      | State (Zustand). `data.ts` writes to SQLite; `ui.ts` is UI state only.                      | JSX, styles.                    |
-| `src/services`   | Effects with the outside world: startup, reminders, backup, glass, sample data.             | React components.               |
-| `src/lib`        | UI utilities without domain (`swipe`, `zoom`, `log`).                                       | Business rules.                 |
-| `src/components` | Reusable components: `ui/` (header, terminal, styles) and `ItemPanel/` (shared panel).      | Knowing about a specific page.  |
-| `src/features/*` | One folder per page/module (home, calendar, routine, notes, savings, settings, onboarding). | Importing from another feature. |
-| `src/app`        | Shell: window, top bar, dock, page fitting (`FitPage`), app startup.                        | Business rules.                 |
-| `src/i18n`       | `t()` and per-area dictionaries in `es/*.ts`.                                               | Untranslated UI text.           |
-| `src-tauri`      | Minimal Rust backend: window, plugins (sql, notifications, dialog, fs) and glass effect.    | Application logic.              |
+| Folder           | Responsibility                                                                                                          | Must not contain                |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `src/domain`     | **Pure** types and business rules (dates, task ordering, repetitions, column distribution).                             | React, database, `window`.      |
+| `src/db`         | SQL interface (`SqlAdapter`), versioned migrations and row ⇄ domain repository.                                         | Business logic, UI.             |
+| `src/store`      | State (Zustand). `data.ts` writes to SQLite; `ui.ts` is UI state only.                                                  | JSX, styles.                    |
+| `src/services`   | Effects with the outside world: startup, reminders, backup, glass, sample data.                                         | React components.               |
+| `src/lib`        | UI utilities without domain (`swipe`, `zoom`, `log`).                                                                   | Business rules.                 |
+| `src/components` | Reusable components: `ui/` (header, terminal, styles) and `ItemPanel/` (shared panel).                                  | Knowing about a specific page.  |
+| `src/features/*` | One folder per page/module (home, calendar, routine, notes, savings, settings, onboarding).                             | Importing from another feature. |
+| `src/app`        | Shell: window, top bar, dock, page fitting (`FitPage`), app startup.                                                    | Business rules.                 |
+| `src/i18n`       | `t()` and per-area dictionaries in `es/*.ts`.                                                                           | Untranslated UI text.           |
+| `src-tauri`      | Minimal Rust backend: window, plugins (sql, notifications, dialog, fs, updater, process, log), backup and glass effect. | Application logic.              |
 
 ## Important decisions (and why)
 
