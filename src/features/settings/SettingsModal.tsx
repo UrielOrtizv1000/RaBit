@@ -1,146 +1,27 @@
 /**
  * Ajustes: perfil, módulos, hora y fecha, recordatorios (en desarrollo), apariencia (tema, idioma, tamaño del texto), datos
- * (exportar/importar) y herramientas de prueba (datos de ejemplo / borrar todo).
+ * (exportar/importar) y herramientas de prueba (datos de ejemplo / borrar todo). Las secciones largas viven en sus propios archivos.
  */
-import { useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { useData, type BackupFile } from "../../store/data";
-import { useUi } from "../../store/ui";
-import { NAV } from "../../app/nav";
-import { downloadBackup, readBackupFile } from "../../services/backup";
-import { clearAllData, seedDemoData } from "../../services/seed";
 import type { FontSize, Modules, Settings } from "../../domain/types";
+import { useData } from "../../store/data";
+import { useUi } from "../../store/ui";
 import { silk } from "../../components/ui/glass";
-import { pillButton } from "../../components/ui/buttons";
 import { LANGS, t, type Lang } from "../../i18n";
-import { resetTours } from "../../components/tourState";
-import { useUpdater } from "../../services/updater";
-
-const MODS: { id: keyof Modules; desc: string; soon?: boolean; beta?: boolean }[] = [
-  { id: "calendar", desc: "Events, tasks and RaBit reminders." },
-  { id: "routine", desc: "Your recurring week, wake-up and bedtime.", beta: true },
-  { id: "notes", desc: "Fast notes you can turn into tasks." },
-  { id: "savings", desc: "Set goals and track what you save." },
-];
-const navOf = (id: string) => NAV.find((n) => n.id === id) ?? NAV[0];
-
-const row: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 14,
-  padding: "13px 16px",
-  borderRadius: 18,
-  background: "rgba(255,255,255,.7)",
-  boxShadow: "inset 0 1px 1px #fff",
-};
-const label = (text: string, mt = 18): ReactNode => <div style={{ ...silk(9.5, { letterSpacing: ".16em", color: "#6b7a73" }), margin: `${mt}px 0 8px` }}>{t(text)}</div>;
-
-function Switch({ on, onClick, label: aria, disabled = false }: { on: boolean; onClick: () => void; label: string; disabled?: boolean }) {
-  return (
-    <button
-      role="switch"
-      aria-checked={on}
-      aria-label={aria}
-      aria-disabled={disabled}
-      disabled={disabled}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (!disabled) onClick();
-      }}
-      style={{
-        width: 42,
-        height: 24,
-        flex: "none",
-        border: 0,
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.55 : 1,
-        borderRadius: 12,
-        padding: 3,
-        background: on ? "var(--rb-green)" : "#c7d0cc",
-        transition: "background .2s ease-out",
-      }}
-    >
-      <div
-        style={{
-          width: 18,
-          height: 18,
-          borderRadius: "50%",
-          background: "#fff",
-          boxShadow: "0 2px 5px rgba(12,40,26,.3)",
-          transform: `translateX(${on ? 18 : 0}px)`,
-          transition: "transform .2s ease-out",
-        }}
-      />
-    </button>
-  );
-}
-
-function Seg<T extends string | number>({ value, opts, onPick }: { value: T; opts: { id: T; label: string }[]; onPick: (v: T) => void }) {
-  return (
-    <div style={{ display: "flex", gap: 2, padding: 3, borderRadius: 999, background: "rgba(18,38,30,.05)" }}>
-      {opts.map((o) => {
-        const a = o.id === value;
-        return (
-          <button
-            key={String(o.id)}
-            onClick={() => onPick(o.id)}
-            aria-pressed={a}
-            style={{
-              padding: "7px 12px",
-              border: 0,
-              borderRadius: 999,
-              fontFamily: "inherit",
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: "pointer",
-              color: a ? "var(--rb-ink)" : "var(--rb-muted)",
-              background: a ? "#fff" : "transparent",
-              boxShadow: a ? "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)" : "none",
-              transition: "background .2s ease-out",
-            }}
-          >
-            {t(o.label)}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+import { label, row, Seg, Switch } from "./settingsParts";
+import { ModulesSection } from "./ModulesSection";
+import { DataSection } from "./DataSection";
+import { TrySection } from "./TrySection";
 
 export function SettingsModal() {
   const open = useUi((s) => s.settingsOpen);
   const openSettings = useUi((s) => s.openSettings);
-  const openTour = useUi((s) => s.openTour);
-  const showToast = useUi((s) => s.showToast);
-  const { user, settings, updateSettings, setName, exportAll, importAll } = useData();
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [confirmClear, setConfirmClear] = useState(false);
-  const [checking, setChecking] = useState(false);
+  const { user, settings, updateSettings, setName } = useData();
   if (!open) return null;
-
-  const checkUpdates = async () => {
-    setChecking(true);
-    await useUpdater.api.check();
-    setChecking(false);
-    showToast(useUpdater.getState().next ? t("Update available — use the download icon") : t("You're up to date"));
-  };
 
   const close = () => openSettings(false);
   const setMods = (modules: Modules) => void updateSettings({ modules });
-  const on = MODS.filter((m) => settings.modules[m.id]).length;
   const pick = <K extends keyof Settings>(k: K, v: Settings[K]) => void updateSettings({ [k]: v } as Partial<Settings>);
   const initial = (user?.name.trim()[0] ?? "R").toUpperCase();
-
-  const onImport = async (f: File | undefined) => {
-    if (!f) return;
-    try {
-      const b: BackupFile = await readBackupFile(f);
-      await importAll(b);
-      showToast(t("Backup imported"));
-    } catch (e) {
-      showToast(e instanceof Error ? e.message : t("Could not import that file"));
-    }
-    if (fileRef.current) fileRef.current.value = "";
-  };
 
   return (
     <div
@@ -215,96 +96,7 @@ export function SettingsModal() {
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "18px 0 8px" }}>
-            <div style={silk(9.5, { letterSpacing: ".16em", color: "var(--rb-faint)" })}>{t("MODULES · {on}/4 ON", { on })}</div>
-            <div style={{ display: "flex", gap: 2, padding: 3, borderRadius: 999, background: "rgba(18,38,30,.05)" }}>
-              <button
-                onClick={() => setMods({ calendar: true, routine: true, notes: true, savings: true })}
-                style={{
-                  padding: "5px 11px",
-                  border: 0,
-                  background: "transparent",
-                  borderRadius: 999,
-                  fontFamily: "inherit",
-                  fontSize: 11.5,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  color: "var(--rb-green-deep)",
-                }}
-              >
-                {t("All on")}
-              </button>
-              <button
-                onClick={() => setMods({ calendar: false, routine: false, notes: false, savings: false })}
-                style={{
-                  padding: "5px 11px",
-                  border: 0,
-                  background: "transparent",
-                  borderRadius: 999,
-                  fontFamily: "inherit",
-                  fontSize: 11.5,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  color: "var(--rb-muted)",
-                }}
-              >
-                {t("All off")}
-              </button>
-            </div>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {MODS.map((m) => {
-              const nv = navOf(m.id),
-                a = settings.modules[m.id];
-              return (
-                <div
-                  key={m.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setMods({ ...settings.modules, [m.id]: !a })}
-                  onKeyDown={(e) => e.key === "Enter" && setMods({ ...settings.modules, [m.id]: !a })}
-                  style={{ ...row, cursor: "pointer", opacity: a ? 1 : 0.72, transition: "opacity .2s ease-out" }}
-                >
-                  <div
-                    style={{
-                      width: 36,
-                      height: 36,
-                      flex: "none",
-                      borderRadius: 12,
-                      display: "grid",
-                      placeItems: "center",
-                      background: a ? "rgba(23,184,102,.14)" : "rgba(18,38,30,.06)",
-                      boxShadow: "inset 0 1px 1px #fff",
-                    }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke={a ? "#0b7a45" : "#8b9a93"} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                      <path d={nv.d} />
-                    </svg>
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>
-                      {t(nv.label)}
-                      {m.beta && (
-                        <span style={{ ...silk(8, { letterSpacing: ".1em", color: "#9a6a14" }), padding: "3px 7px", borderRadius: 6, background: "rgba(201,138,30,.14)" }}>
-                          {t("STILL IN BETA")}
-                        </span>
-                      )}
-                      {m.soon && (
-                        <span style={{ ...silk(8, { letterSpacing: ".1em", color: "#9a6a14" }), padding: "3px 7px", borderRadius: 6, background: "rgba(201,138,30,.14)" }}>
-                          {t("SOON")}
-                        </span>
-                      )}
-                    </div>
-                    <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>{t(m.desc)}</div>
-                  </div>
-                  <Switch on={a} label={t(nv.label)} onClick={() => setMods({ ...settings.modules, [m.id]: !a })} />
-                </div>
-              );
-            })}
-            <div style={{ padding: "4px 4px 0", fontSize: 11.5, lineHeight: 1.5, color: "var(--rb-faint)" }}>
-              {t("Home always stays on. Turned-off modules disappear from the sidebar and Home — your data is kept.")}
-            </div>
-          </div>
+          <ModulesSection modules={settings.modules} setMods={setMods} />
 
           {label("TIME & DATE")}
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -389,132 +181,9 @@ export function SettingsModal() {
             />
           </div>
 
-          {label("DATA")}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <div style={{ ...row, justifyContent: "space-between" }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Backup")}</div>
-                <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>{t("Everything lives on this device. Export a .json to keep a copy.")}</div>
-              </div>
-              <div style={{ display: "flex", gap: 6 }}>
-                <button onClick={() => void downloadBackup(exportAll()).then((ok) => ok && showToast(t("Backup exported")))} style={pillButton}>
-                  {t("Export")}
-                </button>
-                <button onClick={() => fileRef.current?.click()} style={pillButton}>
-                  {t("Import")}
-                </button>
-                <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => void onImport(e.target.files?.[0])} />
-              </div>
-            </div>
-            <div style={{ ...row, justifyContent: "space-between" }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Tutorial")}</div>
-                <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>{t("A quick tour of the gestures and tools.")}</div>
-              </div>
-              <button
-                onClick={() => {
-                  close();
-                  resetTours();
-                  openTour("main");
-                }}
-                style={pillButton}
-              >
-                {t("Show")}
-              </button>
-            </div>
-            <div style={{ ...row, justifyContent: "space-between" }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Updates")}</div>
-                <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>{t("RaBit checks quietly at start. Nothing else is sent.")}</div>
-              </div>
-              <button
-                onClick={() => void checkUpdates()}
-                disabled={checking}
-                style={{
-                  padding: "8px 14px",
-                  border: 0,
-                  borderRadius: 999,
-                  background: "#fff",
-                  boxShadow: "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)",
-                  fontFamily: "inherit",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: "var(--rb-green-deep)",
-                  cursor: checking ? "default" : "pointer",
-                  opacity: checking ? 0.6 : 1,
-                }}
-              >
-                {checking ? t("Checking…") : t("Check for updates")}
-              </button>
-            </div>
-            <div style={{ ...row, justifyContent: "space-between", opacity: 0.8 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Cloud sync")}</div>
-              <span style={{ ...silk(9, { letterSpacing: ".1em", color: "#9a6a14" }), padding: "4px 8px", borderRadius: 6, background: "rgba(201,138,30,.14)" }}>
-                {t("COMING SOON")}
-              </span>
-            </div>
-          </div>
+          <DataSection close={close} />
 
-          {label("TRY RABIT")}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <div style={{ ...row, justifyContent: "space-between" }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Demo data")}</div>
-                <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>
-                  {t("Fills every module with sample tasks, events, notes, routine and stocks.")}
-                </div>
-              </div>
-              <button
-                onClick={() => void seedDemoData().then(() => showToast(t("Demo data loaded")))}
-                style={{
-                  padding: "8px 14px",
-                  border: 0,
-                  borderRadius: 999,
-                  background: "var(--rb-green-grad)",
-                  fontFamily: "inherit",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: "#fff",
-                  cursor: "pointer",
-                }}
-              >
-                {t("Load")}
-              </button>
-            </div>
-            <div style={{ ...row, justifyContent: "space-between" }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--rb-ink)" }}>{t("Clear all data")}</div>
-                <div style={{ fontSize: 12, color: "var(--rb-muted)", marginTop: 3, lineHeight: 1.45 }}>
-                  {t("Removes tasks, events, notes, routine and savings. Your name and settings stay.")}
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  if (!confirmClear) {
-                    setConfirmClear(true);
-                    return;
-                  }
-                  setConfirmClear(false);
-                  void clearAllData().then(() => showToast(t("All data cleared")));
-                }}
-                onBlur={() => setConfirmClear(false)}
-                style={{
-                  padding: "8px 14px",
-                  border: 0,
-                  borderRadius: 999,
-                  background: confirmClear ? "var(--rb-danger)" : "#fff",
-                  boxShadow: "inset 0 1px 1px #fff,0 6px 14px -8px rgba(20,48,34,.4)",
-                  fontFamily: "inherit",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: confirmClear ? "#fff" : "var(--rb-danger)",
-                  cursor: "pointer",
-                }}
-              >
-                {confirmClear ? t("Sure?") : t("Clear")}
-              </button>
-            </div>
-          </div>
+          <TrySection />
         </div>
         <div style={{ padding: "16px 24px 22px" }}>
           <button

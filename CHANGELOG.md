@@ -12,8 +12,9 @@
   copies the public key into the config. The key and the release rules are documented in `docs/UPDATES.md`.
 - The tutorial re-measures with `ResizeObserver` instead of a constant timer, and `<html lang>` follows the chosen language.
 - Docs brought up to date (README status, updater and testing guides, known advisories in `SECURITY.md`).
+- Internal: the four remaining large files were split too (`SettingsModal`, `ItemPanel`, `NotePane`, `SavingsPage`); no file in `src/` is over ~400 lines now.
 - Internal: no lint warnings (`oxlint --deny-warnings`); the seven largest files were split into one component per card, window or dialog
-  (every file is now under ~400 lines, except four still listed in the architecture guide); brand colors are CSS variables (`--rb-*`) and
+  (every file is now under ~400 lines); brand colors are CSS variables (`--rb-*`) and
   shared button styles live in `components/ui/buttons.ts`. No visual change.
 - **Fix: exporting a backup failed in the installed app** (the window had no permission to write the file; the browser version worked). The window's Tauri permissions are now exactly the 21 the app uses (before: `core:default`, `dialog:default`, `fs:default` and others, 21 of the 27 unused commands checked were open); `tests/capabilities.test.ts` keeps them honest and `npm run qa:permissions` checks the real app.
 - README: badges (CI, release, license, platform), a hero image and a gallery of the real app in light and dark; `npm run screenshots` regenerates the images (`docs/assets/screenshots/`).
