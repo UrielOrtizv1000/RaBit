@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-10-20
 
-- **Linux (in progress)**: AppImage, `.deb` and `.rpm` bundles; native window frame (no custom title bar, no transparency), minimum size 1024×680
+First stable release for **Windows** (`RaBit-Setup.exe`) and **Linux** (`RaBit-x86_64.AppImage` with self-update, `.deb`, `.rpm`, `SHA256SUMS-linux.txt`).
+
+- **Linux support**: AppImage, `.deb` and `.rpm` bundles; native window frame (no custom title bar, no transparency), minimum size 1024×680
   (`src-tauri/tauri.linux.conf.json`); the glass effect stays off where the system cannot do it (`set_glass` now reports support);
   `window-vibrancy` is only built on Windows; only the AppImage self-updates (`.deb`/`.rpm` skip the check and point to the package manager). `npm run package` builds the Linux installers too, `scripts/linux/probar-rabit.sh`, and CI now runs clippy, `cargo test` and a Linux bundle build.
   The release workflow builds and publishes Linux x86_64 (AppImage with self-update, `.deb`, `.rpm`, SHA-256 sums); README has Linux download and install notes.
