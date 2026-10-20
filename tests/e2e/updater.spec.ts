@@ -1,4 +1,10 @@
+import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
+
+// The simulation offers the next minor version, so the expected texts follow package.json instead of a fixed number.
+const current: string = JSON.parse(readFileSync("package.json", "utf8")).version;
+const [major, minor] = current.split(".").map(Number);
+const next = `${major}.${minor + 1}.0`;
 
 // The update SIMULATION (dev only, `?update-sim`) walks the real UI: icon → panel → download → ready → restart → "UPDATED TO".
 test("updates: the icon appears, downloads with progress, restarts, and the terminal announces the new version once", async ({ page }) => {
@@ -20,8 +26,8 @@ test("updates: the icon appears, downloads with progress, restarts, and the term
 
   await icon.click();
   const panel = page.getByRole("dialog", { name: "Update available" });
-  await expect(panel).toContainText("v0.2.0");
-  await expect(panel).toContainText("You have v0.1.0");
+  await expect(panel).toContainText(`v${next}`);
+  await expect(panel).toContainText(`You have v${current}`);
   await expect(panel).toContainText("WHAT'S NEW");
   await expect(panel.getByRole("button", { name: "Later" })).toBeVisible();
 
@@ -37,8 +43,8 @@ test("updates: the icon appears, downloads with progress, restarts, and the term
   await icon.click();
   await page.getByRole("button", { name: "Restart to update" }).click();
 
-  // the simulated restart reloads the app "as v0.2.0": the terminal types the notice, then goes back to normal
-  await expect(page.getByText("> UPDATED TO v0.2.0")).toBeVisible({ timeout: 15_000 });
+  // the simulated restart reloads the app "as the next version": the terminal types the notice, then goes back to normal
+  await expect(page.getByText(`> UPDATED TO v${next}`)).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText("SIMULATED RELEASE NOTES")).toBeVisible({ timeout: 15_000 });
   await expect(page.getByRole("button", { name: "Update available" })).toHaveCount(0);
 
